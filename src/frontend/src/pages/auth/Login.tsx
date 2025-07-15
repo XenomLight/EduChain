@@ -2,8 +2,8 @@ import * as React from 'react';
 import RootLayout from '@/components/RootLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import google from '@/assets/google.svg';
-import logo from '@/assets/eduChain.svg';
+import google from '@/assets/icons/google.svg';
+import logo from '@/assets/icons/eduChain.svg';
 import { Link } from 'react-router-dom';
 
 export default function Login() {
