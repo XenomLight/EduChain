@@ -32,7 +32,4 @@ Login
 - Nama: Login
 - Parameter: email: Text, password: Text`
 
-untuk login dan register 
-"nazriel", "nazriel@gmail.com", "passnaz1", "passnaz1";
-"nazriel@gmail.com", "passnaz1";
 
