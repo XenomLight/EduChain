@@ -4,26 +4,20 @@
       "main": "src/backend/main.mo",
       "type": "motoko"
     },
-    "frontend": {
+    "auth_frontend": {
       "dependencies": [
         "backend"
       ],
+      "frontend": {
+        "entrypoint": "src/frontend/src/index.html"
+      },
       "source": [
-        "src/frontend/assets"
+        "src/frontend/assets",
+        "dist/frontend/"
       ],
       "type": "assets"
-    },
-    "internet_identity": {
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "frontend": {},
-      "remote": {
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      },
-      "type": "custom",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
     }
+
   },
   "defaults": {
     "build": {
@@ -31,6 +25,9 @@
       "packtool": ""
     }
   },
-  "output_env_file": ".env",
+  "scripts": {
+    "build": "echo 'No build step needed'"
+  },
+  
   "version": 1
 }
