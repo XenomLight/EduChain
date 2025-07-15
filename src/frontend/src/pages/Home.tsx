@@ -26,13 +26,13 @@ export default function Home() {
           <div className="hidden w-1/2 md:flex">
             <div className="flex w-full flex-col items-end gap-2 md:text-5xl lg:text-6xl xl:text-7xl">
               <div className="flex -translate-x-32 gap-8">
-                <Link to="/login">
+                <Link to="/auth/login">
                   <h1>Login</h1>
                 </Link>
                 <span>/</span>
               </div>
               <div>
-                <Link to="/register">
+                <Link to="/auth/register">
                   <h1>Register</h1>
                 </Link>
               </div>
