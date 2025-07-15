@@ -1,0 +1,27 @@
+/* Home.css*/
+.home-background{
+    min-height: 100vh;
+    width:100vw;
+    background-image: url('/laptop pict.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(0.5) contrast(0.2) saturate(1.2) temperature(0.5) hue-rotate(10deg) highlight(0.5) shadow(0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-title{
+    color: #fff;
+    font-size: 4em;
+    text-align: center;
+}
+
+/*Responsive adjustments*/
+@media(max-width: 600px){
+    .home-title{
+        font-size: 2em;
+    }
+}
