@@ -1,6 +1,7 @@
 import RootLayout from '@/components/RootLayout';
 import logo from '@/assets/icons/eduChain.svg';
 import { Link } from 'react-router-dom';
+import backgroundImage from '@/assets/image/background.webp';
 
 export default function Home() {
   return (
@@ -8,10 +9,12 @@ export default function Home() {
       {/* image background */}
       <div className="absolute inset-0 -z-10">
         <img
-          src="image/background.webp"
+          src={backgroundImage}
           alt="Background"
           className="h-full w-full object-cover"
         />
+        {/* overlay */}
+        <div className="absolute inset-0 bg-black opacity-50"></div>
       </div>
 
       {/* content */}
