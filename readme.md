@@ -14,11 +14,14 @@
 
 ## Testing Endpoint Backend
 
-
 ### Register (dengan principal)
 ```bash
 ### panggilan jika principal diketahui (biasanya dari frontend)
 dfx canister call backend RegisterWithPrincipal '(principal "<PRINCIPAL>", "email1@email.com", "password1", "password1")'
+
+###atau bisa ke 
+
+ dfx canister call backend Register '( )'
 ```
 
  Login (dengan principal)
