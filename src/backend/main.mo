@@ -9,7 +9,10 @@ actor {
     konfirmasi_password : Text;
   };
   type Kursus = {
-    
+    id:Nat:
+    title: Text;
+    provider:Text;
+    currency:Text; 
   }
   stable var users : [User] = [];
 
