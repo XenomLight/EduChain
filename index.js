@@ -2,7 +2,7 @@ import { HttpAgent, Actor } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import fetch from "node-fetch";
 global.fetch = fetch;
-
+import 'dotenv/config'; 
 const authClient = await AuthClient.create();
 
 await authClient.login({
@@ -51,7 +51,10 @@ await authClient.login({
       }
     }
 
-    await RegisterUsers("nazriel@gmail.com", "passnaz1", "passnaz1");
-    await LoginUsers("nazriel@gmail.com", "passnaz1");
+    await RegisterUsers( process.env.REGISTER_EMAIL,
+      process.env.REGISTER_PASSWORD,
+      process.env.REGISTER_CONFIRM);
+    await LoginUsers(process.env.REGISTER_EMAIL,
+  process.env.REGISTER_PASSWORD);
   }
 }); 
