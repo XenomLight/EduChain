@@ -8,7 +8,9 @@ actor {
     password : Text;
     konfirmasi_password : Text;
   };
-
+  type Kursus = {
+    
+  }
   stable var users : [User] = [];
 
   public func Register(username : Text, email : Text, password : Text, konfirmasipassword : Text) : async Text {
