@@ -17,7 +17,7 @@ try {
 
 const actor = Actor.createActor(idlFactory, {
     agent,
-    canisterId: "rkp4c-7iaaa-aaaaa-aaaca-cai"
+    canisterId: "qsgjb-riaaa-aaaaa-aaaga-cai" /// ganti id 
 });
 
 async function RegisterUsers(username, email, password, konfirmasiPassword) {
