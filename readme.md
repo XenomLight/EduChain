@@ -1,8 +1,8 @@
 # EduTech 
 
-Setup & Deploy 
+## Setup & Deploy 
 1. Install DFX:
-  https://internetcomputer.org/docs/current/developer-docs/setup/install/
+   https://internetcomputer.org/docs/current/developer-docs/setup/install/
 2. Jalankan local network:
    ```bash
    dfx start --background
@@ -12,24 +12,40 @@ Setup & Deploy
    dfx deploy backend
    ```
 
-Testing Endpoint Backend
-Register
+## Testing Endpoint Backend
+> **Catatan:** Untuk endpoint yang menerima principal (NFID/Internet Identity), testing penuh dilakukan dari frontend/browser. Contoh berikut hanya untuk referensi.
+
+### Register (dengan principal)
 ```bash
-dfx canister call backend Register '("username1", "email1@email.com", "password1", "password1")'
+# Contoh panggilan jika principal diketahui (biasanya dari frontend)
+dfx canister call backend RegisterWithPrincipal '(principal "<PRINCIPAL>", "email1@email.com", "password1", "password1")'
 ```
-Login
+
+### Login (dengan principal)
 ```bash
-dfx canister call backend Login '("email1@email.com", "password1")'
+dfx canister call backend LoginWithPrincipal '(principal "<PRINCIPAL>", "email1@email.com", "password1")'
 ```
 
-Dokumentasi Endpoint
-Register
-- Nama: Register
-- Parameter:username: , email: , password: , konfirmasipassword: 
+## Dokumentasi Endpoint
+### RegisterWithPrincipal
+- **Nama:** RegisterWithPrincipal
+- **Parameter:**
+  - principal: Principal (dari NFID/Internet Identity)
+  - email: Text
+  - password: Text
+  - konfirmasipassword: Text
+- **Return:** Text (pesan sukses/gagal)
 
+### LoginWithPrincipal
+- **Nama:** LoginWithPrincipal
+- **Parameter:**
+  - principal: Principal (dari NFID/Internet Identity)
+  - email: Text
+  - password: Text
+- **Return:** Text (pesan sukses/gagal)
 
-Login
-- Nama: Login
-- Parameter: email: Text, password: Text`
+---
+
+> Untuk testing login/register dengan NFID, lakukan dari frontend (browser) agar principal user bisa didapatkan secara otomatis.
 
 

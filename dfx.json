@@ -12,7 +12,7 @@
         "entrypoint": "src/frontend/src/index.html"
       },
       "source": [
-        "src/frontend/assets",
+        "src/frontend/assets", 
         "dist/frontend/"
       ],
       "type": "assets"
