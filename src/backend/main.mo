@@ -89,8 +89,8 @@ actor {
       return "Invalid email or password";
     }
   };
-
   public query func getCourses() : async [Kursus] {
     return daftarKursus;
   }
+  
 }
