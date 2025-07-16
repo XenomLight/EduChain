@@ -8,7 +8,7 @@ actor {
     password : Text;
     konfirmasi_password : Text;
   };
-
+  
   type Kursus = {
     id: Nat;
     title: Text;
