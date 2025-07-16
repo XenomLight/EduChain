@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+    --color-background: oklch(0 0 0);
+    --color-foreground: oklch(0.9761 0 0);
+    --color-primary: oklch(0.5823 0.077 212.72);
+    --color-secondary: oklch(0.3658 0.1044 340.67);
+}
+
+@font-face {
+  font-family: "Lexend";
+  src: url("./assets/fonts/Lexend.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+body {
+  font-family: "Lexend", sans-serif;
+}
+
+@layer base {
+    body {
+        @apply bg-background text-foreground;
+    }
+}
