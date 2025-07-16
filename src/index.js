@@ -2,7 +2,7 @@ import { HttpAgent, Actor } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import fetch from "node-fetch";
 global.fetch = fetch;
-import 'dotenv/config'; 
+
 const authClient = await AuthClient.create();
 
 await authClient.login({

@@ -2,6 +2,7 @@ const path = require('path');
 
 module.exports = {
   entry: './src/index.js',
+  mode: 'development',
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
@@ -20,6 +21,7 @@ module.exports = {
       { test: /\.(png|jpg|gif)$/, use: ['file-loader'] },
     ],
   },
+
   devServer: {
     static: './dist',
     port: 3000,
