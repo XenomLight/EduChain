@@ -64,15 +64,18 @@ body {
 }
 /* Make logo much larger */
 .home-logo {
-  width: 400px;
-  max-width: 60vw;
+  width: 750px;
+  max-width: 80vw;
   margin-bottom: 25px;
   position: relative;
+  right: 100px;
 }
 .home-subtext {
   font-family: 'Lexend', sans-serif;
   font-weight: 600;
-  font-size: 2rem;
+  font-size: 2.2rem;
+  position: relative;
+  left: 100px;
   color: #fff;
   margin-top: 8px;
   text-shadow: 0 2px 8px rgba(0,0,0,0.3);
@@ -95,13 +98,16 @@ body {
   width: 950px;
   max-width: 95vw;
   backdrop-filter: blur(2px);
+  align-items: center;
 }
 .home-login-title {
   font-family: 'Lexend', sans-serif;
   font-weight: 600;
-  font-size: 3.5rem;
+  font-size: 5rem;
   color: #fff;
-  text-align: left;
+  text-align: left !important;
+  width: 100%;
+  margin-left: 0;
   margin-bottom: 16px;
 }
 .home-input {
@@ -116,8 +122,6 @@ body {
 .home-signin-btn {
   background: #2A8188;
   color: #fff;
-  font-family: 'Lexend', sans-serif;
-  font-size: 2rem;
   border-radius: 16px;
   padding: 20px 0;
   margin-top: 12px;
@@ -130,10 +134,14 @@ body {
 }
 
 .short-btn {
-  width: 180px;
-  align-self: flex-start;
+  font-family: 'Lexend', sans-serif !important;
+  font-size: 1.8rem;
+  width: 250px;
+  align-self: center;
   margin-top: 8px;
   margin-bottom: 8px;
+  height: 80px;
+  padding: 8px 0;
 }
 
 .home-google-btn {
@@ -141,17 +149,19 @@ body {
   align-items: center;
   background: #fff;
   color: #111;
-  font-family: 'Poppins', sans-serif;
-  font-size: 1.3rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.8rem;
   border-radius: 16px;
-  padding: 14px 32px 14px 20px;
+  padding: 12px 32px 12px 20px;
   border: none;
   box-shadow: 0 4px 16px rgba(0,0,0,0.08);
   cursor: pointer;
   margin-bottom: 12px;
-  width: 100%;
-  max-width: 350px;
+  width: 600px;
+  max-width: 450px;
   transition: background 0.2s;
+  justify-content: center;
+  height: 80px;
 }
 .home-google-btn:hover {
   background: #f2f2f2;
@@ -163,8 +173,8 @@ body {
   margin-left: 2px;
 }
 .google-logo {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
 }
 
 .home-register-row {
@@ -172,7 +182,8 @@ body {
   align-items: center;
   margin-top: 18px;
   font-family: 'Poppins', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.35rem;
+  justify-content: center;
 }
 .home-register-text {
   color: #fff;
@@ -182,7 +193,8 @@ body {
   color: #8AF4FF;
   font-family: 'Poppins', sans-serif;
   margin-left: 6px;
-  text-decoration: underline;
+  text-decoration: none;
   cursor: pointer;
+  font-size: 1.35rem;
 }
 
