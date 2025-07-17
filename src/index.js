@@ -51,10 +51,28 @@ await authClient.login({
       }
     }
 
-    await RegisterUsers( process.env.REGISTER_EMAIL,
+    async function GetAllCourses() {
+      try {
+        const result = await actor.getCourse();
+        console.log("All courses:", JSON.stringify(result, null, 2));
+      } catch (err) {
+        console.log("Gagal ambil courses:", err);
+      }
+    }
+    async function GetCourseById(id) {
+      try {
+        const result = await actor.getCourseById(id);
+        console.log("Course by id:", JSON.stringify(result, null, 2));
+      } catch (err) {
+        console.log("Gagal ambil course by id:", err);
+      }
+    }
+
+
+    await RegisterUsers(process.env.REGISTER_EMAIL,
       process.env.REGISTER_PASSWORD,
       process.env.REGISTER_CONFIRM);
     await LoginUsers(process.env.REGISTER_EMAIL,
-  process.env.REGISTER_PASSWORD);
+      process.env.REGISTER_PASSWORD);
   }
 }); 
