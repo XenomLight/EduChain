@@ -25,6 +25,7 @@ dfx canister call backend RegisterWithPrincipal '(principal "aaaaa-aa", "user1",
  ###Login (dengan principal)
 ```bash
 dfx canister call backend Register '("nazriel", "nazriel@gmail.com", "passnaz1", "passnaz1")'
+dfx canister call backend Login '("nazriel@gmail.com", "passnaz1")'
 ```
 
 ### kursus 
