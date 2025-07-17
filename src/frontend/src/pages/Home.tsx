@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import logo from '@/assets/icons/eduChain.svg';
 import googleLogo from '@/assets/icons/google.svg';
 import { Link } from 'react-router-dom';
+import backgroundImage from '@/assets/image/background.webp';
 
 export default function Home() {
   const [data, setData] = React.useState({
@@ -26,7 +27,17 @@ export default function Home() {
   };
 
   return (
-    <RootLayout className="home-bg">
+    <RootLayout className="relative flex-1">
+      {/* image background */}
+      <div className="absolute inset-0 -z-10">
+        <img
+          src={backgroundImage}
+          alt="Background"
+          className="h-full w-full object-cover"
+        />
+        {/* overlay */}
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+      </div>
       <div className="home-overlay">
         <div className="home-left">
           <img src={logo} alt="EduChain Logo" className="home-logo" />
