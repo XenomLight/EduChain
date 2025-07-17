@@ -1,31 +1,9 @@
-import React from 'react';
 import RootLayout from '@/components/RootLayout';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
 import logo from '@/assets/icons/eduChain.svg';
-import googleLogo from '@/assets/icons/google.svg';
 import { Link } from 'react-router-dom';
 import backgroundImage from '@/assets/image/background.webp';
 
 export default function Home() {
-  const [data, setData] = React.useState({
-    email: '',
-    password: '',
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setData({
-      ...data,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log('Login data:', data);
-  };
-
   return (
     <RootLayout className="relative flex-1">
       {/* image background */}
@@ -38,42 +16,31 @@ export default function Home() {
         {/* overlay */}
         <div className="absolute inset-0 bg-black opacity-50"></div>
       </div>
-      <div className="home-overlay">
-        <div className="home-left">
-          <img src={logo} alt="EduChain Logo" className="home-logo" />
-          <div className="home-subtext">Learn. Earn. On-chain.</div>
-        </div>
-        <div className="home-right">
-          <form className="home-login-form" onSubmit={handleSubmit}>
-            <h2 className="home-login-title">Login</h2>
-            <Input
-              type="email"
-              name="email"
-              placeholder="Email"
-              value={data.email}
-              onChange={handleChange}
-              className="home-input"
-            />
-            <Input
-              type="password"
-              name="password"
-              placeholder="Password"
-              value={data.password}
-              onChange={handleChange}
-              className="home-input"
-            />
-            <Button className="home-signin-btn short-btn">Sign In</Button>
-            <button type="button" className="home-google-btn">
-              <span className="google-icon-wrapper">
-                <img src={googleLogo} alt="Google logo" className="google-logo" />
-              </span>
-              Sign in with Google
-            </button>
-            <div className="home-register-row">
-              <span className="home-register-text">Don't have an account? </span>
-              <Link to="/auth/register" className="home-register-link">Register here</Link>
+
+      {/* content */}
+      <div className="flex min-h-screen w-full flex-col justify-center">
+        <div className="flex w-full flex-col gap-16 md:flex-row md:items-center md:justify-between">
+          <div className="flex w-full flex-col md:w-1/2">
+            <img src={logo} alt="EduChain Logo" className="w-112" />
+            <div className="mt-2 ml-16">
+              <h2 className="text-2xl font-semibold">Learn, Earn, On Chain</h2>
             </div>
-          </form>
+          </div>
+          <div className="hidden w-1/2 md:flex">
+            <div className="flex w-full flex-col items-end gap-2 md:text-5xl lg:text-6xl xl:text-7xl">
+              <div className="flex -translate-x-32 gap-8">
+                <Link to="/auth/login">
+                  <h1>Login</h1>
+                </Link>
+                <span>/</span>
+              </div>
+              <div>
+                <Link to="/auth/register">
+                  <h1>Register</h1>
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </RootLayout>
