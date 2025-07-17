@@ -37,16 +37,16 @@ await authClient.login({
 
     async function RegisterUsers(username, email, password, konfirmasiPassword) {
       try {
-        const result = await actor.Register(username, email, password, konfirmasiPassword);
+        const result = await actor.Register(principal, username, email, password, konfirmasiPassword);
         console.log("Registrasi berhasil:", result);
       } catch (err) {
         console.log("Registrasi gagal:", err);
       }
     }
 
-    async function LoginUsers(email, password) {
+    async function LoginUsers(password) {
       try {
-        const result = await actor.Login(email, password);
+        const result = await actor.Login(principal, password);
         console.log("Login berhasil:", result);
       } catch (err) {
         console.log("Login gagal:", err);
@@ -71,11 +71,10 @@ await authClient.login({
     }
 
 
-    await RegisterUsers(process.env.REGISTER_EMAIL,
-      process.env.REGISTER_USERNAME,
+    await RegisterUsers(process.env.REGISTER_USERNAME,
+      process.env.REGISTER_EMAIL,
       process.env.REGISTER_PASSWORD,
       process.env.REGISTER_CONFIRM);
-    await LoginUsers(process.env.REGISTER_EMAIL,
-      process.env.REGISTER_PASSWORD);
+    await LoginUsers(process.env.REGISTER_PASSWORD);
   }
 }); 

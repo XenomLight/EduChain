@@ -5,6 +5,7 @@ import Nat "mo:base/Nat";
 
 actor {
   type User = {
+    principal: Text;
     email : Text;
     username : Text;
     password : Text;
@@ -131,31 +132,28 @@ actor {
     }
   ];
 
-  public func Register(username : Text, email : Text, password : Text, konfirmasipassword : Text) : async Text {
-    let exists = Array.find<User>(users, func u { u.username == username });
-
+  public func Register(principal: Text, username : Text, email : Text, password : Text, konfirmasipassword : Text) : async Text {
+    let exists = Array.find<User>(users, func u { u.principal == principal });
     if (Option.isSome(exists)) {
-      return "username already exists!";
+      return "principal already registered!";
     };
-
     let newUser : User = {
+      principal = principal;
       email = email;
       username = username;
       password = password;
       konfirmasi_password = konfirmasipassword;
     };
-
     users := Array.append(users, [newUser]);
     return "user registered successfully!";
   };
 
-  public func Login(email : Text, password : Text) : async Text {
-    let userOpt = Array.find<User>(users, func u { u.email == email and u.password == password });
-
+  public func Login(principal: Text, password : Text) : async Text {
+    let userOpt = Array.find<User>(users, func u { u.principal == principal and u.password == password });
     if (Option.isSome(userOpt)) {
       return "login success";
     } else {
-      return "Invalid email or password";
+      return "Invalid principal or password";
     }
   };
   public query func getCourses() : async [Kursus] {

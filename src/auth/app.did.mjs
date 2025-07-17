@@ -1,6 +1,6 @@
 export const idlFactory = ({ IDL }) => {
   return IDL.Service({
-    "Register": IDL.Func([IDL.Text, IDL.Text, IDL.Text, IDL.Text], [IDL.Text], []),
+    "Register": IDL.Func([IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text], [IDL.Text], []),
     "Login": IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
     "getCourses": IDL.Func([], [IDL.Vec(
       IDL.Record({
