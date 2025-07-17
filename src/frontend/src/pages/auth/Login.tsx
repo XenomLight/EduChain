@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button';
 import google from '@/assets/icons/google.svg';
 import logo from '@/assets/icons/eduChain.svg';
 import { Link } from 'react-router-dom';
+import backgroundImage from '@/assets/image/background.webp';
 
 export default function Login() {
   const [data, setData] = React.useState({
@@ -27,6 +28,18 @@ export default function Login() {
 
   return (
     <RootLayout className="relative flex-1">
+      {/* image background */}
+      <div className="absolute inset-0 -z-10">
+        <img
+          src={backgroundImage}
+          alt="Background"
+          className="h-full w-full object-cover"
+        />
+        {/* overlay */}
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+      </div>
+
+      {/* content */}
       <div className="flex min-h-screen w-full flex-col justify-center">
         <div className="flex w-full flex-col gap-16 md:flex-row md:items-center md:justify-between">
           <div className="hidden w-1/2 flex-col md:flex">

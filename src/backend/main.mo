@@ -1,5 +1,7 @@
 import Array "mo:base/Array";
 import Option "mo:base/Option";
+import Text "mo:base/Text";
+import Nat "mo:base/Nat";
 
 actor {
   type User = {
@@ -8,7 +10,7 @@ actor {
     password : Text;
     konfirmasi_password : Text;
   };
-
+  
   type Kursus = {
     id: Nat;
     title: Text;
@@ -16,6 +18,18 @@ actor {
     price: Nat;
     currency: Text;
     detailUrl: Text;
+    modules:[Modul];
+  };
+  type Konten = {
+    id:Nat;
+    title:Text;
+    body:Text;
+  };
+
+  type Modul = {
+    id: Nat;
+    title: Text;
+    contents: [Konten];
   };
 
   stable var users : [User] = [];
@@ -27,6 +41,25 @@ actor {
       price = 12345678;
       currency = "Rp.";
       detailUrl = "/course/1";
+      modules = 
+      [
+      {
+        id = 1;
+        title = "Pengenalan HTML";
+        contents = [
+          { id = 1; title = "Apa itu HTML?"; body = "HTML adalah " },
+          { id = 2; title = "Struktur Dasar HTML"; body = "Struktur dasar"}
+        ];
+      },
+      {
+        id = 2;
+        title = "Pengenalan CSS";
+        contents = [
+           { id = 1; title = "Apa itu CSS?"; body = "CSS adalah " },
+           { id = 2; title = "Cara implementasi?"; body = "implementasinya...... " }
+        ];
+      }
+      ]
     },
     {
       id = 2;
@@ -35,6 +68,15 @@ actor {
       price = 12345678;
       currency = "Rp.";
       detailUrl = "/course/2";
+      modules = [
+        {
+          id = 1;
+          title = "Pengenalan Backend";
+          contents = [
+            { id = 1; title = "Apa itu Backend?"; body = "Backend adalah bagian dari aplikasi yang berjalan di server" }
+          ];
+        }
+      ];
     },
     {
       id = 3;
@@ -43,6 +85,15 @@ actor {
       price = 12345678;
       currency = "Rp.";
       detailUrl = "/course/3";
+      modules = [
+        {
+          id = 1;
+          title = "Integrasi Frontend & Backend";
+          contents = [
+            { id = 1; title = "API dan Fetch"; body = "Cara menghubungkan frontend dan backend dengan API" }
+          ];
+        }
+      ];
     },
     {
       id = 4;
@@ -51,6 +102,15 @@ actor {
       price = 12345678;
       currency = "Rp.";
       detailUrl = "/course/4";
+      modules = [
+        {
+          id = 1;
+          title = "cara desain baik dan benar sesuai human computer interaction";
+          contents = [
+            { id = 1; title = "desain 101"; body = "bagaimana bikin styling dan components" }
+          ];
+        }
+      ];
     },
     {
       id = 5;
@@ -59,6 +119,15 @@ actor {
       price = 12345678;
       currency = "Rp.";
       detailUrl = "/course/5";
+      modules = [
+        {
+          id = 2;
+          title = "Dasar-dasar Analisis Data";
+          contents = [
+            { id = 1; title = "Pengantar Analisis Data"; body = "Analisis data adalah proses menginspeksi, membersihkan, dan memodelkan data." }
+          ];
+        }
+      ];
     }
   ];
 
@@ -91,6 +160,12 @@ actor {
   };
   public query func getCourses() : async [Kursus] {
     return daftarKursus;
-  }
-  
+  };
+
+  public query func getCourseById(id:Nat):async ? Kursus {
+    for (kursus in daftarKursus.vals()){
+      if (kursus.id == id) return ? kursus;
+    };
+    return null;
+  };
 }

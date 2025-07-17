@@ -1,6 +1,8 @@
 import { HttpAgent, Actor } from "@dfinity/agent";
 import { AuthClient } from "@dfinity/auth-client";
 import fetch from "node-fetch";
+import dotenv from "dotenv";
+dotenv.config();
 global.fetch = fetch;
 
 const authClient = await AuthClient.create();
@@ -33,9 +35,9 @@ await authClient.login({
       canisterId: "qsgjb-riaaa-aaaaa-aaaga-cai"
     });
 
-    async function RegisterUsers(email, password, konfirmasiPassword) {
+    async function RegisterUsers(username, email, password, konfirmasiPassword) {
       try {
-        const result = await actor.RegisterWithPrincipal(principal, email, password, konfirmasiPassword);
+        const result = await actor.Register(username, email, password, konfirmasiPassword);
         console.log("Registrasi berhasil:", result);
       } catch (err) {
         console.log("Registrasi gagal:", err);
@@ -44,17 +46,36 @@ await authClient.login({
 
     async function LoginUsers(email, password) {
       try {
-        const result = await actor.LoginWithPrincipal(principal, email, password);
+        const result = await actor.Login(email, password);
         console.log("Login berhasil:", result);
       } catch (err) {
         console.log("Login gagal:", err);
       }
     }
 
-    await RegisterUsers( process.env.REGISTER_EMAIL,
+    async function GetAllCourses() {
+      try {
+        const result = await actor.getCourses();
+        console.log("All courses:", JSON.stringify(result, null, 2));
+      } catch (err) {
+        console.log("Gagal ambil courses:", err);
+      }
+    }
+    async function GetCourseById(id) {
+      try {
+        const result = await actor.getCourseById(id);
+        console.log("Course by id:", JSON.stringify(result, null, 2));
+      } catch (err) {
+        console.log("Gagal ambil course by id:", err);
+      }
+    }
+
+
+    await RegisterUsers(process.env.REGISTER_EMAIL,
+      process.env.REGISTER_USERNAME,
       process.env.REGISTER_PASSWORD,
       process.env.REGISTER_CONFIRM);
     await LoginUsers(process.env.REGISTER_EMAIL,
-  process.env.REGISTER_PASSWORD);
+      process.env.REGISTER_PASSWORD);
   }
 }); 
