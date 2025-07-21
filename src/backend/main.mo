@@ -10,17 +10,8 @@ actor {
     username : Text;
     password : Text;
     konfirmasi_password : Text;
-  };
-  type 
-  type Kursus = {
-    id: Nat;
-    title: Text;
-    provider: Text;
-    price: Nat;
-    currency: Text;
-    detailUrl: Text;
-    modules:[Modul];
-  };
+  }; 
+
   type Konten = {
     id:Nat;
     title:Text;
@@ -33,6 +24,15 @@ actor {
     contents: [Konten];
   };
 
+  type Kursus = {
+    id: Nat;
+    title: Text;
+    provider: Text;
+    price: Nat;
+    currency: Text;
+    detailUrl: Text;
+    modules:[Modul];
+  };
   stable var users : [User] = [];
   stable var daftarKursus: [Kursus] = [
     {
@@ -148,13 +148,15 @@ actor {
     return "user registered successfully!";
   };
 
-  public func Login(principal: Text, password : Text) : async Text {
-    let userOpt = Array.find<User>(users, func u { u.principal == principal and u.password == password });
-    if (Option.isSome(userOpt)) {
-      return "login success";
-    } else {
-      return "Invalid principal or password";
-    }
+  public func Login(principal: Text, email: Text, password: Text) : async Text {
+  let userOpt = Array.find<User>(users, func u {
+    u.principal == principal and u.email == email and u.password == password
+  });
+  if (Option.isSome(userOpt)) {
+    return "login success";
+  } else {
+    return "Invalid principal, email, or password";
+  }
   };
   public query func getCourses() : async [Kursus] {
     return daftarKursus;
