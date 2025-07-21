@@ -149,14 +149,14 @@ actor {
   };
 
   public func Login(principal: Text, email: Text, password: Text) : async Text {
-  let userOpt = Array.find<User>(users, func u {
-    u.principal == principal and u.email == email and u.password == password
-  });
-  if (Option.isSome(userOpt)) {
-    return "login success";
-  } else {
-    return "Invalid principal, email, or password";
-  }
+    let userOpt = Array.find<User>(users, func u {
+      u.principal == principal and u.email == email and u.password == password
+    });
+    if (Option.isSome(userOpt)) {
+      return "login success";
+    } else {
+      return "Invalid principal, email, or password";
+    }
   };
   public query func getCourses() : async [Kursus] {
     return daftarKursus;

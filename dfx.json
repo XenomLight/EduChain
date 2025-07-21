@@ -4,20 +4,18 @@
       "main": "src/backend/main.mo",
       "type": "motoko"
     },
-    "auth_frontend": {
+    "frontend": {
       "dependencies": [
         "backend"
       ],
       "frontend": {
-        "entrypoint": "src/frontend/src/index.html"
+        "entrypoint": "src/frontend/index.html"
       },
       "source": [
-        "src/frontend/assets", 
-        "dist/frontend/"
+        "src/frontend/dist/"
       ],
       "type": "assets"
     }
-
   },
   "defaults": {
     "build": {
@@ -25,9 +23,5 @@
       "packtool": ""
     }
   },
-  "scripts": {
-    "build": "echo 'No build step needed'"
-  },
-  
   "version": 1
 }

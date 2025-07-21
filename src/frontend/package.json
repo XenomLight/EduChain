@@ -7,7 +7,6 @@
     "dev:frontend": "vite",
     "dev:backend": "tsc-b --watch",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "prebuild": "dfx generate backend",
     "build": "tsc -b && vite build",
     "build:prod": "tsc -b && vite build --mode production",
     "preview": "vite preview",
@@ -17,6 +16,10 @@
     "format": "prettier --write . \"src/**/*\""
   },
   "dependencies": {
+    "@dfinity/agent": "^2.4.1",
+    "@dfinity/auth-client": "^2.4.1",
+    "@dfinity/identity": "^2.4.1",
+    "@dfinity/principal": "^2.4.1",
     "@tailwindcss/vite": "^4.1.11",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
