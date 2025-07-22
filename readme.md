@@ -5,13 +5,28 @@
    https://internetcomputer.org/docs/current/developer-docs/setup/install/
 2. Jalankan local network:
    ```bash
-   dfx start --background
+   dfx start --clean --background
    ```
 3. Deploy backend:
    ```bash
    dfx deploy backend
    ```
+## Setup for docker env
+1. Install dfx
+   https://internetcomputer.org/docs/current/developer-docs/setup/install/
 
+2. Install dependencies:
+   ```bash
+   cd src/frontend && npm install
+   ```
+3. Run local network:
+   ```bash
+   dfx start --host 0.0.0.0:4943 --clean --background
+   ```
+4. Deploy both FE & BE:
+   ```
+   cd <root path> && dfx deploy
+   ```
 ## Testing Endpoint Backend
 
 ### Register (dengan principal)
