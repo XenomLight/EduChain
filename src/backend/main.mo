@@ -3,12 +3,15 @@ import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
 
+
 actor {
   type User = {
     principal: Text;
-    email : Text;
+    gmail : Text;
     username : Text;
     password : Text;
+    first_name:Text;
+    last_name:Text;
     konfirmasi_password : Text;
   }; 
 
@@ -132,16 +135,26 @@ actor {
     }
   ];
 
+
+  func simpleHash(s: Text) : Text {
+  var hash : Nat = 0;
+  for (c in Text.toIter(s)) {
+    hash += Nat.fromIntWrap(Char.toNat32(c));
+  };
+  Text.fromNat(hash)
+  }
+
   public func Register(principal: Text, username : Text, email : Text, password : Text, konfirmasipassword : Text) : async Text {
     let exists = Array.find<User>(users, func u { u.principal == principal });
     if (Option.isSome(exists)) {
       return "principal already registered!";
     };
+    let hashedPassword = simpleHash(password);
     let newUser : User = {
       principal = principal;
       email = email;
       username = username;
-      password = password;
+      password = hashedPassword;
       konfirmasi_password = konfirmasipassword;
     };
     users := Array.append(users, [newUser]);
@@ -149,8 +162,9 @@ actor {
   };
 
   public func Login(principal: Text, email: Text, password: Text) : async Text {
+    let hashedPassword = simpleHash(password);
     let userOpt = Array.find<User>(users, func u {
-      u.principal == principal and u.email == email and u.password == password
+      u.principal == principal and u.email == email and u.password == hashedPassword
     });
     if (Option.isSome(userOpt)) {
       return "login success";
