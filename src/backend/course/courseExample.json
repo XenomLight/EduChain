@@ -1,0 +1,96 @@
+[
+  {
+    "id": 1,
+    "title": "Front End Developer",
+    "provider": "Dicoding Indonesia",
+    "price": 12345678,
+    "currency": "Rp.",
+    "detailUrl": "/course/1",
+    "modules": [
+      {
+        "id": 1,
+        "title": "Pengenalan HTML",
+        "contents": [
+          { "id": 1, "title": "Apa itu HTML?", "body": "HTML adalah " },
+          { "id": 2, "title": "Struktur Dasar HTML", "body": "Struktur dasar" }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Pengenalan CSS",
+        "contents": [
+          { "id": 1, "title": "Apa itu CSS?", "body": "CSS adalah " },
+          { "id": 2, "title": "Cara implementasi?", "body": "implementasinya...... " }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Back End Developer",
+    "provider": "Dicoding Indonesia",
+    "price": 12345678,
+    "currency": "Rp.",
+    "detailUrl": "/course/2",
+    "modules": [
+      {
+        "id": 1,
+        "title": "Pengenalan Backend",
+        "contents": [
+          { "id": 1, "title": "Apa itu Backend?", "body": "Backend adalah bagian dari aplikasi yang berjalan di server" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Full-Stack Web Developer",
+    "provider": "hariSenin",
+    "price": 12345678,
+    "currency": "Rp.",
+    "detailUrl": "/course/3",
+    "modules": [
+      {
+        "id": 1,
+        "title": "Integrasi Frontend & Backend",
+        "contents": [
+          { "id": 1, "title": "API dan Fetch", "body": "Cara menghubungkan frontend dan backend dengan API" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 4,
+    "title": "UI/UX Design",
+    "provider": "hariSenin",
+    "price": 12345678,
+    "currency": "Rp.",
+    "detailUrl": "/course/4",
+    "modules": [
+      {
+        "id": 1,
+        "title": "cara desain baik dan benar sesuai human computer interaction",
+        "contents": [
+          { "id": 1, "title": "desain 101", "body": "bagaimana bikin styling dan components" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Data Analyst",
+    "provider": "Dicoding Indonesia",
+    "price": 12345678,
+    "currency": "Rp.",
+    "detailUrl": "/course/5",
+    "modules": [
+      {
+        "id": 2,
+        "title": "Dasar-dasar Analisis Data",
+        "contents": [
+          { "id": 1, "title": "Pengantar Analisis Data", "body": "Analisis data adalah proses menginspeksi, membersihkan, dan memodelkan data." }
+        ]
+      }
+    ]
+  }
+]
