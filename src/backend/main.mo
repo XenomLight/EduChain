@@ -42,7 +42,7 @@ actor {
       id = 1;
       title = "Front End Developer";
       provider = "Dicoding Indonesia";
-      price = 12345678;
+      price = 250000;
       currency = "Rp.";
       detailUrl = "/course/1";
       modules = 
@@ -69,7 +69,7 @@ actor {
       id = 2;
       title = "Back End Developer";
       provider = "Dicoding Indonesia";
-      price = 12345678;
+      price = 250000;
       currency = "Rp.";
       detailUrl = "/course/2";
       modules = [
@@ -86,7 +86,7 @@ actor {
       id = 3;
       title = "Full-Stack Web Developer";
       provider = "hariSenin";
-      price = 12345678;
+      price = 250000;
       currency = "Rp.";
       detailUrl = "/course/3";
       modules = [
@@ -103,7 +103,7 @@ actor {
       id = 4;
       title = "UI/UX Design";
       provider = "hariSenin";
-      price = 12345678;
+      price = 250000;
       currency = "Rp.";
       detailUrl = "/course/4";
       modules = [
