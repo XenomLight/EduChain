@@ -39,7 +39,9 @@ export const idlFactory = ({ IDL }) => {
           }))
         }))
       })
-    )], ["query"])
+    )], ["query"]),
+    "enrollUser": IDL.Func([IDL.Text, IDL.Nat, IDL.Text], [IDL.Text], []),
+    "hasAccess": IDL.Func([IDL.Text, IDL.Nat], [IDL.Bool], ["query"])
   });
 };
 export const init = ({ IDL }) => { return []; };

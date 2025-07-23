@@ -43,7 +43,7 @@ actor {
       title = "Front End Developer";
       provider = "Dicoding Indonesia";
       price = 250000;
-      currency = "Rp.";
+      currency = "IDR";
       detailUrl = "/course/1";
       modules = 
       [
@@ -70,7 +70,7 @@ actor {
       title = "Back End Developer";
       provider = "Dicoding Indonesia";
       price = 250000;
-      currency = "Rp.";
+      currency = "IDR";
       detailUrl = "/course/2";
       modules = [
         {
@@ -87,7 +87,7 @@ actor {
       title = "Full-Stack Web Developer";
       provider = "hariSenin";
       price = 250000;
-      currency = "Rp.";
+      currency = "IDR";
       detailUrl = "/course/3";
       modules = [
         {
@@ -104,7 +104,7 @@ actor {
       title = "UI/UX Design";
       provider = "hariSenin";
       price = 250000;
-      currency = "Rp.";
+      currency = "IDR";
       detailUrl = "/course/4";
       modules = [
         {
@@ -120,8 +120,8 @@ actor {
       id = 5;
       title = "Data Analyst";
       provider = "Dicoding Indonesia";
-      price = 12345678;
-      currency = "Rp.";
+      price = 250000;
+      currency = "IDR";
       detailUrl = "/course/5";
       modules = [
         {
@@ -135,6 +135,36 @@ actor {
     }
   ];
 
+  type Enrollment = {
+    enrollment_id: Nat;
+    user_id: Text;
+    course_id: Nat;
+    enrollment_date: Text;
+  };
+  stable var enrollments: [Enrollment] = [];
+  var next_enrollment_id: Nat = 1;
+
+  public func enrollUser(user_id: Text, course_id: Nat, enrollment_date: Text): async Text {
+    // Cek apakah sudah pernah enroll
+    let exists = Array.find<Enrollment>(enrollments, func e { e.user_id == user_id and e.course_id == course_id });
+    if (Option.isSome(exists)) {
+      return "User already enrolled in this course!";
+    };
+    let newEnrollment: Enrollment = {
+      enrollment_id = next_enrollment_id;
+      user_id = user_id;
+      course_id = course_id;
+      enrollment_date = enrollment_date;
+    };
+    enrollments := Array.append(enrollments, [newEnrollment]);
+    next_enrollment_id += 1;
+    return "Enrollment successful!";
+  };
+
+  public query func hasAccess(user_id: Text, course_id: Nat): async Bool {
+    let exists = Array.find<Enrollment>(enrollments, func e { e.user_id == user_id and e.course_id == course_id });
+    Option.isSome(exists)
+  }
 
   func simpleHash(s: Text) : Text {
   var hash : Nat = 0;

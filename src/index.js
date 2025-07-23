@@ -70,6 +70,29 @@ await authClient.login({
       }
     }
 
+    async function enrollUser(course_id, enrollment_date) {
+      try {
+        const result = await actor.enrollUser(principal, course_id, enrollment_date);
+        console.log("Enroll user result:", result);
+      } catch (err) {
+        console.log("Enroll user gagal:", err);
+      }
+    }
+
+    async function hasAccess(course_id) {
+      try {
+        const result = await actor.hasAccess(principal, course_id);
+        console.log("User has access to course", course_id, ":", result);
+        return result;
+      } catch (err) {
+        console.log("Cek akses gagal:", err);
+        return false;
+      }
+    }
+
+    // Contoh pemanggilan enrollUser dan hasAccess
+    // await enrollUser(1, "2024-06-10");
+    // await hasAccess(1);
 
     await RegisterUsers(process.env.REGISTER_USERNAME,
       process.env.REGISTER_EMAIL,
