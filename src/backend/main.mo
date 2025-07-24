@@ -2,7 +2,8 @@ import Array "mo:base/Array";
 import Option "mo:base/Option";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
-
+import Nat32 "mo:base/Nat32";
+import Char "mo:base/Char";
 
 actor {
   type User = {
@@ -14,6 +15,13 @@ actor {
     last_name:Text;
     konfirmasi_password : Text;
   }; 
+
+ type Enrollment = {
+    enrollment_id: Nat;
+    user_id: Text;
+    course_id: Nat;
+    enrollment_date: Text;
+  };
 
   type Konten = {
     id:Nat;
@@ -36,6 +44,9 @@ actor {
     detailUrl: Text;
     modules:[Modul];
   };
+  stable var enrollments: [Enrollment] = [];
+  var next_enrollment_id: Nat = 1;
+
   stable var users : [User] = [];
   stable var daftarKursus: [Kursus] = [
     {
@@ -135,15 +146,61 @@ actor {
     }
   ];
 
-  type Enrollment = {
-    enrollment_id: Nat;
-    user_id: Text;
-    course_id: Nat;
-    enrollment_date: Text;
-  };
-  stable var enrollments: [Enrollment] = [];
-  var next_enrollment_id: Nat = 1;
+ 
 
+  public query func hasAccess(user_id: Text, course_id: Nat): async Bool {
+    let exists = Array.find<Enrollment>(enrollments, func e { e.user_id == user_id and e.course_id == course_id });
+    Option.isSome(exists)
+  };
+
+  func simpleHash(s: Text) : Text {
+    var hash : Nat = 0;
+    for (c in Text.toIter(s)) {
+      hash += Nat32.toNat(Char.toNat32(c));
+    };
+    Nat.toText(hash)
+  };
+
+  public func Register(principal: Text, username: Text, gmail: Text, password: Text, konfirmasi_password: Text, first_name: Text, last_name: Text) : async Text {
+    let exists = Array.find<User>(users, func u { u.principal == principal });
+    if (Option.isSome(exists)) {
+      return "principal already registered!";
+    };
+    let hashedPassword = simpleHash(password);
+    let newUser : User = {
+      principal = principal;
+      gmail = gmail;
+      username = username;
+      password = hashedPassword;
+      first_name = first_name;
+      last_name = last_name;
+      konfirmasi_password = konfirmasi_password;
+    };
+    users := Array.append(users, [newUser]);
+    return "user registered successfully!";
+  };
+
+  public func Login(principal: Text, gmail: Text, password: Text) : async Text {
+    let hashedPassword = simpleHash(password);
+    let userOpt = Array.find<User>(users, func u {
+      u.principal == principal and u.gmail == gmail and u.password == hashedPassword
+    });
+    if (Option.isSome(userOpt)) {
+      return "login success";
+    } else {
+      return "Invalid principal, gmail, or password";
+    }
+  };
+  public query func getCourses() : async [Kursus] {
+    return daftarKursus;
+  };
+
+  public query func getCourseById(id:Nat):async ? Kursus {
+    for (kursus in daftarKursus.vals()){
+      if (kursus.id == id) return ? kursus;
+    };
+    return null;
+  };
   public func enrollUser(user_id: Text, course_id: Nat, enrollment_date: Text): async Text {
     // Cek apakah sudah pernah enroll
     let exists = Array.find<Enrollment>(enrollments, func e { e.user_id == user_id and e.course_id == course_id });
@@ -156,60 +213,8 @@ actor {
       course_id = course_id;
       enrollment_date = enrollment_date;
     };
-    enrollments := Array.append(enrollments, [newEnrollment]);
+   enrollments  := Array.append(enrollments, [newEnrollment]);
     next_enrollment_id += 1;
     return "Enrollment successful!";
-  };
-
-  public query func hasAccess(user_id: Text, course_id: Nat): async Bool {
-    let exists = Array.find<Enrollment>(enrollments, func e { e.user_id == user_id and e.course_id == course_id });
-    Option.isSome(exists)
-  }
-
-  func simpleHash(s: Text) : Text {
-  var hash : Nat = 0;
-  for (c in Text.toIter(s)) {
-    hash += Nat.fromIntWrap(Char.toNat32(c));
-  };
-  Text.fromNat(hash)
-  }
-
-  public func Register(principal: Text, username : Text, email : Text, password : Text, konfirmasipassword : Text) : async Text {
-    let exists = Array.find<User>(users, func u { u.principal == principal });
-    if (Option.isSome(exists)) {
-      return "principal already registered!";
-    };
-    let hashedPassword = simpleHash(password);
-    let newUser : User = {
-      principal = principal;
-      email = email;
-      username = username;
-      password = hashedPassword;
-      konfirmasi_password = konfirmasipassword;
-    };
-    users := Array.append(users, [newUser]);
-    return "user registered successfully!";
-  };
-
-  public func Login(principal: Text, email: Text, password: Text) : async Text {
-    let hashedPassword = simpleHash(password);
-    let userOpt = Array.find<User>(users, func u {
-      u.principal == principal and u.email == email and u.password == hashedPassword
-    });
-    if (Option.isSome(userOpt)) {
-      return "login success";
-    } else {
-      return "Invalid principal, email, or password";
-    }
-  };
-  public query func getCourses() : async [Kursus] {
-    return daftarKursus;
-  };
-
-  public query func getCourseById(id:Nat):async ? Kursus {
-    for (kursus in daftarKursus.vals()){
-      if (kursus.id == id) return ? kursus;
-    };
-    return null;
   };
 }

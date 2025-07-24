@@ -90,14 +90,12 @@ await authClient.login({
       }
     }
 
-    // Contoh pemanggilan enrollUser dan hasAccess
-    // await enrollUser(1, "2024-06-10");
-    // await hasAccess(1);
-
     await RegisterUsers(process.env.REGISTER_USERNAME,
       process.env.REGISTER_EMAIL,
       process.env.REGISTER_PASSWORD,
       process.env.REGISTER_CONFIRM);
     await LoginUsers(process.env.REGISTER_PASSWORD);
+    await enrollUser(1, "2024-06-10");
+    await hasAccess(1);
   }
 }); 
