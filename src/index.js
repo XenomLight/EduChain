@@ -35,7 +35,7 @@ await authClient.login({
       canisterId: "qsgjb-riaaa-aaaaa-aaaga-cai"
     });
 
-    async function RegisterUsers(username, email, password, konfirmasiPassword) {
+    async function registerWithEmail(username, email, password, konfirmasiPassword) {
       try {
         const result = await actor.Register(principal, username, email, password, konfirmasiPassword);
         console.log("Registrasi berhasil:", result);
@@ -44,7 +44,7 @@ await authClient.login({
       }
     }
 
-    async function LoginUsers(password) {
+    async function loginWithEmail(password) {
       try {
         const result = await actor.Login(principal, password);
         console.log("Login berhasil:", result);
@@ -90,12 +90,12 @@ await authClient.login({
       }
     }
 
-    await RegisterUsers(process.env.REGISTER_USERNAME,
+    await registerWithEmail(process.env.REGISTER_USERNAME,
       process.env.REGISTER_EMAIL,
       process.env.REGISTER_PASSWORD,
       process.env.REGISTER_CONFIRM);
-    await LoginUsers(process.env.REGISTER_PASSWORD);
-    await enrollUser(1, "2024-06-10");
-    await hasAccess(1);
+    await loginWithEmail(process.env.REGISTER_PASSWORD);
+    await enrollUser("course-1", "2024-06-10");
+    await hasAccess("course-1");
   }
 }); 

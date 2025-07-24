@@ -1,32 +1,35 @@
-import Array "mo:base/Array";
-import Option "mo:base/Option";
+import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Nat "mo:base/Nat";
-import Nat32 "mo:base/Nat32";
-import Char "mo:base/Char";
+import Principal "mo:base/Principal";
+import Iter "mo:base/Iter";
+import HashMap "mo:base/HashMap";
 
 actor {
-  type User = {
-    principal: Text;
-    gmail : Text;
-    username : Text;
-    password : Text;
-    first_name:Text;
-    last_name:Text;
-    konfirmasi_password : Text;
-  }; 
 
- type Enrollment = {
-    enrollment_id: Nat;
-    user_id: Text;
-    course_id: Nat;
-    enrollment_date: Text;
+  // ---------- TYPES Data ----------
+  public type Error = {
+    #AlreadyExists;
+    #NotFound;
+    #InvalidCredentials;
+    #PasswordsDoNotMatch;
+    #Unauthorized;
+    #IdAlreadyExists;
+  };
+
+  type User = {
+    principal: Principal;
+    username: Text;
+    first_name: ?Text;
+    last_name: ?Text;
+    email: ?Text;
+    passwordHash: ?Text;
   };
 
   type Konten = {
-    id:Nat;
-    title:Text;
-    body:Text;
+    id: Nat;
+    title: Text;
+    body: Text;
   };
 
   type Modul = {
@@ -36,185 +39,174 @@ actor {
   };
 
   type Kursus = {
-    id: Nat;
+    id: Text;
     title: Text;
     provider: Text;
     price: Nat;
     currency: Text;
     detailUrl: Text;
-    modules:[Modul];
+    modules: [Modul];
   };
-  stable var enrollments: [Enrollment] = [];
-  var next_enrollment_id: Nat = 1;
 
-  stable var users : [User] = [];
-  stable var daftarKursus: [Kursus] = [
-    {
-      id = 1;
-      title = "Front End Developer";
-      provider = "Dicoding Indonesia";
-      price = 250000;
-      currency = "IDR";
-      detailUrl = "/course/1";
-      modules = 
-      [
-      {
-        id = 1;
-        title = "Pengenalan HTML";
-        contents = [
-          { id = 1; title = "Apa itu HTML?"; body = "HTML adalah " },
-          { id = 2; title = "Struktur Dasar HTML"; body = "Struktur dasar"}
-        ];
-      },
-      {
-        id = 2;
-        title = "Pengenalan CSS";
-        contents = [
-           { id = 1; title = "Apa itu CSS?"; body = "CSS adalah " },
-           { id = 2; title = "Cara implementasi?"; body = "implementasinya...... " }
-        ];
+  // ---------- STORAGE ----------
+  private stable var _users: [(Principal, User)] = [];
+  private stable var _usersByEmail: [(Text, User)] = [];
+  private stable var _usernames: [(Text, ())] = [];
+  private stable var _courses: [(Text, Kursus)] = [];
+
+  let users = HashMap.HashMap<Principal, User>(0, Principal.equal, Principal.hash);
+  let usersByEmail = HashMap.HashMap<Text, User>(0, Text.equal, Text.hash);
+  let usernames = HashMap.HashMap<Text, ()>(0, Text.equal, Text.hash);
+  let courses = HashMap.HashMap<Text, Kursus>(0, Text.equal, Text.hash);
+
+  stable var seed: Nat = 1;
+
+  // ---------- HELPERS ----------
+  private func hashPassword(password: Text): Text {
+    return "hashed_" # password # "_hashed"; // dummy hash
+  };
+
+  private func isEmailTaken(email: Text): Bool {
+    return usersByEmail.get(email) != null;
+  };
+
+  private func isUsernameTaken(username: Text): Bool {
+    return usernames.get(username) != null;
+  };
+
+  private func nextRandom(): Nat {
+    let a: Nat = 1664525;
+    let c: Nat = 1013904223;
+    let m: Nat = 4294967296;
+    seed := (a * seed + c) % m;
+    return seed;
+  };
+
+  private func generateUniqueUsername(): Text {
+    loop {
+      let candidate = "User_" # Nat.toText(nextRandom());
+      if (not isUsernameTaken(candidate)) return candidate;
+    }
+  };
+
+  // ---------- USER ----------
+  public shared (msg) func loginWithPrincipal(first_name: ?Text, last_name: ?Text): async Result.Result<User, Error> {
+    let caller = msg.caller;
+    switch (users.get(caller)) {
+      case (?user) return #ok(user);
+      case null {
+        let newUser: User = {
+          principal = caller;
+          username = generateUniqueUsername();
+          first_name = first_name;
+          last_name = last_name;
+          email = null;
+          passwordHash = null;
+        };
+        users.put(caller, newUser);
+        usernames.put(newUser.username, ());
+        return #ok(newUser);
       }
-      ]
-    },
-    {
-      id = 2;
-      title = "Back End Developer";
-      provider = "Dicoding Indonesia";
-      price = 250000;
-      currency = "IDR";
-      detailUrl = "/course/2";
-      modules = [
-        {
-          id = 1;
-          title = "Pengenalan Backend";
-          contents = [
-            { id = 1; title = "Apa itu Backend?"; body = "Backend adalah bagian dari aplikasi yang berjalan di server" }
-          ];
-        }
-      ];
-    },
-    {
-      id = 3;
-      title = "Full-Stack Web Developer";
-      provider = "hariSenin";
-      price = 250000;
-      currency = "IDR";
-      detailUrl = "/course/3";
-      modules = [
-        {
-          id = 1;
-          title = "Integrasi Frontend & Backend";
-          contents = [
-            { id = 1; title = "API dan Fetch"; body = "Cara menghubungkan frontend dan backend dengan API" }
-          ];
-        }
-      ];
-    },
-    {
-      id = 4;
-      title = "UI/UX Design";
-      provider = "hariSenin";
-      price = 250000;
-      currency = "IDR";
-      detailUrl = "/course/4";
-      modules = [
-        {
-          id = 1;
-          title = "cara desain baik dan benar sesuai human computer interaction";
-          contents = [
-            { id = 1; title = "desain 101"; body = "bagaimana bikin styling dan components" }
-          ];
-        }
-      ];
-    },
-    {
-      id = 5;
-      title = "Data Analyst";
-      provider = "Dicoding Indonesia";
-      price = 250000;
-      currency = "IDR";
-      detailUrl = "/course/5";
-      modules = [
-        {
-          id = 2;
-          title = "Dasar-dasar Analisis Data";
-          contents = [
-            { id = 1; title = "Pengantar Analisis Data"; body = "Analisis data adalah proses menginspeksi, membersihkan, dan memodelkan data." }
-          ];
-        }
-      ];
-    }
-  ];
-
- 
-
-  public query func hasAccess(user_id: Text, course_id: Nat): async Bool {
-    let exists = Array.find<Enrollment>(enrollments, func e { e.user_id == user_id and e.course_id == course_id });
-    Option.isSome(exists)
+    };
   };
 
-  func simpleHash(s: Text) : Text {
-    var hash : Nat = 0;
-    for (c in Text.toIter(s)) {
-      hash += Nat32.toNat(Char.toNat32(c));
-    };
-    Nat.toText(hash)
-  };
+  public shared (msg) func registerWithEmail(first_name: Text, last_name: Text, username: Text, email: Text, password: Text, confirmPassword: Text): async Result.Result<User, Error> {
+    if (password != confirmPassword) return #err(#PasswordsDoNotMatch);
+    if (isEmailTaken(email) or isUsernameTaken(username)) return #err(#AlreadyExists);
 
-  public func Register(principal: Text, username: Text, gmail: Text, password: Text, konfirmasi_password: Text, first_name: Text, last_name: Text) : async Text {
-    let exists = Array.find<User>(users, func u { u.principal == principal });
-    if (Option.isSome(exists)) {
-      return "principal already registered!";
-    };
-    let hashedPassword = simpleHash(password);
-    let newUser : User = {
-      principal = principal;
-      gmail = gmail;
+    let newUser: User = {
+      principal = msg.caller;
       username = username;
-      password = hashedPassword;
-      first_name = first_name;
-      last_name = last_name;
-      konfirmasi_password = konfirmasi_password;
+      first_name = ?first_name;
+      last_name = ?last_name;
+      email = ?email;
+      passwordHash = ?hashPassword(password);
     };
-    users := Array.append(users, [newUser]);
-    return "user registered successfully!";
+
+    users.put(newUser.principal, newUser);
+    usersByEmail.put(email, newUser);
+    usernames.put(username, ());
+    return #ok(newUser);
   };
 
-  public func Login(principal: Text, gmail: Text, password: Text) : async Text {
-    let hashedPassword = simpleHash(password);
-    let userOpt = Array.find<User>(users, func u {
-      u.principal == principal and u.gmail == gmail and u.password == hashedPassword
-    });
-    if (Option.isSome(userOpt)) {
-      return "login success";
-    } else {
-      return "Invalid principal, gmail, or password";
+  public func loginWithEmail(email: Text, password: Text): async Result.Result<User, Error> {
+    switch (usersByEmail.get(email)) {
+      case (?user) {
+        if (user.passwordHash == ?hashPassword(password)) {
+          return #ok(user);
+        } else {
+          return #err(#InvalidCredentials);
+        }
+      };
+      case null return #err(#NotFound);
     }
   };
-  public query func getCourses() : async [Kursus] {
-    return daftarKursus;
+
+  public shared query (msg) func getMe(): async ?User {
+    return users.get(msg.caller);
   };
 
-  public query func getCourseById(id:Nat):async ? Kursus {
-    for (kursus in daftarKursus.vals()){
-      if (kursus.id == id) return ? kursus;
-    };
-    return null;
+  public shared (msg) func whoami(): async Principal {
+    return msg.caller;
   };
-  public func enrollUser(user_id: Text, course_id: Nat, enrollment_date: Text): async Text {
-    // Cek apakah sudah pernah enroll
-    let exists = Array.find<Enrollment>(enrollments, func e { e.user_id == user_id and e.course_id == course_id });
-    if (Option.isSome(exists)) {
-      return "User already enrolled in this course!";
-    };
-    let newEnrollment: Enrollment = {
-      enrollment_id = next_enrollment_id;
-      user_id = user_id;
-      course_id = course_id;
-      enrollment_date = enrollment_date;
-    };
-   enrollments  := Array.append(enrollments, [newEnrollment]);
-    next_enrollment_id += 1;
-    return "Enrollment successful!";
+
+  // ---------- COURSE ----------
+  public query func getCourses(): async [Kursus] {
+    return Iter.toArray(courses.vals());
   };
-}
+
+  public query func getCourseById(id: Text): async ?Kursus {
+    return courses.get(id);
+  };
+
+  public query func getModulebyCourseID(id: Text): async ?[Modul] {
+    switch (courses.get(id)) {
+      case (?course) return ?course.modules;
+      case null return null;
+    }
+  };
+
+  // ---------- ADMIN ----------
+  public shared (msg) func addCourse(
+    id: Text,
+    title: Text,
+    provider: Text,
+    price: Nat,
+    currency: Text,
+    detailUrl: Text,
+    modulesParam: [Modul]
+  ): async Result.Result<Kursus, Error> {
+    let admin: Principal = Principal.fromText("q6txp-dokbc-yq2x2-5w3ex-ywtty-w6dzx-vt4nf-zfay7-6pj57-d3nba-cae");
+    if (msg.caller != admin) return #err(#Unauthorized);
+    if (courses.get(id) != null) return #err(#IdAlreadyExists);
+
+    let newCourse: Kursus = {
+      id = id;
+      title = title;
+      provider = provider;
+      price = price;
+      currency = currency;
+      detailUrl = detailUrl;
+      modules = modulesParam;
+    };
+
+    courses.put(id, newCourse);
+    return #ok(newCourse);
+  };
+
+  // ---------- SYSTEM ----------
+  system func preupgrade() {
+    _users := Iter.toArray(users.entries());
+    _usersByEmail := Iter.toArray(usersByEmail.entries());
+    _usernames := Iter.toArray(usernames.entries());
+    _courses := Iter.toArray(courses.entries());
+  };
+
+  system func postupgrade() {
+    for ((p, user) in _users.vals()) users.put(p, user);
+    for ((e, user) in _usersByEmail.vals()) usersByEmail.put(e, user);
+    for ((u, _) in _usernames.vals()) usernames.put(u, ());
+    for ((id, c) in _courses.vals()) courses.put(id, c);
+  };
+
+};
