@@ -5,16 +5,10 @@
       "type": "motoko"
     },
     "frontend": {
-      "dependencies": [
-        "backend"
-      ],
-      "frontend": {
-        "entrypoint": "src/frontend/index.html"
-      },
-      "source": [
-        "src/frontend/dist/"
-      ],
-      "type": "assets"
+      "dependencies": ["backend"],
+      "source": ["src/frontend/dist"],
+      "type": "assets",
+      "ignore": ["src/frontend/dist/.ic-assets.json5"]
     }
   },
   "defaults": {
