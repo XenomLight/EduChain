@@ -39,14 +39,14 @@ dfx canister call backend RegisterWithPrincipal '(principal "aaaaa-aa", "user1",
 
  ###Login (dengan principal)
 ```bash
-dfx canister call backend Register '("nazriel", "nazriel@gmail.com", "passnaz1", "passnaz1")'
+dfx canister call backend registerWithEmail '("Nazriel", "Akbar", "nazriel", "nazriel@gmail.com", "passnaz1", "passnaz1")'
 dfx canister call backend Login '("nazriel@gmail.com", "passnaz1")'
 ```
 
 ### kursus 
 ```bash
  dfx canister call backend getCourseById '(1)'
- 
+ dfx canister call backend addCourse 
   dfx canister call backend getCourses
  ```
 ## Dokumentasi Endpoint
