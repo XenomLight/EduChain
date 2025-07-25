@@ -47,8 +47,10 @@ dfx canister call backend Login '("nazriel@gmail.com", "passnaz1")'
 ```bash
  dfx canister call backend getCourseById '(1)'
  dfx canister call backend addCourse 
-  dfx canister call backend getCourses
+ dfx canister call backend getCourses
+ dfx canister call backend setCoursePrice '("course_001", 100, "ICP")' 
  ```
+
 ## Dokumentasi Endpoint
 ### RegisterWithPrincipal
 - **Nama:** RegisterWithPrincipal

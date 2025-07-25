@@ -79,6 +79,19 @@ await authClient.login({
       }
     }
 
+    async function deleteCourse(courseId) {
+      try {
+        const result = await actor.deleteCourse(courseId);
+        if ("ok" in result) {
+          console.log("Course deleted successfully:", result.ok);
+        } else {
+          console.log("Delete course failed:", result.err);
+        }
+      } catch (err) {
+        console.error("Delete course error:", err);
+      }
+    }
+
     async function hasAccess(course_id) {
       try {
         const result = await actor.hasAccess(principal, course_id);
@@ -97,5 +110,8 @@ await authClient.login({
     await loginWithEmail(process.env.REGISTER_PASSWORD);
     await enrollUser("course-1", "2024-06-10");
     await hasAccess("course-1");
+    await GetCourseById("course-1");
+    await GetAllCourses("course-1");
+    await deleteCourse("course-1");
   }
 }); 

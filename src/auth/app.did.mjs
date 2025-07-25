@@ -29,6 +29,11 @@ export const idlFactory = ({ IDL }) => {
     detailUrl: IDL.Text,
     modules: IDL.Vec(Modul)
   });
+  const Enrollment = IDL.Record({
+    user_id: IDL.Principal,
+    course_id: IDL.Text,
+    enrollment_date: IDL.Text
+  });
 
   const User = IDL.Record({
     principal: IDL.Principal,
@@ -48,6 +53,10 @@ export const idlFactory = ({ IDL }) => {
     ok: Kursus,
     err: Error
   });
+  const ResultEnrollment = IDL.Variant({
+    ok: Enrollment,
+    err: Error
+  });
 
   return IDL.Service({
 
@@ -57,7 +66,12 @@ export const idlFactory = ({ IDL }) => {
       [ResultUser],
       []
     ),
-
+    hasAccess: IDL.Func(
+      [IDL.Principal, IDL.Text],
+      [IDL.Bool],
+      ["query"]
+    ),
+    
     registerWithEmail: IDL.Func(
       [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
       [ResultUser],
@@ -73,18 +87,44 @@ export const idlFactory = ({ IDL }) => {
     getMe: IDL.Func([], [IDL.Opt(User)], ["query"]),
 
     whoami: IDL.Func([], [IDL.Principal], []),
-
+    enrollUser: IDL.Func(
+      [IDL.Text, IDL.Text],
+      [ResultEnrollment],
+      []
+    ),
     // COURSE
     getCourses: IDL.Func([], [IDL.Vec(Kursus)], ["query"]),
 
     getCourseById: IDL.Func([IDL.Text], [IDL.Opt(Kursus)], ["query"]),
-
+    deleteCourse: IDL.Func([IDL.Text], [IDL.Variant({ ok: IDL.Text, err: IDLError })], []),
     getModulebyCourseID: IDL.Func([IDL.Text], [IDL.Opt(IDL.Vec(Modul))], ["query"]),
-
+    enrollUser: IDL.Func(
+      [IDL.Text, IDL.Text],
+      [ResultEnrollment],
+      []
+      
+    ),
     // ADMIN
     addCourse: IDL.Func([
       IDL.Text, IDL.Text, IDL.Text, IDL.Nat, IDL.Text, IDL.Text, IDL.Vec(Modul)
-    ], [ResultCourse], [])
+    ], [ResultCourse], []),
+
+    // Set course price - Admin only
+    setCoursePrice: IDL.Func([
+      IDL.Text, IDL.Nat, IDL.Text
+    ], [ResultCourse], []),
+
+    // Get modules with access control
+    getModulesWithAccess: IDL.Func([IDL.Text], [IDL.Variant({
+      ok: IDL.Vec(Modul),
+      err: Error
+    })], ["query"]),
+
+    // Get course content with access control
+    getCourseContent: IDL.Func([IDL.Text, IDL.Nat], [IDL.Variant({
+      ok: IDL.Vec(Konten),
+      err: Error
+    })], ["query"])
   });
 };
 
