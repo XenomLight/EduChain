@@ -1,7 +1,6 @@
 import Array "mo:base/Array";
 import Blob "mo:base/Blob";
 import Buffer "mo:base/Buffer";
-import Char "mo:base/Char";
 import Debug "mo:base/Debug";
 import Hash "mo:base/Hash";
 import HashMap "mo:base/HashMap";
@@ -10,22 +9,16 @@ import Iter "mo:base/Iter";
 import Nat "mo:base/Nat";
 import Nat32 "mo:base/Nat32";
 import Option "mo:base/Option";
+import Order "mo:base/Order";
 import Principal "mo:base/Principal";
 import Result "mo:base/Result";
 import Text "mo:base/Text";
 import Time "mo:base/Time";
+import Char "mo:base/Char";
+import Float "mo:base/Float";
 
 actor {
-  // ---------- TYPES Data ----------
-  
-  // Helper function for custom hashing (replacing Hash.xor)
-  private func customHash(a: Hash.Hash, b: Hash.Hash) : Hash.Hash {
-    let a32 = a;
-    let b32 = b;
-    let x = (a32 +% b32) % (2**32 - 1);
-    x
-  };
-
+  // ========== TYPES ==========
   public type Error = {
     #AlreadyExists;
     #NotFound;
@@ -33,29 +26,7 @@ actor {
     #PasswordsDoNotMatch;
     #Unauthorized;
     #IdAlreadyExists;
-    #InvalidAmount;
-  };
-
-  public type User = {
-    user_id: Nat;
-    principal: Principal;
-    username: Text;
-    first_name: ?Text;
-    last_name: ?Text;
-    email: ?Text;
-    password_hash: ?Text;
-    created_at: Int;
-    updated_at: Int;
-  };
-
-  public type Transactions = {
-    transaksi_id: Nat;
-    user_id: Nat;  // Changed from Principal to Nat
-    course_id: Text;
-    harga_transaksi: Nat;
-    currency: Text;
-    tanggal_transaksi: Int;
-    status: Text;
+    #InvalidState;
   };
 
   public type Konten = {
@@ -78,34 +49,39 @@ actor {
     updated_at: Int;
   };
 
-  public type Kursus = {
+  public type Course = {
     id: Text;
     title: Text;
-    instructor: Text;         // e.g. "Alex Morgan"
-    category: Text;          // e.g. "UI/UX Design"
+    instructor: Text;
+    category: Text;
     price: Nat;
-    priceDiscount: ?Nat;     // Optional discounted price
-    currency: Text;          // e.g. "USD"
-    rating: Float;           // e.g. 4.8
-    totalRatings: Nat;       // e.g. 12.5k
-    thumbnail: Text;         // URL to course thumbnail
-    duration: Nat;           // in minutes
-    durationText: Text;      // e.g. "12h 30m"
+    priceDiscount: ?Nat;
+    currency: Text;
+    rating: Float;
+    totalRatings: Nat;
+    thumbnail: Text;
+    duration: Nat;
+    durationText: Text;
     modules: [Modul];
     description: Text;
-    level: Text;             // e.g. "Beginner", "Intermediate", "Advanced"
-    isFavorite: Bool;        // Whether the course is favorited by the user
-    progress: ?Nat;          // Optional progress percentage (0-100)
-    totalStudents: Nat;      // Total number of students enrolled
-    totalModules: Nat;       // Total number of modules
-    totalLessons: Nat;       // Total number of lessons
-    totalDuration: Nat;      // Total duration in minutes
+    level: Text;
+    isFavorite: Bool;
+    progress: ?Nat;
+    totalStudents: Nat;
+    totalModules: Nat;
+    totalLessons: Nat;
+    totalDuration: Nat;
     created_at: Int;
     updated_at: Int;
+    bannerImage: ?Text;
+    learningOutcomes: [Text];
+    requirements: [Text];
+    whatYouGet: [Text];
+    tags: [Text];
   };
 
   public type Enrollment = {
-    user_id: Nat;  // Changed from Principal to Nat
+    user_id: Principal;
     course_id: Text;
     enrollment_date: Text;
     status: Text;
@@ -113,359 +89,207 @@ actor {
     updated_at: Int;
   };
 
-  // ---------- STORAGE ----------
+  public type User = {
+    user_id: Nat;
+    principal: Principal;
+    username: Text;
+    first_name: ?Text;
+    last_name: ?Text;
+    email: ?Text;
+    password_hash: ?Text;
+    created_at: Int;
+    updated_at: Int;
+  };
+
+  public type Transaction = {
+    transaksi_id: Nat;
+    user_id: Nat;
+    course_id: Text;
+    harga_transaksi: Nat;
+    currency: Text;
+    tanggal_transaksi: Int;
+    status: Text;
+  };
+
+  public type Result<T, E> = { #ok: T; #err: E };
+  public type ResultUser = Result<User, Error>;
+  public type ResultCourse = Result<Course, Error>;
+  public type ResultEnrollment = Result<Enrollment, Error>;
+  public type ResultBool = Result<Bool, Error>;
+  public type ResultModules = Result<[Modul], Error>;
+  public type ResultContents = Result<[Konten], Error>;
+  // ========== STORAGE ==========
   private stable var nextUserId: Nat = 1;
+  private stable var nextEnrollmentId: Nat = 1;
   private stable var nextTransactionId: Nat = 1;
-  
+
   // User storage
-  private stable var usersEntries: [(Principal, User)] = [];
+  private stable var userEntries: [(Principal, User)] = [];
   private var users = HashMap.HashMap<Principal, User>(1, Principal.equal, Principal.hash);
-  
-  // Principal to user_id mapping
-  private stable var principalToUserIdEntries: [(Principal, Nat)] = [];
-  private var principalToUserId = HashMap.HashMap<Principal, Nat>(1, Principal.equal, Principal.hash);
-  
-  // User ID to Principal mapping
-  private stable var userIdToPrincipalEntries: [(Nat, Principal)] = [];
-  private var userIdToPrincipal = HashMap.HashMap<Nat, Principal>(1, Nat.equal, Hash.hash);
-  
-  // Other storage
-  private stable var usersByEmailEntries: [(Text, Principal)] = [];
   private var usersByEmail = HashMap.HashMap<Text, Principal>(1, Text.equal, Text.hash);
-  
-  private stable var usernamesEntries: [(Text, ())] = [];
-  private var usernames = HashMap.HashMap<Text, ()>(1, Text.equal, Text.hash);
-  
-  private stable var coursesEntries: [(Text, Kursus)] = [];
-  private var courses = HashMap.HashMap<Text, Kursus>(1, Text.equal, Text.hash);
-  
-  private stable var enrollmentsEntries: [((Principal, Text), Enrollment)] = [];
+  private var usernames = HashMap.HashMap<Text, Principal>(1, Text.equal, Text.hash);
+
+  // Course storage
+  private stable var courseEntries: [(Text, Course)] = [];
+  private var courses = HashMap.HashMap<Text, Course>(1, Text.equal, Text.hash);
+
+  // Enrollment storage
+  private stable var enrollmentEntries: [(Principal, Text, Enrollment)] = [];
   private var enrollments = HashMap.HashMap<(Principal, Text), Enrollment>(1, 
     func(a: (Principal, Text), b: (Principal, Text)): Bool { 
-      Principal.equal(a.0, b.0) and Text.equal(a.1, b.1) 
-    }, 
-    func((p, t): (Principal, Text)): Hash.Hash { 
-      let ph = Principal.hash(p);
-      let th = Text.hash(t);
-      customHash(ph, th)
+      Principal.equal(a.0, b.0) and a.1 == b.1 
+    },
+    func((p, c): (Principal, Text)): Hash.Hash {
+      let h1 = Principal.hash(p);
+      let h2 = Text.hash(c);
+      h1 ^ h2
     }
   );
-  
-  private stable var transactionsEntries: [(Nat, Transactions)] = [];
-  private var transactions = HashMap.HashMap<Nat, Transactions>(1, Nat.equal, Hash.hash);
 
-  // Helper function to get current timestamp
+  // Transaction storage
+  private stable var transactionEntries: [(Nat, Transaction)] = [];
+  private var transactions = HashMap.HashMap<Nat, Transaction>(1, Nat.equal, Hash.hash);
+  private var userTransactions = HashMap.HashMap<Nat, [Nat]>(1, Nat.equal, Hash.hash);
+
+  // ========== HELPER FUNCTIONS ==========
   private func getCurrentTime(): Int {
     Time.now() / 1_000_000_000; // Convert to seconds
   };
 
-  // Helper function to generate a new user ID
-  private func getNextUserId(): Nat {
-    let id = nextUserId;
-    nextUserId += 1;
-    id
-  };
-
-  // Helper function to generate a new transaction ID
-  private func getNextTransactionId(): Nat {
-    let id = nextTransactionId;
-    nextTransactionId += 1;
-    id
-  };
-
-  // Helper function to get user_id from Principal
-  private func getUserId(principal: Principal): ?Nat {
-    principalToUserId.get(principal)
-  };
-
-  // Helper function to get Principal from user_id
-  private func getPrincipal(userId: Nat): ?Principal {
-    userIdToPrincipal.get(userId)
-  };
-
-  // Helper function to check if email is taken
   private func isEmailTaken(email: Text): Bool {
     usersByEmail.get(email) != null
   };
 
-  // Helper function to check if username is taken
   private func isUsernameTaken(username: Text): Bool {
     usernames.get(username) != null
   };
 
-  // Placeholder for password hashing - replace with secure hashing in production
-  private func hashPassword(password: Text): Text {
-    // In a real application, use a secure hashing algorithm
-    // This is just a placeholder
-    let hashed = Text.map(password, func (c: Char): Char { 
-      let n = Char.toNat32(c);
-      let rotated = (n +% 13) % 26;
-      Char.fromNat32(rotated + 97)
-    });
-    hashed
+ private func hashPassword(password: Text): Text {
+  // Simple hash function for development
+  // In production, use a proper password hashing library
+  var hash : Nat32 = 0;
+  for (c in Text.toIter(password)) {
+    hash := hash *% 31 +% Char.toNat32(c);
+    hash := hash +% (hash << 10);
+    hash := hash ^ (hash >> 6);
+  };
+  hash := hash +% (hash << 3);
+  hash := hash ^ (hash >> 11);
+  hash := hash +% (hash << 15);
+  Nat32.toText(hash);
   };
 
-  // ---------- AUTHENTICATION ----------
+  // ========== USER MANAGEMENT ==========
+  public shared (msg) func loginWithEmail(email: Text, password: Text): async ResultUser {
+    switch (usersByEmail.get(email)) {
+        case (?principal) {
+            switch (users.get(principal)) {
+                case (?user) {
+                    // Verify password
+                    switch (user.password_hash) {
+                        case (?hash) {
+                            if (hash == hashPassword(password)) {
+                                #ok(user)
+                            } else {
+                                #err(#InvalidCredentials)
+                            }
+                        };
+                        case null #err(#InvalidCredentials)
+                    }
+                };
+                case null #err(#NotFound)
+            }
+        };
+        case null #err(#NotFound)
+    }
+  };
+  public shared (msg) func loginWithPrincipal(username: ?Text, email: ?Text): async ResultUser {
+    // Return current user if exists
+    switch (users.get(msg.caller)) {
+        case (?user) #ok(user);
+        case null #err(#NotFound)
+    }
+  };
+  public shared query (msg) func whoami(): async Principal {
+    msg.caller
+  };
+  public shared query (msg) func getModulesWithAccess(courseId: Text): async ResultModules {
+    switch (courses.get(courseId)) {
+      case (?course) {
+        // Check if user has access
+        let enrollmentKey = (msg.caller, courseId);
+        if (enrollments.get(enrollmentKey) != null or course.price == 0) {
+          #ok(course.modules)
+        } else {
+          #err(#Unauthorized)
+        }
+      };
+      case null #err(#NotFound)
+    }
+  };
+
+  public shared query (msg) func getCourseContent(courseId: Text, moduleId: Nat): async ResultContents {
+    switch (courses.get(courseId)) {
+      case (?course) {
+        // Check if user has access
+        let enrollmentKey = (msg.caller, courseId);
+        if (enrollments.get(enrollmentKey) != null or course.price == 0) {
+          // Find the module
+          switch (Array.find<Modul>(course.modules, func(m: Modul): Bool { m.id == moduleId })) {
+            case (?foundModule) #ok(foundModule.contents);
+            case null #err(#NotFound)
+          }
+        } else {
+          #err(#Unauthorized)
+        }
+      };
+      case null #err(#NotFound)
+    }
+  };
+
   public shared (msg) func registerWithEmail(
-    first_name: Text, 
-    last_name: Text, 
-    username: Text, 
-    email: Text, 
-    password: Text, 
-    confirmPassword: Text
-  ): async Result.Result<User, Error> {
+    username: Text,
+    email: Text,
+    password: Text,
+    confirmPassword: Text,
+    firstName: Text,
+    lastName: Text
+  ): async ResultUser {
     if (password != confirmPassword) return #err(#PasswordsDoNotMatch);
     if (isEmailTaken(email) or isUsernameTaken(username)) return #err(#AlreadyExists);
 
-    let userId = getNextUserId();
+    let userId = nextUserId;
+    nextUserId += 1;
     let now = getCurrentTime();
     
     let newUser: User = {
       user_id = userId;
       principal = msg.caller;
       username = username;
-      first_name = ?first_name;
-      last_name = ?last_name;
       email = ?email;
       password_hash = ?hashPassword(password);
+      first_name = ?firstName;
+      last_name = ?lastName;
       created_at = now;
       updated_at = now;
     };
 
     // Store user data
     users.put(msg.caller, newUser);
-    principalToUserId.put(msg.caller, userId);
-    userIdToPrincipal.put(userId, msg.caller);
     usersByEmail.put(email, msg.caller);
-    usernames.put(username, ());
+    usernames.put(username, msg.caller);
     
-    return #ok(newUser);
+    #ok(newUser)
   };
 
-  public shared (msg) func loginWithEmail(email: Text, password: Text): async Result.Result<User, Error> {
-    switch (usersByEmail.get(email)) {
-      case (?principal) {
-        switch (users.get(principal)) {
-          case (?user) {
-            // In a real app, verify the password hash properly
-            if (user.password_hash == ?hashPassword(password)) {
-              return #ok(user);
-            } else {
-              return #err(#InvalidCredentials);
-            }
-          };
-          case null return #err(#NotFound);
-        }
-      };
-      case null return #err(#NotFound);
-    }
-  };
-
-  public shared query (msg) func getMe(): async Result.Result<User, Error> {
+  public shared query (msg) func getMe(): async ResultUser {
     switch (users.get(msg.caller)) {
       case (?user) #ok(user);
       case null #err(#NotFound);
     }
   };
 
-  public shared query (msg) func getMyTransactions(): async Result.Result<[Transactions], Error> {
-    switch (getUserId(msg.caller)) {
-      case (?userId) {
-        let userTransactions = Array.filter(
-          Iter.toArray(transactions.vals()),
-          func(t: Transactions): Bool { t.user_id == userId }
-        );
-        #ok(userTransactions)
-      };
-      case null #err(#NotFound);
-    }
-  };
-
-  // Update enrollUser to use user_id
-  public shared (msg) func enrollUser(course_id: Text, enrollment_date: Text): async Result.Result<Enrollment, Error> {
-    switch (getUserId(msg.caller)) {
-      case (?userId) {
-        let key = (msg.caller, course_id);
-        if (enrollments.get(key) != null) {
-          return #err(#AlreadyExists);
-        };
-
-        let now = getCurrentTime();
-        let enrollment: Enrollment = {
-          user_id = userId;
-          course_id = course_id;
-          enrollment_date = enrollment_date;
-          status = "active";
-          created_at = now;
-          updated_at = now;
-        };
-
-        enrollments.put(key, enrollment);
-        #ok(enrollment)
-      };
-      case null #err(#Unauthorized);
-    }
-  };
-
-  // Update hasAccess to use user_id
-  public shared query (msg) func hasAccess(course_id: Text): async Result.Result<Bool, Error> {
-    switch (getUserId(msg.caller)) {
-      case (?userId) {
-        let key = (msg.caller, course_id);
-        #ok(enrollments.get(key) != null)
-      };
-      case null #err(#Unauthorized);
-    }
-  };
-
-  // Update getModulesWithAccess to use user_id
-  public shared query (msg) func getModulesWithAccess(courseId: Text): async Result.Result<[Modul], Error> {
-    let key = (msg.caller, courseId);
-    
-    switch (enrollments.get(key)) {
-      case (?_) {
-        // User is enrolled, return all modules
-        switch (courses.get(courseId)) {
-          case (?course) #ok(course.modules);
-          case null #err(#NotFound);
-        }
-      };
-      case null {
-        // User not enrolled, check if course is free
-        switch (courses.get(courseId)) {
-          case (?course) {
-            if (course.price == 0) {
-              #ok(course.modules)
-            } else {
-              #err(#Unauthorized)
-            }
-          };
-          case null #err(#NotFound);
-        }
-      };
-    }
-  };
-
-  // Update getCourseContent to use user_id
-  public shared query (msg) func getCourseContent(courseId: Text, moduleId: Nat): async Result.Result<[Konten], Error> {
-    let key = (msg.caller, courseId);
-    
-    // Check if user has access (enrolled or course is free)
-    let hasAccess = switch (enrollments.get(key)) {
-      case (?enrollment) true;
-      case null {
-        switch (courses.get(courseId)) {
-          case (?course) course.price == 0;
-          case null return #err(#NotFound);
-        }
-      }
-    };
-
-    if (not hasAccess) return #err(#Unauthorized);
-    
-    // User has access, find the module
-    switch (courses.get(courseId)) {
-      case (?course) {
-        for (m in course.modules.vals()) {
-          if (m.id == moduleId) {
-            return #ok(m.contents);
-          }
-        };
-        #err(#NotFound)
-      };
-      case null #err(#NotFound);
-    }
-  };
-
-  // Update createTransaction to use user_id
-  public shared (msg) func createTransaction(
-    course_id: Text,
-    harga_transaksi: Nat,
-    currency: Text,
-    status: Text
-  ): async Result.Result<Transactions, Error> {
-    switch (getUserId(msg.caller)) {
-      case (?userId) {
-        let transaksi_id = getNextTransactionId();
-        let currentTime = getCurrentTime();
-        
-        let newTransaction: Transactions = {
-          transaksi_id = transaksi_id;
-          user_id = userId;
-          course_id = course_id;
-          harga_transaksi = harga_transaksi;
-          currency = currency;
-          tanggal_transaksi = currentTime;
-          status = status;
-        };
-
-        transactions.put(transaksi_id, newTransaction);
-        
-        // If payment is successful, enroll the user
-        if (status == "completed") {
-          let enrollmentResult = await enrollUser(course_id, Int.toText(currentTime));
-          switch (enrollmentResult) {
-            case (#err(e)) Debug.print("Enrollment failed: " # debug_show(e));
-            case _ {};
-          };
-        };
-
-        #ok(newTransaction)
-      };
-      case null #err(#Unauthorized);
-    }
-  };
-
-  // Add this function after the other course-related functions
-  public shared (msg) func setCoursePrice(
-    courseId: Text,
-    price: Nat,
-    currency: Text
-  ): async Result.Result<Kursus, Error> {
-    // Check if the caller is authorized (e.g., admin)
-    // For now, we'll allow any authenticated user to set prices
-    // In production, you should add proper authorization
-    
-    switch (courses.get(courseId)) {
-      case (?existingCourse) {
-        // Update existing course price
-        let updatedCourse: Kursus = {
-          id = existingCourse.id;
-          title = existingCourse.title;
-          instructor = existingCourse.instructor;
-          category = existingCourse.category;
-          price = price;
-          priceDiscount = existingCourse.priceDiscount;
-          currency = currency;
-          rating = existingCourse.rating;
-          totalRatings = existingCourse.totalRatings;
-          thumbnail = existingCourse.thumbnail;
-          duration = existingCourse.duration;
-          durationText = existingCourse.durationText;
-          modules = existingCourse.modules;
-          description = existingCourse.description;
-          level = existingCourse.level;
-          isFavorite = existingCourse.isFavorite;
-          progress = existingCourse.progress;
-          totalStudents = existingCourse.totalStudents;
-          totalModules = existingCourse.totalModules;
-          totalLessons = existingCourse.totalLessons;
-          totalDuration = existingCourse.totalDuration;
-          created_at = existingCourse.created_at;
-          updated_at = getCurrentTime();
-        };
-        
-        courses.put(courseId, updatedCourse);
-        #ok(updatedCourse)
-      };
-      case null {
-        // Course not found, return error
-        #err(#NotFound)
-      };
-    }
-  };
-
-  // Update addCourse function
+  // ========== COURSE MANAGEMENT ==========
   public shared (msg) func addCourse(
     id: Text,
     title: Text,
@@ -478,118 +302,430 @@ actor {
     description: Text,
     level: Text,
     modules: [Modul],
-    duration: Nat
-  ): async Result.Result<Kursus, Error> {
-    // Check if course already exists
-    if (courses.get(id) != null) {
-      return #err(#AlreadyExists);
-    };
+    duration: Nat,
+    bannerImage: ?Text,
+    learningOutcomes: [Text],
+    requirements: [Text],
+    whatYouGet: [Text],
+    tags: [Text]
+  ): async ResultCourse {
+    switch (users.get(msg.caller)) {
+      case null return #err(#Unauthorized);
+      case (?_) {
+        if (courses.get(id) != null) return #err(#AlreadyExists);
 
-    let now = Time.now() / 1_000_000_000; // Convert to seconds
-    
-    // Calculate course statistics
-    let totalMods = modules.size();
-    let totalLessons = Array.foldLeft<Modul, Nat>(
-      modules, 0, 
-      func(acc: Nat, m: Modul): Nat { acc + m.contents.size() }
-    );
-    
-    let totalDur = Array.foldLeft<Modul, Nat>(
-      modules, 0,
-      func(acc: Nat, m: Modul): Nat {
-        acc + Array.foldLeft<Konten, Nat>(
-          m.contents, 0,
-          func(acc2: Nat, c: Konten): Nat { acc2 + Option.get(c.duration, 0) }
-        )
+        let now = getCurrentTime();
+        let newCourse: Course = {
+          id = id;
+          title = title;
+          instructor = instructor;
+          category = category;
+          price = price;
+          priceDiscount = priceDiscount;
+          currency = currency;
+          rating = 0.0;
+          totalRatings = 0;
+          thumbnail = thumbnail;
+          duration = duration;
+          durationText = Nat.toText(duration) # " minutes";
+          modules = modules;
+          description = description;
+          level = level;
+          isFavorite = false;
+          progress = null;
+          totalStudents = 0;
+          totalModules = modules.size();
+          totalLessons = Array.foldLeft<Modul, Nat>(modules, 0, func(acc, m) = acc + m.contents.size());
+          totalDuration = duration;
+          created_at = now;
+          updated_at = now;
+          bannerImage = bannerImage;
+          learningOutcomes = learningOutcomes;
+          requirements = requirements;
+          whatYouGet = whatYouGet;
+          tags = tags;
+        };
+
+        courses.put(id, newCourse);
+        #ok(newCourse)
       }
-    );
-
-    // Format duration as "Xh Ym"
-    let hours = totalDur / 60;
-    let minutes = totalDur % 60;
-    let durationText = if (hours > 0) {
-      if (minutes > 0) {
-        debug_show(hours) # "h " # debug_show(minutes) # "m"
-      } else {
-        debug_show(hours) # "h"
-      }
-    } else {
-      debug_show(minutes) # "m"
-    };
-
-    let newCourse: Kursus = {
-      id = id;
-      title = title;
-      instructor = instructor;
-      category = category;
-      price = price;
-      priceDiscount = priceDiscount;
-      currency = currency;
-      thumbnail = thumbnail;
-      description = description;
-      level = level;
-      modules = modules;
-      duration = duration;
-      durationText = durationText;
-      rating = 0.0;  // Default rating
-      totalRatings = 0;  // No ratings yet
-      isFavorite = false;  // Not favorited by default
-      progress = null;  // No progress for new course
-      totalStudents = 0;  // No students enrolled yet
-      totalModules = totalMods;
-      totalLessons = totalLessons;
-      totalDuration = totalDur;
-      created_at = now;
-      updated_at = now;
-    };
-
-    courses.put(id, newCourse);
-    #ok(newCourse)
+    }
   };
 
-  // Update system functions for upgrade/downgrade
+  public shared query func getCourseById(courseId: Text): async ResultCourse {
+    switch (courses.get(courseId)) {
+      case (?course) #ok(course);
+      case null #err(#NotFound);
+    }
+  };
+
+  public shared query func getCourses(
+    page: Nat,
+    pageSize: Nat,
+    sortBy: ?{
+      #newest;
+      #popular;
+      #rating;
+      #priceHighToLow;
+      #priceLowToHigh;
+    }
+  ): async [Course] {
+    let allCourses = Iter.toArray(courses.vals());
+    
+    // Sort courses based on the sortBy parameter
+    let sortedCourses = switch(sortBy) {
+      case (?#newest) { Array.sort(allCourses, func(a: Course, b: Course): Order.Order {
+        Int.compare(b.created_at, a.created_at);
+      }) };
+      case (?#popular) { Array.sort(allCourses, func(a: Course, b: Course): Order.Order {
+        Nat.compare(b.totalStudents, a.totalStudents);
+      }) };
+      case (?#rating) { Array.sort(allCourses, func(a: Course, b: Course): Order.Order {
+        Float.compare(b.rating, a.rating);
+      }) };
+      case (?#priceHighToLow) { Array.sort(allCourses, func(a: Course, b: Course): Order.Order {
+        Nat.compare(b.price, a.price);
+      }) };
+      case (?#priceLowToHigh) { Array.sort(allCourses, func(a: Course, b: Course): Order.Order {
+        Nat.compare(a.price, b.price);
+      }) };
+      case (null) { allCourses }; // Default: no specific sort
+    };
+
+    // Calculate pagination
+    let start = page * pageSize;
+    
+    // Return empty array if start is beyond the array size
+    if (start >= sortedCourses.size()) {
+      return [];
+    };
+    
+    // Calculate end index, making sure not to exceed array bounds
+    let end = Nat.min(start + pageSize, sortedCourses.size());
+    
+    // Extract the page of results
+    Array.tabulate<Course>(
+      end - start,
+      func(i: Nat): Course { sortedCourses[start + i] }
+    );
+  };
+
+  // ========== ENROLLMENT ==========
+  public shared (msg) func enrollUser(
+    courseId: Text,
+    enrollmentDate: Text
+  ): async ResultEnrollment {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Check if course exists
+        switch (courses.get(courseId)) {
+          case null return #err(#NotFound);
+          case (?course) {
+            // Check if already enrolled
+            let enrollmentKey = (msg.caller, courseId);
+            if (enrollments.get(enrollmentKey) != null) {
+              return #err(#AlreadyExists);
+            };
+
+            let now = getCurrentTime();
+            let enrollment: Enrollment = {
+              user_id = msg.caller;
+              course_id = courseId;
+              enrollment_date = enrollmentDate;
+              status = "active";
+              created_at = now;
+              updated_at = now;
+            };
+
+            // Store enrollment
+            enrollments.put(enrollmentKey, enrollment);
+
+            #ok(enrollment)
+          }
+        }
+      };
+      case null #err(#Unauthorized);
+    }
+  };
+
+  // ========== PAYMENT & TRANSACTIONS ==========
+  public shared (msg) func createTransaction(
+    courseId: Text
+  ): async Result.Result<Transaction, Error> {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Check if course exists
+        switch (courses.get(courseId)) {
+          case null return #err(#NotFound);
+          case (?course) {
+            // Create transaction
+            let transactionId = nextTransactionId;
+            nextTransactionId += 1;
+
+            let transaction: Transaction = {
+              transaksi_id = transactionId;
+              user_id = user.user_id;
+              course_id = courseId;
+              harga_transaksi = course.price;
+              currency = course.currency;
+              tanggal_transaksi = getCurrentTime();
+              status = "pending";
+            };
+
+            // Store transaction
+            transactions.put(transactionId, transaction);
+
+            // Create or update user's transaction list
+            let existingTxns = switch (userTransactions.get(user.user_id)) {
+              case (?txns) { Buffer.fromArray<Nat>(txns) };
+              case null { Buffer.Buffer<Nat>(0) };
+            };
+            
+            // Add new transaction ID
+            existingTxns.add(transactionId);
+            
+            // Store updated transaction list
+            userTransactions.put(user.user_id, existingTxns.toArray());
+
+            #ok(transaction)
+          }
+        }
+      };
+      case null #err(#Unauthorized);
+    }
+  };
+
+  public shared (msg) func confirmPayment(
+    transactionId: Nat
+  ): async Result.Result<{ transaction: Transaction; enrollment: ?Enrollment }, Error> {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (transactions.get(transactionId)) {
+          case (?txn) {
+            if (txn.user_id != user.user_id) return #err(#Unauthorized);
+            if (txn.status != "pending") return #err(#InvalidState);
+
+            // Update transaction status
+            let updatedTxn = {
+              txn with
+              status = "completed";
+            };
+            transactions.put(transactionId, updatedTxn);
+
+            // Enroll user in the course
+            let enrollmentResult = await enrollUser(txn.course_id, Int.toText(getCurrentTime()));
+            let enrollment = switch (enrollmentResult) {
+              case (#ok(enroll)) ?enroll;
+              case (#err(_)) null; // Log error but don't fail
+            };
+
+            #ok({ transaction = updatedTxn; enrollment })
+          };
+          case null #err(#NotFound)
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+  public shared query (msg) func hasAccess(userPrincipal: Principal, courseId: Text): async ResultBool {
+    let enrollmentKey = (userPrincipal, courseId);
+    switch (courses.get(courseId)) {
+      case (?course) {
+        if (enrollments.get(enrollmentKey) != null or course.price == 0) {
+          #ok(true)
+        } else {
+          #ok(false)
+        }
+      };
+      case null #err(#NotFound)
+    }
+  };
+
+  public shared (msg) func deleteCourse(courseId: Text): async ResultBool {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (courses.get(courseId)) {
+          case (?course) {
+            courses.delete(courseId);
+            #ok(true)
+          };
+          case null #err(#NotFound)
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+
+  public shared (msg) func updateCourseProgress(courseId: Text, progress: Nat): async ResultBool {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        let enrollmentKey = (msg.caller, courseId);
+        switch (enrollments.get(enrollmentKey)) {
+          case (?enrollment) {
+            // Update course progress logic here
+            #ok(true)
+          };
+          case null #err(#Unauthorized)
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+  public shared (msg) func toggleFavorite(courseId: Text): async ResultBool {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (courses.get(courseId)) {
+          case (?course) {
+            // Toggle favorite logic here
+            #ok(true)
+          };
+          case null #err(#NotFound)
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+  public shared (msg) func setCoursePrice(courseId: Text, price: Nat, currency: Text): async ResultCourse {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (courses.get(courseId)) {
+          case (?course) {
+            let updatedCourse = {
+              course with
+              price = price;
+              currency = currency;
+              updated_at = getCurrentTime();
+            };
+            courses.put(courseId, updatedCourse);
+            #ok(updatedCourse)
+          };
+          case null #err(#NotFound)
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+  public shared query func searchCourses(
+    query: Text,
+    category: ?Text,
+    level: ?Text,
+    minRating: ?Float,
+    maxPrice: ?Nat,
+    page: Nat,
+    pageSize: Nat
+  ): async [Course] {
+    let allCourses = Iter.toArray(courses.vals());
+    
+    // Filter courses based on search criteria
+    let filteredCourses = Array.filter<Course>(allCourses, func(course: Course): Bool {
+      let titleMatch = Text.contains(Text.toLowercase(course.title), #text Text.toLowercase(query));
+      let descMatch = Text.contains(Text.toLowercase(course.description), #text Text.toLowercase(query));
+      let categoryMatch = switch (category) {
+        case (?cat) course.category == cat;
+        case null true;
+      };
+      let levelMatch = switch (level) {
+        case (?lev) course.level == lev;
+        case null true;
+      };
+      let ratingMatch = switch (minRating) {
+        case (?rating) course.rating >= rating;
+        case null true;
+      };
+      let priceMatch = switch (maxPrice) {
+        case (?price) course.price <= price;
+        case null true;
+      };
+      
+      (titleMatch or descMatch) and categoryMatch and levelMatch and ratingMatch and priceMatch
+    });
+    
+    // Apply pagination
+    let start = page * pageSize;
+    if (start >= filteredCourses.size()) {
+      return [];
+    };
+    
+    let end = Nat.min(start + pageSize, filteredCourses.size());
+    Array.tabulate<Course>(
+      end - start,
+      func(i: Nat): Course { filteredCourses[start + i] }
+    )
+  };
+  public shared query (msg) func getMyTransactions(): async Result.Result<[Transaction], Error> {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (userTransactions.get(user.user_id)) {
+          case (?txnIds) {
+            let txns = Array.mapFilter<Nat, Transaction>(
+              txnIds,
+              func(id: Nat): ?Transaction { transactions.get(id) }
+            );
+            #ok(txns)
+          };
+          case null #ok([])
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+
+
+  // ========== SYSTEM FUNCTIONS ==========
   system func preupgrade() {
-    usersEntries := Iter.toArray(users.entries());
-    principalToUserIdEntries := Iter.toArray(principalToUserId.entries());
-    userIdToPrincipalEntries := Iter.toArray(userIdToPrincipal.entries());
-    usersByEmailEntries := Iter.toArray(usersByEmail.entries());
-    usernamesEntries := Iter.toArray(usernames.entries());
-    coursesEntries := Iter.toArray(courses.entries());
-    enrollmentsEntries := Iter.toArray(enrollments.entries());
-    transactionsEntries := Iter.toArray(transactions.entries());
+    userEntries := Iter.toArray(users.entries());
+    courseEntries := Iter.toArray(courses.entries());
+    enrollmentEntries := Iter.toArray(
+      Iter.map<((Principal, Text), Enrollment), (Principal, Text, Enrollment)>(
+        enrollments.entries(),
+        func(((p, c), e)): (Principal, Text, Enrollment) { (p, c, e) }
+      )
+    );
+    transactionEntries := Iter.toArray(transactions.entries());
   };
 
   system func postupgrade() {
-    users := HashMap.fromIter<Principal, User>(usersEntries.vals(), 1, Principal.equal, Principal.hash);
-    principalToUserId := HashMap.fromIter<Principal, Nat>(principalToUserIdEntries.vals(), 1, Principal.equal, Principal.hash);
-    userIdToPrincipal := HashMap.fromIter<Nat, Principal>(userIdToPrincipalEntries.vals(), 1, Nat.equal, Hash.hash);
-    usersByEmail := HashMap.fromIter<Text, Principal>(usersByEmailEntries.vals(), 1, Text.equal, Text.hash);
-    usernames := HashMap.fromIter<Text, ()>(usernamesEntries.vals(), 1, Text.equal, Text.hash);
-    courses := HashMap.fromIter<Text, Kursus>(coursesEntries.vals(), 1, Text.equal, Text.hash);
-    
+    // Rebuild HashMaps from stable entries
+    users := HashMap.fromIter<Principal, User>(userEntries.vals(), 1, Principal.equal, Principal.hash);
+    courses := HashMap.fromIter<Text, Course>(courseEntries.vals(), 1, Text.equal, Text.hash);
+    transactions := HashMap.fromIter<Nat, Transaction>(transactionEntries.vals(), 1, Nat.equal, Hash.hash);
+
+    // Rebuild enrollments HashMap
     enrollments := HashMap.fromIter<(Principal, Text), Enrollment>(
-      enrollmentsEntries.vals(), 
-      1, 
+      Iter.map<(Principal, Text, Enrollment), ((Principal, Text), Enrollment)>(
+        enrollmentEntries.vals(),
+        func((p, c, e)): ((Principal, Text), Enrollment) { ((p, c), e) }
+      ),
+      1,
       func(a: (Principal, Text), b: (Principal, Text)): Bool { 
-        Principal.equal(a.0, b.0) and Text.equal(a.1, b.1) 
-      }, 
-      func((p, t): (Principal, Text)): Hash.Hash { 
-        let ph = Principal.hash(p);
-        let th = Text.hash(t);
-        customHash(ph, th)
+        Principal.equal(a.0, b.0) and a.1 == b.1 
+      },
+      func((p, c): (Principal, Text)): Hash.Hash {
+        let h1 = Principal.hash(p);
+        let h2 = Text.hash(c);
+        h1 ^ h2
       }
     );
-    
-    transactions := HashMap.fromIter<Nat, Transactions>(transactionsEntries.vals(), 1, Nat.equal, Hash.hash);
-    
-    // Clean up
-    usersEntries := [];
-    principalToUserIdEntries := [];
-    userIdToPrincipalEntries := [];
-    usersByEmailEntries := [];
-    usernamesEntries := [];
-    coursesEntries := [];
-    enrollmentsEntries := [];
-    transactionsEntries := [];
+
+    // Rebuild indexes
+    for ((principal, user) in users.entries()) {
+      switch (user.email) {
+        case (?email) { usersByEmail.put(email, principal) };
+        case null {};
+      };
+      usernames.put(user.username, principal);
+    };
+
+    // Clear stable entries
+    userEntries := [];
+    courseEntries := [];
+    enrollmentEntries := [];
+    transactionEntries := [];
   };
 };
