@@ -230,7 +230,7 @@ await authClient.login({
       console.log("\n=== All tests completed successfully! ===");
       
     } catch (error) {
-      console.error("\n❌ Test failed:", error);
+      console.error("\n Test failed:", error);
       process.exit(1);
     }
   }
