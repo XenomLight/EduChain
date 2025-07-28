@@ -109,7 +109,27 @@ actor {
     currency: Text;
     tanggal_transaksi: Int;
     status: Text;
+    payment_method: Text; // "ICP" or "QRIS"
+    payment_proof: ?Text; // For payment proof if needed
   };
+
+  public type PaymentHistory = {
+    id: Nat;
+    user_principal: Principal;
+    user_id: Nat;
+    course_id: Text;
+    course_title: Text;
+    transaction_id: Nat;
+    payment_method: Text; // "ICP" or "QRIS"
+    amount: Nat;
+    currency: Text;
+    status: Text; // "pending", "completed", "failed"
+    created_at: Int;
+    completed_at: ?Int;
+    enrollment_status: Text; // "enrolled", "not_enrolled"
+  };
+
+
 
   public type Result<T, E> = { #ok: T; #err: E };
   public type ResultUser = Result<User, Error>;
@@ -118,10 +138,14 @@ actor {
   public type ResultBool = Result<Bool, Error>;
   public type ResultModules = Result<[Modul], Error>;
   public type ResultContents = Result<[Konten], Error>;
+  public type ResultTransaction = Result<Transaction, Error>;
+  public type ResultPaymentHistory = Result<[PaymentHistory], Error>;
+  public type ResultPaymentHistoryItem = Result<PaymentHistory, Error>;
   // ========== STORAGE ==========
   private stable var nextUserId: Nat = 1;
   private stable var nextEnrollmentId: Nat = 1;
   private stable var nextTransactionId: Nat = 1;
+  private stable var nextPaymentHistoryId: Nat = 1;
 
   // User storage
   private stable var userEntries: [(Principal, User)] = [];
@@ -135,6 +159,7 @@ actor {
 
   // Enrollment storage
   private stable var enrollmentEntries: [(Principal, Text, Enrollment)] = [];
+  stable var stableEnrollments : [(Principal, Text, Enrollment)] = [];
   private var enrollments = HashMap.HashMap<(Principal, Text), Enrollment>(1, 
     func(a: (Principal, Text), b: (Principal, Text)): Bool { 
       Principal.equal(a.0, b.0) and a.1 == b.1 
@@ -150,6 +175,11 @@ actor {
   private stable var transactionEntries: [(Nat, Transaction)] = [];
   private var transactions = HashMap.HashMap<Nat, Transaction>(1, Nat.equal, Hash.hash);
   private var userTransactions = HashMap.HashMap<Nat, [Nat]>(1, Nat.equal, Hash.hash);
+
+  // Payment history storage
+  private stable var paymentHistoryEntries: [(Nat, PaymentHistory)] = [];
+  private var paymentHistories = HashMap.HashMap<Nat, PaymentHistory>(1, Nat.equal, Hash.hash);
+  private var userPaymentHistories = HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
 
   // ========== HELPER FUNCTIONS ==========
   private func getCurrentTime(): Int {
@@ -293,21 +323,10 @@ actor {
   public shared (msg) func addCourse(
     id: Text,
     title: Text,
+    description: Text,
     instructor: Text,
     category: Text,
-    price: Nat,
-    priceDiscount: ?Nat,
-    currency: Text,
-    thumbnail: Text,
-    description: Text,
-    level: Text,
-    modules: [Modul],
-    duration: Nat,
-    bannerImage: ?Text,
-    learningOutcomes: [Text],
-    requirements: [Text],
-    whatYouGet: [Text],
-    tags: [Text]
+    price: Nat
   ): async ResultCourse {
     switch (users.get(msg.caller)) {
       case null return #err(#Unauthorized);
@@ -321,29 +340,29 @@ actor {
           instructor = instructor;
           category = category;
           price = price;
-          priceDiscount = priceDiscount;
-          currency = currency;
+          priceDiscount = null;
+          currency = "IDR";
           rating = 0.0;
           totalRatings = 0;
-          thumbnail = thumbnail;
-          duration = duration;
-          durationText = Nat.toText(duration) # " minutes";
-          modules = modules;
+          thumbnail = "";
+          duration = 0;
+          durationText = "0 minutes";
+          modules = [];
           description = description;
-          level = level;
+          level = "Beginner";
           isFavorite = false;
           progress = null;
           totalStudents = 0;
-          totalModules = modules.size();
-          totalLessons = Array.foldLeft<Modul, Nat>(modules, 0, func(acc, m) = acc + m.contents.size());
-          totalDuration = duration;
+          totalModules = 0;
+          totalLessons = 0; // Initialize to 0 since modules array is empty
+          totalDuration = 0; // Initialize to 0 since we're not calculating it yet
           created_at = now;
           updated_at = now;
-          bannerImage = bannerImage;
-          learningOutcomes = learningOutcomes;
-          requirements = requirements;
-          whatYouGet = whatYouGet;
-          tags = tags;
+          bannerImage = null;
+          learningOutcomes = [];
+          requirements = [];
+          whatYouGet = [];
+          tags = [];
         };
 
         courses.put(id, newCourse);
@@ -470,6 +489,8 @@ actor {
               currency = course.currency;
               tanggal_transaksi = getCurrentTime();
               status = "pending";
+              payment_method = "ICP";
+              payment_proof = null;
             };
 
             // Store transaction
@@ -486,6 +507,37 @@ actor {
             
             // Store updated transaction list
             userTransactions.put(user.user_id, existingTxns.toArray());
+
+            // Create PaymentHistory entry
+            let paymentHistoryId = nextPaymentHistoryId;
+            nextPaymentHistoryId += 1;
+
+            let paymentHistory: PaymentHistory = {
+              id = paymentHistoryId;
+              user_principal = msg.caller;
+              user_id = user.user_id;
+              course_id = courseId;
+              course_title = course.title;
+              transaction_id = transactionId;
+              payment_method = "ICP";
+              amount = course.price;
+              currency = course.currency;
+              status = "pending";
+              created_at = getCurrentTime();
+              completed_at = null;
+              enrollment_status = "not_enrolled";
+            };
+
+            // Store payment history
+            paymentHistories.put(paymentHistoryId, paymentHistory);
+
+            // Update user's payment history list
+            let existingHistories = switch (userPaymentHistories.get(msg.caller)) {
+              case (?histories) { Buffer.fromArray<Nat>(histories) };
+              case null { Buffer.Buffer<Nat>(0) };
+            };
+            existingHistories.add(paymentHistoryId);
+            userPaymentHistories.put(msg.caller, existingHistories.toArray());
 
             #ok(transaction)
           }
@@ -511,6 +563,30 @@ actor {
               status = "completed";
             };
             transactions.put(transactionId, updatedTxn);
+
+            // Update PaymentHistory status
+            let userHistories = switch (userPaymentHistories.get(msg.caller)) {
+              case (?histories) histories;
+              case null [];
+            };
+            
+            // Find and update the corresponding PaymentHistory
+            for (historyId in userHistories.vals()) {
+              switch (paymentHistories.get(historyId)) {
+                case (?history) {
+                  if (history.transaction_id == transactionId) {
+                    let updatedHistory = {
+                      history with
+                      status = "completed";
+                      completed_at = ?getCurrentTime();
+                      enrollment_status = "enrolled";
+                    };
+                    paymentHistories.put(historyId, updatedHistory);
+                  };
+                };
+                case null {};
+              };
+            };
 
             // Enroll user in the course
             let enrollmentResult = await enrollUser(txn.course_id, Int.toText(getCurrentTime()));
@@ -611,7 +687,7 @@ actor {
   };
 
   public shared query func searchCourses(
-    query: Text,
+    searchQuery: Text,
     category: ?Text,
     level: ?Text,
     minRating: ?Float,
@@ -623,8 +699,15 @@ actor {
     
     // Filter courses based on search criteria
     let filteredCourses = Array.filter<Course>(allCourses, func(course: Course): Bool {
-      let titleMatch = Text.contains(Text.toLowercase(course.title), #text Text.toLowercase(query));
-      let descMatch = Text.contains(Text.toLowercase(course.description), #text Text.toLowercase(query));
+      // Simple case-insensitive search by converting both to lowercase
+      let searchLower = searchQuery;
+      let titleLower = course.title;
+      let descLower = course.description;
+      
+      // Check if title or description contains the search term (case sensitive for now)
+      let titleMatch = Text.contains(titleLower, #text searchLower);
+      let descMatch = Text.contains(descLower, #text searchLower);
+      
       let categoryMatch = switch (category) {
         case (?cat) course.category == cat;
         case null true;
@@ -652,11 +735,14 @@ actor {
     };
     
     let end = Nat.min(start + pageSize, filteredCourses.size());
+    
+    // Extract the page of results
     Array.tabulate<Course>(
       end - start,
       func(i: Nat): Course { filteredCourses[start + i] }
     )
   };
+
   public shared query (msg) func getMyTransactions(): async Result.Result<[Transaction], Error> {
     switch (users.get(msg.caller)) {
       case (?user) {
@@ -675,57 +761,160 @@ actor {
     }
   };
 
+  // Get payment history by user (principal)
+  public shared query (msg) func getMyPaymentHistory(): async ResultPaymentHistory {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (userPaymentHistories.get(msg.caller)) {
+          case (?historyIds) {
+            let histories = Array.mapFilter<Nat, PaymentHistory>(
+              historyIds,
+              func(id: Nat): ?PaymentHistory { paymentHistories.get(id) }
+            );
+            // Sort by created_at descending (newest first)
+            let sortedHistories = Array.sort<PaymentHistory>(histories, func(a: PaymentHistory, b: PaymentHistory): Order.Order {
+              Int.compare(b.created_at, a.created_at)
+            });
+            #ok(sortedHistories)
+          };
+          case null #ok([])
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+  // Get payment history by course
+  public shared query (msg) func getPaymentHistoryByCourse(courseId: Text): async ResultPaymentHistory {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (userPaymentHistories.get(msg.caller)) {
+          case (?historyIds) {
+            let histories = Array.mapFilter<Nat, PaymentHistory>(
+              historyIds,
+              func(id: Nat): ?PaymentHistory { 
+                switch (paymentHistories.get(id)) {
+                  case (?history) {
+                    if (history.course_id == courseId) {
+                      ?history
+                    } else {
+                      null
+                    }
+                  };
+                  case null null;
+                }
+              }
+            );
+            // Sort by created_at descending (newest first)
+            let sortedHistories = Array.sort<PaymentHistory>(histories, func(a: PaymentHistory, b: PaymentHistory): Order.Order {
+              Int.compare(b.created_at, a.created_at)
+            });
+            #ok(sortedHistories)
+          };
+          case null #ok([])
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+  // Get payment history by user principal and course (combined)
+  public shared query (msg) func getPaymentHistoryByUserAndCourse(courseId: Text): async ResultPaymentHistory {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        switch (userPaymentHistories.get(msg.caller)) {
+          case (?historyIds) {
+            let histories = Array.mapFilter<Nat, PaymentHistory>(
+              historyIds,
+              func(id: Nat): ?PaymentHistory { 
+                switch (paymentHistories.get(id)) {
+                  case (?history) {
+                    if (history.course_id == courseId and history.user_principal == msg.caller) {
+                      ?history
+                    } else {
+                      null
+                    }
+                  };
+                  case null null;
+                }
+              }
+            );
+            // Sort by created_at descending (newest first)
+            let sortedHistories = Array.sort<PaymentHistory>(histories, func(a: PaymentHistory, b: PaymentHistory): Order.Order {
+              Int.compare(b.created_at, a.created_at)
+            });
+            #ok(sortedHistories)
+          };
+          case null #ok([])
+        }
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+
+
 
 
   // ========== SYSTEM FUNCTIONS ==========
   system func preupgrade() {
     userEntries := Iter.toArray(users.entries());
     courseEntries := Iter.toArray(courses.entries());
-    enrollmentEntries := Iter.toArray(
-      Iter.map<((Principal, Text), Enrollment), (Principal, Text, Enrollment)>(
-        enrollments.entries(),
-        func(((p, c), e)): (Principal, Text, Enrollment) { (p, c, e) }
-      )
+    // Convert enrollment entries to the correct format for stable storage
+    stableEnrollments := Array.map<((Principal, Text), Enrollment), (Principal, Text, Enrollment)>(
+    Iter.toArray(enrollments.entries()),
+    func((key, value)) = (key.0, key.1, value)
     );
+
     transactionEntries := Iter.toArray(transactions.entries());
+    paymentHistoryEntries := Iter.toArray(paymentHistories.entries());
   };
 
   system func postupgrade() {
-    // Rebuild HashMaps from stable entries
-    users := HashMap.fromIter<Principal, User>(userEntries.vals(), 1, Principal.equal, Principal.hash);
-    courses := HashMap.fromIter<Text, Course>(courseEntries.vals(), 1, Text.equal, Text.hash);
-    transactions := HashMap.fromIter<Nat, Transaction>(transactionEntries.vals(), 1, Nat.equal, Hash.hash);
-
-    // Rebuild enrollments HashMap
-    enrollments := HashMap.fromIter<(Principal, Text), Enrollment>(
-      Iter.map<(Principal, Text, Enrollment), ((Principal, Text), Enrollment)>(
-        enrollmentEntries.vals(),
-        func((p, c, e)): ((Principal, Text), Enrollment) { ((p, c), e) }
-      ),
-      1,
-      func(a: (Principal, Text), b: (Principal, Text)): Bool { 
-        Principal.equal(a.0, b.0) and a.1 == b.1 
-      },
-      func((p, c): (Principal, Text)): Hash.Hash {
-        let h1 = Principal.hash(p);
-        let h2 = Text.hash(c);
-        h1 ^ h2
-      }
+    // Rebuild users
+    users := HashMap.fromIter<Principal, User>(userEntries.vals(), userEntries.size(), Principal.equal, Principal.hash);
+    
+    // Rebuild courses
+    courses := HashMap.fromIter<Text, Course>(courseEntries.vals(), courseEntries.size(), Text.equal, Text.hash);
+    
+     enrollments := HashMap.fromIter<(Principal, Text), Enrollment>(
+    Array.map<(Principal, Text, Enrollment), ((Principal, Text), Enrollment)>(
+      enrollmentEntries,
+      func((userId, courseId, enrollment)) = ((userId, courseId), enrollment)
+    ).vals(),
+    enrollmentEntries.size(),
+    func(a: (Principal, Text), b: (Principal, Text)): Bool { 
+      Principal.equal(a.0, b.0) and a.1 == b.1 
+    },
+    func((p, c): (Principal, Text)): Hash.Hash {
+      let h1 = Principal.hash(p);
+      let h2 = Text.hash(c);
+      h1 ^ h2
+    }
     );
+  
+    // Rebuild transactions
+    transactions := HashMap.fromIter<Nat, Transaction>(transactionEntries.vals(), transactionEntries.size(), Nat.equal, Hash.hash);
+    
+    // Rebuild payment histories
+    paymentHistories := HashMap.fromIter<Nat, PaymentHistory>(paymentHistoryEntries.vals(), paymentHistoryEntries.size(), Nat.equal, Hash.hash);
 
-    // Rebuild indexes
-    for ((principal, user) in users.entries()) {
-      switch (user.email) {
-        case (?email) { usersByEmail.put(email, principal) };
-        case null {};
-      };
-      usernames.put(user.username, principal);
+    // Rebuild user payment histories index
+    userPaymentHistories := HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
+    for ((id, history) in paymentHistories.entries()) {
+    let existingHistories = switch (userPaymentHistories.get(history.user_principal)) {
+      case (?histories) { Buffer.fromArray<Nat>(histories) };
+      case null { Buffer.Buffer<Nat>(0) };
+    };
+    existingHistories.add(id);
+    userPaymentHistories.put(history.user_principal, Buffer.toArray(existingHistories));
     };
 
-    // Clear stable entries
+    // Clear temporary storage
     userEntries := [];
     courseEntries := [];
     enrollmentEntries := [];
     transactionEntries := [];
+    paymentHistoryEntries := [];
   };
 };

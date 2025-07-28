@@ -68,6 +68,36 @@ export const idlFactory = ({ IDL }) => {
     updated_at: IDL.Int
   });
 
+  const Transaction = IDL.Record({
+    transaksi_id: IDL.Nat,
+    user_id: IDL.Nat,
+    course_id: IDL.Text,
+    harga_transaksi: IDL.Nat,
+    currency: IDL.Text,
+    tanggal_transaksi: IDL.Int,
+    status: IDL.Text,
+    payment_method: IDL.Text,
+    payment_proof: IDL.Opt(IDL.Text)
+  });
+
+  const PaymentHistory = IDL.Record({
+    id: IDL.Nat,
+    user_principal: IDL.Principal,
+    user_id: IDL.Nat,
+    course_id: IDL.Text,
+    course_title: IDL.Text,
+    transaction_id: IDL.Nat,
+    payment_method: IDL.Text,
+    amount: IDL.Nat,
+    currency: IDL.Text,
+    status: IDL.Text,
+    created_at: IDL.Int,
+    completed_at: IDL.Opt(IDL.Int),
+    enrollment_status: IDL.Text
+  });
+
+
+
   const User = IDL.Record({
     user_id: IDL.Nat,
     principal: IDL.Principal,
@@ -92,6 +122,17 @@ export const idlFactory = ({ IDL }) => {
   const ResultEnrollment = IDL.Variant({
     ok: Enrollment,
     err: Error
+  });
+  const ResultTransaction = IDL.Variant({ ok: Transaction, err: Error });
+  const ResultTransactions = IDL.Variant({ ok: IDL.Vec(Transaction), err: Error });
+  const ResultPaymentHistory = IDL.Variant({ ok: IDL.Vec(PaymentHistory), err: Error });
+  const ResultPaymentHistoryItem = IDL.Variant({ ok: PaymentHistory, err: Error });
+  const ResultPaymentConfirmation = IDL.Variant({ 
+    ok: IDL.Record({ 
+      transaction: Transaction, 
+      enrollment: IDL.Opt(Enrollment) 
+    }), 
+    err: Error 
   });
   const ResultBool = IDL.Variant({ ok: IDL.Bool, err: Error });
   const ResultModules = IDL.Variant({ ok: IDL.Vec(Modul), err: Error });
@@ -185,7 +226,25 @@ export const idlFactory = ({ IDL }) => {
     getModulesWithAccess: IDL.Func([IDL.Text], [ResultModules], ["query"]),
 
     // Get course content with access control
-    getCourseContent: IDL.Func([IDL.Text, IDL.Nat], [ResultContents], ["query"])
+    getCourseContent: IDL.Func([IDL.Text, IDL.Nat], [ResultContents], ["query"]),
+
+    // TRANSACTIONS & PAYMENTS
+    createTransaction: IDL.Func(
+      [IDL.Text],
+      [ResultTransaction],
+      []
+    ),
+    confirmPayment: IDL.Func(
+      [IDL.Nat],
+      [ResultPaymentConfirmation],
+      []
+    ),
+    getMyTransactions: IDL.Func([], [ResultTransactions], ["query"]),
+
+    // PAYMENT HISTORY
+    getMyPaymentHistory: IDL.Func([], [ResultPaymentHistory], ["query"]),
+    getPaymentHistoryByCourse: IDL.Func([IDL.Text], [ResultPaymentHistory], ["query"]),
+    getPaymentHistoryByUserAndCourse: IDL.Func([IDL.Text], [ResultPaymentHistory], ["query"])
   });
 
 };
