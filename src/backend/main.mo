@@ -28,6 +28,35 @@ actor {
     #IdAlreadyExists;
     #InvalidState;
   };
+  public type CourseUpdate = {
+    title: ?Text;
+    description: ?Text;
+    price: ?Nat;
+    priceDiscount: ?Nat;  
+    currency: ?Text;
+    thumbnail: ?Text;
+    bannerImage: ?Text;
+    isPublished: ?Bool;
+    duration: ?Nat;
+    durationText: ?Text;
+    totalStudents: ?Nat;
+    totalModules: ?Nat;
+    totalLessons: ?Nat;
+    totalDuration: ?Nat;
+    modules: ?[ModuleUpdate];
+    level: ?Text;
+    learningOutcomes: ?[Text];
+    requirements: ?[Text];
+    whatYouGet: ?[Text];
+    tags: ?[Text];
+  };
+  public type ModuleUpdate = {
+    id: Nat;
+    title: ?Text;
+    description: ?Text;
+    order: ?Nat;
+    contents: ?[ContentUpdate];
+  };
 
   public type Konten = {
     id: Nat;
@@ -38,6 +67,14 @@ actor {
     created_at: Int;
     updated_at: Int;
   };
+
+  public type ContentUpdate = {
+  id: Nat;
+  title: ?Text;
+  content_type: ?Text;
+  content_url: ?Text;
+  duration: ?Nat;
+};
 
   public type Modul = {
     id: Nat;
@@ -66,6 +103,7 @@ actor {
     description: Text;
     level: Text;
     isFavorite: Bool;
+    isPublished: Bool; 
     progress: ?Nat;
     totalStudents: Nat;
     totalModules: Nat;
@@ -312,6 +350,115 @@ actor {
     #ok(newUser)
   };
 
+  public shared (msg) func updateCourse(
+    courseId: Text,
+    updates: CourseUpdate
+  ): async Result.Result<Course, Error> {
+    switch (courses.get(courseId)) {
+      case null { 
+        return #err(#NotFound); 
+      };
+      case (?existingCourse) {
+        // Verify the user is the course instructor
+        let callerId = Principal.toText(msg.caller);
+        if (existingCourse.instructor != callerId) {
+          return #err(#Unauthorized);
+        };
+
+        // Create the updated course by explicitly specifying all fields
+        let updatedCourse: Course = {
+          id = existingCourse.id;
+          title = Option.get(updates.title, existingCourse.title);
+          instructor = existingCourse.instructor; // Cannot be updated
+          category = existingCourse.category;     // Cannot be updated
+          price = Option.get(updates.price, existingCourse.price);
+          priceDiscount = updates.priceDiscount; // Can be null
+          currency = Option.get(updates.currency, existingCourse.currency);
+          rating = existingCourse.rating; // Cannot be updated directly
+          totalRatings = existingCourse.totalRatings; // Cannot be updated directly
+          thumbnail = Option.get(updates.thumbnail, existingCourse.thumbnail);
+          duration = Option.get(updates.duration, existingCourse.duration);
+          durationText = Option.get(updates.durationText, existingCourse.durationText);
+          
+          // Handle optional fields
+          bannerImage = switch(updates.bannerImage) {
+            case (?banner) ?banner;
+            case null existingCourse.bannerImage;
+          };
+          
+          // Modules are handled separately below
+          
+          description = Option.get(updates.description, existingCourse.description);
+          level = Option.get(updates.level, existingCourse.level);
+          isFavorite = existingCourse.isFavorite; // Cannot be updated here
+          isPublished = Option.get(updates.isPublished, existingCourse.isPublished);
+          progress = existingCourse.progress; // Cannot be updated here
+          totalStudents = Option.get(updates.totalStudents, existingCourse.totalStudents);
+          totalModules = Option.get(updates.totalModules, existingCourse.totalModules);
+          totalLessons = Option.get(updates.totalLessons, existingCourse.totalLessons);
+          totalDuration = Option.get(updates.totalDuration, existingCourse.totalDuration);
+          created_at = existingCourse.created_at; // Cannot be updated
+          updated_at = getCurrentTime();
+          
+          // Handle array fields
+          learningOutcomes = Option.get(updates.learningOutcomes, existingCourse.learningOutcomes);
+          requirements = Option.get(updates.requirements, existingCourse.requirements);
+          whatYouGet = Option.get(updates.whatYouGet, existingCourse.whatYouGet);
+          tags = Option.get(updates.tags, existingCourse.tags);
+          
+          // Update modules if provided
+          modules = switch(updates.modules) {
+            case null { existingCourse.modules };
+            case (?moduleUpdates) { 
+              // Map ModuleUpdate to Modul
+              Array.map<ModuleUpdate, Modul>(moduleUpdates, func(update) {
+                // Find existing module or create new one
+                let existingModule = Array.find<Modul>(existingCourse.modules, func(m: Modul) : Bool { m.id == update.id });
+                let baseModule = switch(existingModule) {
+                  case (?m) m;
+                  case null {
+                    // Create new module if not found
+                    {
+                      id = update.id;
+                      title = "";
+                      description = null;
+                      order = 0;
+                      contents = [];
+                      created_at = getCurrentTime();
+                      updated_at = getCurrentTime();
+                    }
+                  }
+                };
+                
+                // Update module fields
+                {
+                  baseModule with
+                  title = Option.get(update.title, baseModule.title);
+                  description = switch(update.description) {
+                    case null baseModule.description;
+                    case (?desc) {
+                      if (desc == "") {
+                        null
+                      } else {
+                        ?desc
+                      }
+                    };
+                  };
+                  order = Option.get(update.order, baseModule.order);
+                  updated_at = getCurrentTime();
+                }
+              });
+            };
+          };
+        };
+
+        // Save changes
+        courses.put(courseId, updatedCourse);
+        #ok(updatedCourse)
+      }
+    }
+  };
+
   public shared query (msg) func getMe(): async ResultUser {
     switch (users.get(msg.caller)) {
       case (?user) #ok(user);
@@ -351,6 +498,7 @@ actor {
           description = description;
           level = "Beginner";
           isFavorite = false;
+          isPublished = false; // Default to false when creating a new course
           progress = null;
           totalStudents = 0;
           totalModules = 0;

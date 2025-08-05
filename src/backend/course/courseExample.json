@@ -1,96 +1,99 @@
-[
-  {
-    "id": 1,
-    "title": "Front End Developer",
-    "provider": "Dicoding Indonesia",
-    "price": 12345678,
-    "currency": "Rp.",
-    "detailUrl": "/course/1",
-    "modules": [
-      {
-        "id": 1,
-        "title": "Pengenalan HTML",
-        "contents": [
-          { "id": 1, "title": "Apa itu HTML?", "body": "HTML adalah " },
-          { "id": 2, "title": "Struktur Dasar HTML", "body": "Struktur dasar" }
-        ]
-      },
-      {
-        "id": 2,
-        "title": "Pengenalan CSS",
-        "contents": [
-          { "id": 1, "title": "Apa itu CSS?", "body": "CSS adalah " },
-          { "id": 2, "title": "Cara implementasi?", "body": "implementasinya...... " }
-        ]
-      }
-    ]
-  },
-  {
-    "id": 2,
-    "title": "Back End Developer",
-    "provider": "Dicoding Indonesia",
-    "price": 12345678,
-    "currency": "Rp.",
-    "detailUrl": "/course/2",
-    "modules": [
-      {
-        "id": 1,
-        "title": "Pengenalan Backend",
-        "contents": [
-          { "id": 1, "title": "Apa itu Backend?", "body": "Backend adalah bagian dari aplikasi yang berjalan di server" }
-        ]
-      }
-    ]
-  },
-  {
-    "id": 3,
-    "title": "Full-Stack Web Developer",
-    "provider": "hariSenin",
-    "price": 12345678,
-    "currency": "Rp.",
-    "detailUrl": "/course/3",
-    "modules": [
-      {
-        "id": 1,
-        "title": "Integrasi Frontend & Backend",
-        "contents": [
-          { "id": 1, "title": "API dan Fetch", "body": "Cara menghubungkan frontend dan backend dengan API" }
-        ]
-      }
-    ]
-  },
-  {
-    "id": 4,
-    "title": "UI/UX Design",
-    "provider": "hariSenin",
-    "price": 12345678,
-    "currency": "Rp.",
-    "detailUrl": "/course/4",
-    "modules": [
-      {
-        "id": 1,
-        "title": "cara desain baik dan benar sesuai human computer interaction",
-        "contents": [
-          { "id": 1, "title": "desain 101", "body": "bagaimana bikin styling dan components" }
-        ]
-      }
-    ]
-  },
-  {
-    "id": 5,
-    "title": "Data Analyst",
-    "provider": "Dicoding Indonesia",
-    "price": 12345678,
-    "currency": "Rp.",
-    "detailUrl": "/course/5",
-    "modules": [
-      {
-        "id": 2,
-        "title": "Dasar-dasar Analisis Data",
-        "contents": [
-          { "id": 1, "title": "Pengantar Analisis Data", "body": "Analisis data adalah proses menginspeksi, membersihkan, dan memodelkan data." }
-        ]
-      }
-    ]
-  }
-]
+{
+  "id": "course-3",
+  "title": "Full-Stack Web Developer",
+  "provider": "hariSenin",
+  "category": "Web Development",
+  "price": 20000000,
+  "priceDiscount": 18000000,
+  "currency": "IDR",
+  "rating": 4.9,
+  "totalRatings": 150,
+  "thumbnail": "/images/fullstack-thumb.jpg",
+  "duration": 18000,
+  "durationText": "5 jam",
+  "description": "Kursus lengkap untuk menjadi Full-Stack Developer profesional",
+  "level": "Menengah",
+  "isFavorite": false,
+  "progress": null,
+  "totalStudents": 250,
+  "totalModules": 3,
+  "totalLessons": 6,
+  "totalDuration": 18000,
+  "bannerImage": "/images/fullstack-banner.jpg",
+  "learningOutcomes": [
+    "Membangun aplikasi web lengkap dari frontend hingga backend",
+    "Mengintegrasikan frontend dengan API",
+    "Mengelola database dan autentikasi"
+  ],
+  "requirements": [
+    "Pemahaman dasar HTML, CSS, dan JavaScript",
+    "Laptop/PC dengan koneksi internet"
+  ],
+  "whatYouGet": [
+    "Sertifikat kelulusan",
+    "Source code lengkap",
+    "Dukungan mentor profesional"
+  ],
+  "tags": ["fullstack", "web", "api"],
+  "modules": [
+    {
+      "id": 1,
+      "title": "Dasar-dasar Full-Stack",
+      "description": "Pengenalan dasar-dasar pengembangan full-stack",
+      "order": 1,
+      "contents": [
+        {
+          "id": 1,
+          "title": "Konsep Arsitektur Full-Stack",
+          "content_type": "text",
+          "content_url": null,
+          "duration": 3600
+        },
+        {
+          "id": 2,
+          "title": "Setup Lingkungan Pengembangan",
+          "content_type": "text",
+          "content_url": null,
+          "duration": 1800
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Frontend Development",
+      "description": "Membangun antarmuka pengguna dengan React",
+      "order": 2,
+      "contents": [
+        {
+          "id": 1,
+          "title": "Membangun UI dengan React",
+          "content_type": "text",
+          "content_url": null,
+          "duration": 3600
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Backend Development",
+      "description": "Membangun API dan mengelola database",
+      "order": 3,
+      "contents": [
+        {
+          "id": 1,
+          "title": "Membangun RESTful API",
+          "content_type": "text",
+          "content_url": null,
+          "duration": 3600
+        },
+        {
+          "id": 2,
+          "title": "Koneksi Database",
+          "content_type": "text",
+          "content_url": null,
+          "duration": 3600
+        }
+      ]
+    }
+  ]
+}

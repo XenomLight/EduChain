@@ -168,11 +168,11 @@ await authClient.login({
         return false;
       }
     }
-    // Test the complete flow
+
     console.log("\n=== Starting EduTech Backend Test ===");
     
     try {
-      // 1. Register user
+
       console.log("\n1. Testing Registration...");
       await registerWithEmail(
         process.env.REGISTER_USERNAME,
@@ -183,47 +183,41 @@ await authClient.login({
         "User"
       );
       
-      // 2. Login with email
+
       console.log("\n2. Testing Login...");
       await loginWithEmail(process.env.REGISTER_EMAIL, process.env.REGISTER_PASSWORD);
       
-      // 3. Get all courses
+
       console.log("\n3. Testing Get All Courses...");
       await GetAllCourses();
       
-      // 4. Get specific course
+      
       console.log("\n4. Testing Get Course By ID...");
       await GetCourseById("course-1");
       
-      // 5. Enroll in course
+
       console.log("\n5. Testing Course Enrollment...");
       await enrollUser("course-1", new Date().toISOString());
       
-      // 6. Check access
       console.log("\n6. Testing Access Check...");
       await hasAccess("course-1");
       
-      // 7. Get course modules
+
       console.log("\n7. Testing Get Course Modules...");
       await getCourseModules("course-1");
       
-      // 8. Get module content
+
       console.log("\n8. Testing Get Module Content...");
       await getModuleContent("course-1", 1);
       
-      // 9. Update progress
+
       console.log("\n9. Testing Update Progress...");
       await updateProgress("course-1", 50);
       
-      // 10. Toggle favorite
       console.log("\n10. Testing Toggle Favorite...");
       await toggleFavorite("course-1");
-      
-      // 11. Search courses
       console.log("\n11. Testing Search Courses...");
       await searchCourses("blockchain", "technology", "beginner", 4.5, 100);
-      
-      // 12. Delete course
       console.log("\n12. Testing Delete Course...");
       await deleteCourse("course-1");
       

@@ -15,8 +15,6 @@ export const idlFactory = ({ IDL }) => {
     content_type: IDL.Text,
     content_url: IDL.Opt(IDL.Text),
     duration: IDL.Opt(IDL.Nat),
-    created_at: IDL.Int,
-    updated_at: IDL.Int
   });
 
   const Modul = IDL.Record({
@@ -25,14 +23,12 @@ export const idlFactory = ({ IDL }) => {
     description: IDL.Opt(IDL.Text),
     order: IDL.Nat,
     contents: IDL.Vec(Konten),
-    created_at: IDL.Int,
-    updated_at: IDL.Int
   });
 
   const Kursus = IDL.Record({
     id: IDL.Text,
     title: IDL.Text,
-    instructor: IDL.Text,
+    provider: IDL.Text,
     category: IDL.Text,
     price: IDL.Nat,
     priceDiscount: IDL.Opt(IDL.Nat),
@@ -51,8 +47,6 @@ export const idlFactory = ({ IDL }) => {
     totalModules: IDL.Nat,
     totalLessons: IDL.Nat,
     totalDuration: IDL.Nat,
-    created_at: IDL.Int,
-    updated_at: IDL.Int,
     bannerImage: IDL.Opt(IDL.Text),
     learningOutcomes: IDL.Vec(IDL.Text),
     requirements: IDL.Vec(IDL.Text),
@@ -62,19 +56,17 @@ export const idlFactory = ({ IDL }) => {
   const Enrollment = IDL.Record({
     user_id: IDL.Principal,
     course_id: IDL.Text,
-    enrollment_date: IDL.Text,
+    enrollment_date: IDL.Int,
     status: IDL.Text,
-    created_at: IDL.Int,
-    updated_at: IDL.Int
   });
 
   const Transaction = IDL.Record({
     transaksi_id: IDL.Nat,
     user_id: IDL.Nat,
     course_id: IDL.Text,
-    harga_transaksi: IDL.Nat,
+    amount: IDL.Nat,
     currency: IDL.Text,
-    tanggal_transaksi: IDL.Int,
+    transaction_date: IDL.Int,
     status: IDL.Text,
     payment_method: IDL.Text,
     payment_proof: IDL.Opt(IDL.Text)
@@ -91,13 +83,59 @@ export const idlFactory = ({ IDL }) => {
     amount: IDL.Nat,
     currency: IDL.Text,
     status: IDL.Text,
-    created_at: IDL.Int,
+
     completed_at: IDL.Opt(IDL.Int),
     enrollment_status: IDL.Text
   });
 
 
+  const ContentUpdate = IDL.Record({
+    id: IDL.Nat,
+    title: IDL.Opt(IDL.Text),
+    content_type: IDL.Opt(IDL.Text),
+    content_url: IDL.Opt(IDL.Text),
+    duration: IDL.Opt(IDL.Nat)
+  });
 
+  const ModuleUpdate = IDL.Record({
+    id: IDL.Nat,
+    title: IDL.Opt(IDL.Text),
+    description: IDL.Opt(IDL.Text),
+    order: IDL.Opt(IDL.Nat),
+    contents: IDL.Opt(IDL.Vec(ContentUpdate))
+  });
+
+  const CourseUpdate = IDL.Record({
+    title: IDL.Opt(IDL.Text),
+    provider: IDL.Opt(IDL.Text),
+    category: IDL.Opt(IDL.Text),
+    price: IDL.Opt(IDL.Nat),
+    priceDiscount: IDL.Opt(IDL.Nat),
+    currency: IDL.Opt(IDL.Text),
+    thumbnail: IDL.Opt(IDL.Text),
+    bannerImage: IDL.Opt(IDL.Text),
+    description: IDL.Opt(IDL.Text),
+    level: IDL.Opt(IDL.Text),
+    learningOutcomes: IDL.Opt(IDL.Vec(IDL.Text)),
+    requirements: IDL.Opt(IDL.Vec(IDL.Text)),
+    whatYouGet: IDL.Opt(IDL.Vec(IDL.Text)),
+    tags: IDL.Opt(IDL.Vec(IDL.Text)),
+    isPublished: IDL.Opt(IDL.Bool),
+    duration: IDL.Opt(IDL.Nat),
+    durationText: IDL.Opt(IDL.Text),
+    totalStudents: IDL.Opt(IDL.Nat),
+    totalModules: IDL.Opt(IDL.Nat),
+    totalLessons: IDL.Opt(IDL.Nat),
+    totalDuration: IDL.Opt(IDL.Nat),
+    modules: IDL.Opt(IDL.Vec(ModuleUpdate))
+  });
+
+  // Di dalam IDL.Service
+  updateCourse: IDL.Func(
+    [IDL.Text, CourseUpdate],
+    [IDL.Variant({ ok: Course, err: Error })],
+    []
+  )
   const User = IDL.Record({
     user_id: IDL.Nat,
     principal: IDL.Principal,
@@ -106,8 +144,6 @@ export const idlFactory = ({ IDL }) => {
     last_name: IDL.Opt(IDL.Text),
     email: IDL.Opt(IDL.Text),
     password_hash: IDL.Opt(IDL.Text),
-    created_at: IDL.Int,
-    updated_at: IDL.Int
   });
 
   const ResultUser = IDL.Variant({
@@ -127,12 +163,12 @@ export const idlFactory = ({ IDL }) => {
   const ResultTransactions = IDL.Variant({ ok: IDL.Vec(Transaction), err: Error });
   const ResultPaymentHistory = IDL.Variant({ ok: IDL.Vec(PaymentHistory), err: Error });
   const ResultPaymentHistoryItem = IDL.Variant({ ok: PaymentHistory, err: Error });
-  const ResultPaymentConfirmation = IDL.Variant({ 
-    ok: IDL.Record({ 
-      transaction: Transaction, 
-      enrollment: IDL.Opt(Enrollment) 
-    }), 
-    err: Error 
+  const ResultPaymentConfirmation = IDL.Variant({
+    ok: IDL.Record({
+      transaction: Transaction,
+      enrollment: IDL.Opt(Enrollment)
+    }),
+    err: Error
   });
   const ResultBool = IDL.Variant({ ok: IDL.Bool, err: Error });
   const ResultModules = IDL.Variant({ ok: IDL.Vec(Modul), err: Error });
@@ -201,8 +237,8 @@ export const idlFactory = ({ IDL }) => {
     // ADMIN
     addCourse: IDL.Func(
       [
-        IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Nat, 
-        IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text, 
+        IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Nat,
+        IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text,
         IDL.Text, IDL.Vec(Modul), IDL.Nat, IDL.Opt(IDL.Text),
         IDL.Vec(IDL.Text), IDL.Vec(IDL.Text), IDL.Vec(IDL.Text), IDL.Vec(IDL.Text)
       ],
