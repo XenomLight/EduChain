@@ -127,6 +127,13 @@ actor {
     updated_at: Int;
   };
 
+  public type Wallet = {
+    address: Text;
+    wallet_type: Text; // "NFID", "Plug", dll
+    is_primary: Bool;
+    connected_at: Int;
+  };
+
   public type User = {
     user_id: Nat;
     principal: Principal;
@@ -135,6 +142,9 @@ actor {
     last_name: ?Text;
     email: ?Text;
     password_hash: ?Text;
+    date_of_birth: ?Text; // Format: "YYYY-MM-DD"
+    gender: ?Text; // "male", "female", "other"
+    wallets: [Wallet]; // Daftar wallet yang terhubung
     created_at: Int;
     updated_at: Int;
   };
@@ -218,6 +228,109 @@ actor {
   private stable var paymentHistoryEntries: [(Nat, PaymentHistory)] = [];
   private var paymentHistories = HashMap.HashMap<Nat, PaymentHistory>(1, Nat.equal, Hash.hash);
   private var userPaymentHistories = HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
+
+  // ========== WALLET & PROFILE FUNCTIONS ==========
+  
+  // Update profil pengguna
+  public shared (msg) func updateProfile(
+    firstName: ?Text,
+    lastName: ?Text,
+    dateOfBirth: ?Text,
+    gender: ?Text
+  ): async Result.Result<User, Error> {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        let updatedUser: User = {
+          user with
+          first_name = firstName;
+          last_name = lastName;
+          date_of_birth = dateOfBirth;
+          gender = gender;
+          updated_at = Time.now();
+        };
+        users.put(msg.caller, updatedUser);
+        #ok(updatedUser);
+      };
+      case null { #err(#NotFound); };
+    };
+  };
+
+  // Hubungkan wallet baru
+  public shared (msg) func connectWallet(
+    address: Text,
+    walletType: Text
+  ): async Result.Result<Wallet, Error> {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Cek apakah wallet sudah terdaftar
+        let existingWallet = Array.find<Wallet>(
+          user.wallets,
+          func(w: Wallet): Bool { w.address == address }
+        );
+        
+        if (existingWallet != null) {
+          return #err(#AlreadyExists);
+        };
+        
+        let newWallet: Wallet = {
+          address = address;
+          wallet_type = walletType;
+          is_primary = user.wallets.size() == 0; // Jadikan primary jika wallet pertama
+          connected_at = Time.now();
+        };
+        
+        let updatedWallets = Array.append<Wallet>(user.wallets, [newWallet]);
+        let updatedUser: User = {
+          user with
+          wallets = updatedWallets;
+          updated_at = Time.now();
+        };
+        
+        users.put(msg.caller, updatedUser);
+        #ok(newWallet);
+      };
+      case null { #err(#NotFound); };
+    };
+  };
+
+  // Dapatkan daftar wallet pengguna
+  public shared query (msg) func getMyWallets(): async Result.Result<[Wallet], Error> {
+    switch (users.get(msg.caller)) {
+      case (?user) { #ok(user.wallets); };
+      case null { #err(#NotFound); };
+    };
+  };
+
+  // Set wallet utama
+  public shared (msg) func setPrimaryWallet(
+    address: Text
+  ): async Result.Result<[Wallet], Error> {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Reset semua wallet ke non-primary
+        let updatedWallets = Array.map<Wallet, Wallet>(
+          user.wallets,
+          func(w: Wallet): Wallet {
+            {
+              w with
+              is_primary = w.address == address;
+            }
+          }
+        );
+        
+        // Perbarui user dengan wallet yang sudah diupdate
+        let updatedUser: User = {
+          user with
+          wallets = updatedWallets;
+          updated_at = Time.now();
+        };
+        
+        users.put(msg.caller, updatedUser);
+        #ok(updatedWallets);
+      };
+      case null { #err(#NotFound); };
+    };
+  };
 
   // ========== HELPER FUNCTIONS ==========
   private func getCurrentTime(): Int {
@@ -338,6 +451,9 @@ actor {
       password_hash = ?hashPassword(password);
       first_name = ?firstName;
       last_name = ?lastName;
+      date_of_birth = null; // Inisialisasi dengan null
+      gender = null;        // Inisialisasi dengan null
+      wallets = [];         // Inisialisasi array kosong untuk wallet
       created_at = now;
       updated_at = now;
     };

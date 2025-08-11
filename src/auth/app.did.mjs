@@ -136,6 +136,13 @@ export const idlFactory = ({ IDL }) => {
     [IDL.Variant({ ok: Course, err: Error })],
     []
   )
+  const Wallet = IDL.Record({
+    address: IDL.Text,
+    wallet_type: IDL.Text,
+    is_primary: IDL.Bool,
+    connected_at: IDL.Int
+  });
+
   const User = IDL.Record({
     user_id: IDL.Nat,
     principal: IDL.Principal,
@@ -144,6 +151,9 @@ export const idlFactory = ({ IDL }) => {
     last_name: IDL.Opt(IDL.Text),
     email: IDL.Opt(IDL.Text),
     password_hash: IDL.Opt(IDL.Text),
+    date_of_birth: IDL.Opt(IDL.Text),
+    gender: IDL.Opt(IDL.Text),
+    wallets: IDL.Vec(Wallet),
   });
 
   const ResultUser = IDL.Variant({
@@ -173,6 +183,8 @@ export const idlFactory = ({ IDL }) => {
   const ResultBool = IDL.Variant({ ok: IDL.Bool, err: Error });
   const ResultModules = IDL.Variant({ ok: IDL.Vec(Modul), err: Error });
   const ResultContents = IDL.Variant({ ok: IDL.Vec(Konten), err: Error });
+  const ResultWallets = IDL.Variant({ ok: IDL.Vec(Wallet), err: Error });
+  const ResultWallet = IDL.Variant({ ok: Wallet, err: Error });
   return IDL.Service({
 
     // USER
@@ -196,6 +208,28 @@ export const idlFactory = ({ IDL }) => {
     loginWithEmail: IDL.Func(
       [IDL.Text, IDL.Text],
       [ResultUser],
+      []
+    ),
+
+    // Profile & Wallet
+    updateProfile: IDL.Func(
+      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Text), IDL.Opt(IDL.Text), IDL.Opt(IDL.Text)],
+      [ResultUser],
+      []
+    ),
+    connectWallet: IDL.Func(
+      [IDL.Text, IDL.Text],
+      [ResultWallet],
+      []
+    ),
+    getMyWallets: IDL.Func(
+      [],
+      [ResultWallets],
+      ['query']
+    ),
+    setPrimaryWallet: IDL.Func(
+      [IDL.Text],
+      [ResultWallets],
       []
     ),
 
