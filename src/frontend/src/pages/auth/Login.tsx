@@ -1,4 +1,6 @@
 import * as React from 'react';
+import { useAuth } from '@/hooks/useAuth';
+import { authService } from '@/lib/auth';
 import RootLayout from '@/components/RootLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -8,6 +10,8 @@ import { Link } from 'react-router-dom';
 import backgroundImage from '@/assets/image/background.webp';
 
 export default function Login() {
+  const { setIsAuthenticated, setPrincipal, setWalletType } = useAuth();
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [data, setData] = React.useState({
     email: '',
     password: '',
@@ -24,6 +28,24 @@ export default function Login() {
     e.preventDefault();
     // Handle login logic here
     console.log('Login data:', data);
+  };
+
+  const handleWalletLogin = async () => {
+    setIsLoading(true);
+    try {
+      const success = await authService.loginWithInternetIdentity();
+      if (success) {
+        setIsAuthenticated(authService.isAuthenticated);
+        setPrincipal(authService.principal);
+        setWalletType(authService.walletType);
+      }
+      return success;
+    } catch (error) {
+      console.error('Internet Identity login failed:', error);
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -65,12 +87,21 @@ export default function Login() {
                 value={data.password}
                 onChange={handleChange}
               />
-              <Button className="w-full">Sign In</Button>
+              <Button className="w-full" disabled={isLoading}>
+                {isLoading ? 'Signing In...' : 'Sign In'}
+              </Button>
               <Button className="bg-foreground! hover:bg-foreground/90! text-background! flex w-full items-center justify-center gap-4">
                 <span>
                   <img width={24} src={google} alt="Google logo" />
                 </span>
                 Sign In With Google
+              </Button>
+              <Button
+                className="bg-foreground! hover:bg-foreground/90! text-background! flex w-full items-center justify-center gap-4"
+                onClick={handleWalletLogin}
+              >
+                <span className="text-xl md:text-2xl">🆔</span>
+                Connect Internet Identity
               </Button>
             </form>
             <div className="mt-4 text-center">
