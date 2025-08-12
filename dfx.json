@@ -8,7 +8,10 @@
       "dependencies": ["backend"],
       "source": ["src/frontend/dist"],
       "type": "assets",
-      "ignore": ["src/frontend/dist/.ic-assets.json5"]
+      "ic": "src/frontend/ic-assets.json5",
+      "ignore": [
+        "src/frontend/dist/.ic-assets.json5"
+      ]
     }
   },
   "defaults": {

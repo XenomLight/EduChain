@@ -9,7 +9,7 @@
     "dev:backend": "cd src/frontend && npm run dev:backend", 
     "dev": "cd src/frontend && npm run dev",
     "generate": "dfx generate backend",
-    "build": "cd src/frontend && npm run build"
+    "build": "rm -f src/frontend/dist/.ic-assets.json5 && cd src/frontend && npm run build"
   },
   "keywords": [],
   "author": "",
