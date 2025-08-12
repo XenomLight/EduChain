@@ -4,19 +4,22 @@ import { Actor, HttpAgent, type ActorSubclass } from '@dfinity/agent';
 import { IDL } from '@dfinity/candid';
 import { idlFactory } from '../../../auth/app.did.mjs';
 
-const canisterId = "qsgjb-riaaa-aaaaa-aaaga-cai";
-const network = process.env.DFX_NETWORK || 'local';
+const canisterId = 'qsgjb-riaaa-aaaaa-aaaga-cai';
+// const network = process.env.DFX_NETWORK || 'local';
+const network = 'local';
 
 // Untuk local development, gunakan Internet Identity canister lokal
-const identityProvider = network === 'ic' 
-  ? 'https://identity.ic0.app' 
-  : `http://localhost:4943/?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY || 'rdmx6-jaaaa-aaaaa-aaadq-cai'}`;
+// const identityProvider = network === 'ic'
+//   ? 'https://identity.ic0.app'
+//   : `http://localhost:4943/?canisterId=${process.env.CANISTER_ID_INTERNET_IDENTITY || 'rdmx6-jaaaa-aaaaa-aaadq-cai'}`;
+const identityProvider = `http://localhost:4943/?canisterId=rdmx6-jaaaa-aaaaa-aaadq-cai`;
 
 export const useAuth = () => {
   const [authClient, setAuthClient] = useState<AuthClient | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [actor, setActor] = useState<ActorSubclass | null>(null);
-  const [principal, setPrincipal] = useState<string>('');
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [principal, setPrincipal] = useState<string | null>('');
+  const [walletType, setWalletType] = useState<string | null>('');
 
   useEffect(() => {
     updateActor();
@@ -25,10 +28,10 @@ export const useAuth = () => {
   async function updateActor() {
     const authClient = await AuthClient.create();
     const identity = authClient.getIdentity();
-    
+
     const agent = new HttpAgent({
       host: network === 'local' ? 'http://127.0.0.1:4943' : 'https://ic0.app',
-      identity
+      identity,
     });
 
     if (network === 'local') {
@@ -37,7 +40,7 @@ export const useAuth = () => {
 
     const actor = Actor.createActor(idlFactory as IDL.InterfaceFactory, {
       agent,
-      canisterId
+      canisterId,
     });
 
     const isAuthenticated = await authClient.isAuthenticated();
@@ -51,31 +54,29 @@ export const useAuth = () => {
 
   async function login() {
     if (!authClient) return;
-    
+
     await authClient.login({
       identityProvider,
-      onSuccess: updateActor
+      onSuccess: updateActor,
     });
   }
 
   async function logout() {
     if (!authClient) return;
-    
+
     await authClient.logout();
     updateActor();
   }
 
   return {
-    isAuthenticated,
     login,
     logout,
     actor,
-    principal
+    isAuthenticated,
+    setIsAuthenticated,
+    principal,
+    setPrincipal,
+    walletType,
+    setWalletType,
   };
 };
-
-
-
-
-
-
