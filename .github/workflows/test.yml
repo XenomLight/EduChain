@@ -33,6 +33,9 @@ jobs:
         run: |
               source "$HOME/.local/share/dfx/env"
               dfx start --clean --background
+              dfx deps pull
+              dfx deps init rdmx6-jaaaa-aaaaa-aaadq-cai --argument null
+              dfx deps deploy
               dfx deploy
               #bisa tambahin step test lainnya:
               dfx stop
