@@ -97,10 +97,10 @@ export default function Login() {
                 Sign In With Google
               </Button>
               <Button
-                className="bg-foreground! hover:bg-foreground/90! text-background! flex w-full items-center justify-center gap-4"
+                className="flex w-full cursor-pointer items-center justify-center gap-4 border-2 border-white/30 bg-transparent text-white shadow-none hover:bg-white/10"
                 onClick={handleWalletLogin}
               >
-                <span className="text-xl md:text-2xl">🆔</span>
+                <span className="w-6">🆔</span>
                 Connect Internet Identity
               </Button>
             </form>
