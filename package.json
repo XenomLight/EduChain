@@ -6,10 +6,10 @@
   "type": "module",
   "scripts": {
     "dev:frontend": "cd src/frontend && npm run dev",
-    "dev:backend": "cd src/frontend && npm run dev:backend", 
+    "dev:backend": "cd src/frontend && npm run dev:backend",
     "dev": "cd src/frontend && npm run dev",
     "generate": "dfx generate backend",
-    "build": "rm -f src/frontend/dist/.ic-assets.json5 && cd src/frontend && npm run build"
+    "build": "cd src/frontend && npm run build"
   },
   "keywords": [],
   "author": "",
@@ -18,7 +18,10 @@
     "@dfinity/agent": "^2.4.1",
     "@dfinity/auth-client": "^2.4.1",
     "@vitejs/plugin-react": "^4.6.0",
+    "lucide-react": "^0.539.0",
     "node-fetch": "^2.7.0",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
     "ts-loader": "^9.5.2",
     "vite-plugin-environment": "^1.1.3"
   }
