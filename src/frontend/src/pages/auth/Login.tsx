@@ -1,20 +1,21 @@
 import * as React from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
+import AuthLayout from '@/components/AuthLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import google from '@/assets/icons/google.svg';
-import { Link } from 'react-router-dom';
-import AuthLayout from '@/components/AuthLayout';
 
 export default function Login() {
+  const navigate = useNavigate();
   const { setIsAuthenticated, setPrincipal, setWalletType } = useAuth();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+  const [error, setError] = React.useState('');
   const [data, setData] = React.useState({
     email: '',
     password: '',
   });
-  const [error, setError] = React.useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({
@@ -41,6 +42,7 @@ export default function Login() {
         setIsAuthenticated(authService.isAuthenticated);
         setPrincipal(authService.principal);
         setWalletType(authService.walletType);
+        navigate('/');
       }
       return success;
     } catch (error) {
