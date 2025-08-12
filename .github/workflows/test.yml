@@ -19,7 +19,7 @@ jobs:
           node-version: 16
 
       - name: Install DFX
-        run: echo y | sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+        run: DFXVM_INIT_YES=true sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
 
       - name: Install frontend dependencies
         run: cd src/frontend && npm install
