@@ -159,7 +159,7 @@ export default function Register() {
           className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-white px-6 py-3 text-lg font-medium text-black! transition-all hover:bg-gray-300! md:gap-4 md:px-8 md:py-4 md:text-xl"
         >
           <img src={google} alt="Google" className="h-5 w-5 md:h-6 md:w-6" />
-          Sign In With Google
+          Continue With Google
         </Button>
         <Button
           type="button"
