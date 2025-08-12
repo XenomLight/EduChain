@@ -25,7 +25,7 @@ export const idlFactory = ({ IDL }) => {
     contents: IDL.Vec(Konten),
   });
 
-  const Kursus = IDL.Record({
+  const Course = IDL.Record({
     id: IDL.Text,
     title: IDL.Text,
     provider: IDL.Text,
@@ -162,7 +162,7 @@ export const idlFactory = ({ IDL }) => {
   });
 
   const ResultCourse = IDL.Variant({
-    ok: Kursus,
+    ok: Course,
     err: Error
   });
   const ResultEnrollment = IDL.Variant({
@@ -250,7 +250,7 @@ export const idlFactory = ({ IDL }) => {
         priceHighToLow: IDL.Null,
         priceLowToHigh: IDL.Null
       }))],
-      [IDL.Vec(Kursus)],
+      [IDL.Vec(Course)],
       ["query"]
     ),
 
@@ -258,7 +258,7 @@ export const idlFactory = ({ IDL }) => {
     deleteCourse: IDL.Func([IDL.Text], [ResultBool], []),
     searchCourses: IDL.Func(
       [IDL.Text, IDL.Opt(IDL.Text), IDL.Opt(IDL.Text), IDL.Opt(IDL.Float), IDL.Opt(IDL.Nat), IDL.Nat, IDL.Nat],
-      [IDL.Vec(Kursus)],
+      [IDL.Vec(Course)],
       ["query"]
     ),
     // getModulebyCourseID: IDL.Func([IDL.Text], [IDL.Opt(IDL.Vec(Modul))], ["query"]),
