@@ -23,21 +23,23 @@ jobs:
         with:
           node-version: 16
 
-      - name: Install DFX
-        run: DFXVM_INIT_YES=true sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
-
-      - name: Source dfx
-        run: source "$HOME/.local/share/dfx/env" && dfx --version
-        
+      - name: Install and source DFX
+        run: |
+          DFXVM_INIT_YES=true sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+          echo 'source "$HOME/.local/share/dfx/env"' >> $GITHUB_ENV
+          
       - name: Install frontend dependencies
         run: cd src/frontend && npm install
-
+        
       - name: Start local replica
         run: dfx start --host 0.0.0.0:4943 --clean --background
-
-      - name: Deploy canisters
+        env:
+         BASH_ENV: $HOME/.local/share/dfx/env
+         
+      - name: Deploy canisters (FE&BE)
         run: dfx deploy
-
+        env:
+         BASH_ENV: $HOME/.local/share/dfx/env
       #bisa tambahin step test lainnya:
 
       - name: Stop local replica
