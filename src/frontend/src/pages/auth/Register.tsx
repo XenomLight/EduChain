@@ -82,6 +82,7 @@ export default function Register() {
       return success;
     } catch (error) {
       console.error('Internet Identity login failed:', error);
+      setError('Internet Identity login failed. Please try again.');
       return false;
     } finally {
       setIsLoading(false);

@@ -14,16 +14,21 @@ export default function Login() {
     email: '',
     password: '',
   });
+  const [error, setError] = React.useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({
       ...data,
       [e.target.name]: e.target.value,
     });
+    setError('');
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
     // Handle login logic here
     console.log('Login data:', data);
   };
@@ -40,6 +45,7 @@ export default function Login() {
       return success;
     } catch (error) {
       console.error('Internet Identity login failed:', error);
+      setError('Internet Identity login failed. Please try again.');
       return false;
     } finally {
       setIsLoading(false);
@@ -48,11 +54,11 @@ export default function Login() {
 
   return (
     <AuthLayout title="Login">
-      {/* {error && (
+      {error && (
         <div className="w-full max-w-sm rounded-lg border border-red-500 bg-red-500/20 px-4 py-2 text-center text-red-200 md:max-w-lg">
           {error}
         </div>
-      )} */}
+      )}
       <form
         onSubmit={handleSubmit}
         className="w-full max-w-sm space-y-4 md:max-w-lg md:space-y-5"
