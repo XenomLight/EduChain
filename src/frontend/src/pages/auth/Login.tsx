@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { authService } from '@/lib/auth';
-import RootLayout from '@/components/RootLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import google from '@/assets/icons/google.svg';
-import logo from '@/assets/icons/eduChain.svg';
 import { Link } from 'react-router-dom';
-import backgroundImage from '@/assets/image/background.webp';
+import AuthLayout from '@/components/AuthLayout';
 
 export default function Login() {
   const { setIsAuthenticated, setPrincipal, setWalletType } = useAuth();
@@ -49,72 +47,76 @@ export default function Login() {
   };
 
   return (
-    <RootLayout className="relative flex-1">
-      {/* image background */}
-      <div className="absolute inset-0 -z-10">
-        <img
-          src={backgroundImage}
-          alt="Background"
-          className="h-full w-full object-cover"
-        />
-        {/* overlay */}
-        <div className="absolute inset-0 bg-black opacity-50"></div>
-      </div>
-
-      {/* content */}
-      <div className="flex min-h-screen w-full flex-col justify-center">
-        <div className="flex w-full flex-col gap-16 md:flex-row md:items-center md:justify-between">
-          <div className="hidden w-1/2 flex-col md:flex">
-            <img src={logo} alt="EduChain Logo" className="w-112" />
-            <div className="mt-2 ml-16">
-              <h2 className="text-2xl font-semibold">Learn, Earn, On Chain</h2>
-            </div>
-          </div>
-          <div className="flex w-full flex-col md:w-1/2">
-            <h1 className="text-5xl font-semibold">Login</h1>
-            <form onSubmit={handleSubmit} className="mt-8 w-full space-y-4">
-              <Input
-                type="email"
-                name="email"
-                placeholder="Email"
-                value={data.email}
-                onChange={handleChange}
-              />
-              <Input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={data.password}
-                onChange={handleChange}
-              />
-              <Button className="w-full" disabled={isLoading}>
-                {isLoading ? 'Signing In...' : 'Sign In'}
-              </Button>
-              <Button className="bg-foreground! hover:bg-foreground/90! text-background! flex w-full items-center justify-center gap-4">
-                <span>
-                  <img width={24} src={google} alt="Google logo" />
-                </span>
-                Sign In With Google
-              </Button>
-              <Button
-                className="flex w-full cursor-pointer items-center justify-center gap-4 border-2 border-white/30 bg-transparent text-white shadow-none hover:bg-white/10"
-                onClick={handleWalletLogin}
-              >
-                <span className="w-6">🆔</span>
-                Connect Internet Identity
-              </Button>
-            </form>
-            <div className="mt-4 text-center">
-              <p>
-                Don't have an account?{' '}
-                <Link to="/auth/register" className="text-primary">
-                  Register here
-                </Link>
-              </p>
-            </div>
-          </div>
+    <AuthLayout title="Login">
+      {/* {error && (
+        <div className="w-full max-w-sm rounded-lg border border-red-500 bg-red-500/20 px-4 py-2 text-center text-red-200 md:max-w-lg">
+          {error}
         </div>
+      )} */}
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm space-y-4 md:max-w-lg md:space-y-5"
+      >
+        <Input
+          type="email"
+          name="email"
+          placeholder="Enter your email"
+          value={data.email}
+          onChange={handleChange}
+          className="border-white/30 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/60 md:px-6 md:py-4 md:text-lg"
+          required
+        />
+        <Input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={data.password}
+          onChange={handleChange}
+          className="border-white/30 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/60 md:px-6 md:py-4 md:text-lg"
+          required
+        />
+        <div className="flex justify-center pt-2">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full cursor-pointer rounded-xl bg-[#2A8188] py-3 text-base font-medium text-white transition-colors hover:bg-[#2A8188]/90 disabled:opacity-50 md:py-4 md:text-lg"
+          >
+            {isLoading ? 'Signing In...' : 'Sign In'}
+          </Button>
+        </div>
+      </form>
+      <div className="flex w-full max-w-sm items-center md:max-w-lg">
+        <div className="flex-1 border-t border-white/30"></div>
+        <span className="px-4 text-base text-white/70 md:px-6 md:text-lg">
+          or
+        </span>
+        <div className="flex-1 border-t border-white/30"></div>
       </div>
-    </RootLayout>
+      <div className="flex w-full max-w-sm flex-col space-y-3 md:max-w-lg md:space-y-4">
+        <Button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-white px-6 py-3 text-lg font-medium text-black! transition-all hover:bg-gray-300! md:gap-4 md:px-8 md:py-4 md:text-xl"
+        >
+          <img src={google} alt="Google" className="h-5 w-5 md:h-6 md:w-6" />
+          Sign In With Google
+        </Button>
+        <Button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-transparent px-6 py-3 text-lg font-medium text-white transition-all hover:bg-white/10 md:gap-4 md:px-8 md:py-4 md:text-xl"
+          onClick={handleWalletLogin}
+        >
+          <span className="text-xl md:text-2xl">🆔</span>
+          Connect Internet Identity
+        </Button>
+      </div>
+      <div className="mt-4 text-center">
+        <p>
+          Don't have an account?{' '}
+          <Link to="/auth/register" className="text-primary">
+            Register here
+          </Link>
+        </p>
+      </div>
+    </AuthLayout>
   );
 }
