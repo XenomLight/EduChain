@@ -32,7 +32,7 @@ jobs:
       - name: Start local replica and deploy canister
         run: |
               source "$HOME/.local/share/dfx/env"
-              dfx start --host 0.0.0.0:4943 --clean --background
+              dfx start --clean --background
               dfx deploy
               #bisa tambahin step test lainnya:
               dfx stop
