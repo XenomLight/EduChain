@@ -185,7 +185,10 @@ export default function Register() {
       <div className="space-y-2 text-center text-base text-white/80 md:space-y-3 md:text-lg">
         <p>
           Already have an account?{' '}
-          <Link to="/" className="text-blue-400 underline hover:text-blue-300">
+          <Link
+            to="/auth/login"
+            className="text-blue-400 underline hover:text-blue-300"
+          >
             Click here
           </Link>
         </p>
