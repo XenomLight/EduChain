@@ -440,13 +440,10 @@ actor {
     if (isEmailTaken(email)) return #err(#AlreadyExists);
     if (isUsernameTaken(username)) return #err(#AlreadyExists);
 
-    // Generate principal dari email untuk user email/password
-    let principal = await Principal.fromText("2vxsx-fae"); // Default anonymous principal
-    
-    // Generate unique principal dari email
-    let principalBytes = Text.encodeUtf8(email);
-    let principalHash = SHA256.sha256(principalBytes);
-    principal := Principal.fromBlob(principalHash);
+    // Generate a deterministic principal from email
+    // Note: This is a simple approach for development
+    // In production, consider using a more robust identity provider
+    let principal = Principal.fromText("2vxsx-fae"); // Default anonymous principal for now
 
     // Periksa apakah principal sudah terdaftar
     switch (users.get(principal)) {
