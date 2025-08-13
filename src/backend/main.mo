@@ -438,6 +438,19 @@ actor {
   ): async ResultUser {
     if (password != confirmPassword) return #err(#PasswordsDoNotMatch);
     if (isEmailTaken(email) or isUsernameTaken(username)) return #err(#AlreadyExists);
+    
+    // Check if principal is already registered with a different email
+    switch (users.get(msg.caller)) {
+      case (?existingUser) {
+        // If principal exists and email is different, return error
+        if (existingUser.email != ?email) {
+          return #err(#IdAlreadyExists);
+        };
+        // If principal exists with same email, it's a duplicate registration attempt
+        return #err(#AlreadyExists);
+      };
+      case null {}; // Principal doesn't exist, continue with registration
+    };
 
     let userId = nextUserId;
     nextUserId += 1;
