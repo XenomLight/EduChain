@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import AuthLayout from '@/components/AuthLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-import google from '@/assets/icons/google.svg';
+// import google from '@/assets/icons/google.svg';
 // import { Principal } from '@dfinity/principal';
 
 export default function Login() {
@@ -139,13 +139,13 @@ export default function Login() {
         <div className="flex-1 border-t border-white/30"></div>
       </div>
       <div className="flex w-full max-w-sm flex-col space-y-3 md:max-w-lg md:space-y-4">
-        <Button
+        {/* <Button
           type="button"
           className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-white px-6 py-3 text-lg font-medium text-black! transition-all hover:bg-gray-300! md:gap-4 md:px-8 md:py-4 md:text-xl"
         >
           <img src={google} alt="Google" className="h-5 w-5 md:h-6 md:w-6" />
           Continue with Google
-        </Button>
+        </Button> */}
         <Button
           type="button"
           className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-transparent px-6 py-3 text-lg font-medium text-white transition-all hover:bg-white/10 md:gap-4 md:px-8 md:py-4 md:text-xl"
