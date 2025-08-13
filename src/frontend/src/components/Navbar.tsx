@@ -4,7 +4,6 @@ import logo from '../assets/icons/eduChain.svg';
 import { useAuth } from '@/hooks/useAuth';
 import Button from './ui/Button';
 import { useState } from 'react';
-// import { authService } from '@/lib/auth';
 
 const Navbar = () => {
   const { isAuthenticated, principal, logout } = useAuth();
