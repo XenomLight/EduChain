@@ -437,19 +437,23 @@ actor {
     lastName: Text
   ): async ResultUser {
     if (password != confirmPassword) return #err(#PasswordsDoNotMatch);
-    if (isEmailTaken(email) or isUsernameTaken(username)) return #err(#AlreadyExists);
+    if (isEmailTaken(email)) return #err(#AlreadyExists);
+    if (isUsernameTaken(username)) return #err(#AlreadyExists);
+
+    // Generate principal dari email untuk user email/password
+    let principal = await Principal.fromText("2vxsx-fae"); // Default anonymous principal
     
-    // Check if principal is already registered with a different email
-    switch (users.get(msg.caller)) {
+    // Generate unique principal dari email
+    let principalBytes = Text.encodeUtf8(email);
+    let principalHash = SHA256.sha256(principalBytes);
+    principal := Principal.fromBlob(principalHash);
+
+    // Periksa apakah principal sudah terdaftar
+    switch (users.get(principal)) {
       case (?existingUser) {
-        // If principal exists and email is different, return error
-        if (existingUser.email != ?email) {
-          return #err(#IdAlreadyExists);
-        };
-        // If principal exists with same email, it's a duplicate registration attempt
         return #err(#AlreadyExists);
       };
-      case null {}; // Principal doesn't exist, continue with registration
+      case null {}; // Lanjutkan registrasi
     };
 
     let userId = nextUserId;
@@ -458,23 +462,23 @@ actor {
     
     let newUser: User = {
       user_id = userId;
-      principal = msg.caller;
+      principal = principal;
       username = username;
       email = ?email;
       password_hash = ?hashPassword(password);
       first_name = ?firstName;
       last_name = ?lastName;
-      date_of_birth = null; // Inisialisasi dengan null
-      gender = null;        // Inisialisasi dengan null
-      wallets = [];         // Inisialisasi array kosong untuk wallet
+      date_of_birth = null;
+      gender = null;
+      wallets = [];
       created_at = now;
       updated_at = now;
     };
 
-    // Store user data
-    users.put(msg.caller, newUser);
-    usersByEmail.put(email, msg.caller);
-    usernames.put(username, msg.caller);
+    // Simpan data user
+    users.put(principal, newUser);
+    usersByEmail.put(email, principal);
+    usernames.put(username, principal);
     
     #ok(newUser)
   };
