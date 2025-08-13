@@ -6,11 +6,17 @@ import AuthLayout from '@/components/AuthLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import google from '@/assets/icons/google.svg';
-import { Principal } from '@dfinity/principal';
+// import { Principal } from '@dfinity/principal';
 
 export default function Login() {
   const navigate = useNavigate();
-  const { actor, setIsAuthenticated, setPrincipal, setWalletType } = useAuth();
+  const {
+    actor,
+    loginWithEmail,
+    setIsAuthenticated,
+    setPrincipal,
+    setWalletType,
+  } = useAuth();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [error, setError] = React.useState('');
   const [data, setData] = React.useState({
@@ -51,25 +57,12 @@ export default function Login() {
         return;
       }
 
-      const result = (await actor.loginWithEmail(
-        data.email,
-        data.password
-      )) as { ok?: unknown; err?: unknown };
-
-      if (result.err) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const errorMessage: any = {
-          InvalidCredentials: 'Invalid password!',
-          NotFound: 'Account is not exist. Please register your account first!',
-        };
-        setError(errorMessage[Object.keys(result.err)[0]]);
+      const { status, message } = await loginWithEmail(data);
+      if (status !== 'success') {
+        setError(message);
         setIsLoading(false);
         return;
       }
-
-      setIsAuthenticated(true);
-      setPrincipal(Principal.from(result?.ok?.principal).toText());
-      setWalletType('EMAIL');
       navigate('/');
     } catch (error) {
       console.error('Registration error:', error);
