@@ -6,6 +6,7 @@ import AuthLayout from '@/components/AuthLayout';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import google from '@/assets/icons/google.svg';
+import { Principal } from '@dfinity/principal';
 
 export default function Register() {
   const { actor, setIsAuthenticated, setPrincipal, setWalletType } = useAuth();
@@ -32,36 +33,55 @@ export default function Register() {
     setIsLoading(true);
     setError('');
 
-    // Validasi password
+    // input validation
+    if (!data.email) {
+      setError('Please enter your email!');
+      setIsLoading(false);
+      return;
+    }
+    if (!data.username) {
+      setError('Please enter your username!');
+      setIsLoading(false);
+      return;
+    }
     if (data.password !== data.confirmPassword) {
-      setError('Passwords do not match');
+      setError('Password is not match!');
       setIsLoading(false);
       return;
     }
 
+    // process data
     try {
-      // Register biasa tanpa wallet - gunakan principal dummy atau email sebagai ID
-      const dummyPrincipal = `email:${data.email}`;
-
       if (!actor) {
         setError('Backend connection failed. Please try again.');
         setIsLoading(false);
         return;
       }
 
-      const result = (await actor.Register(
-        dummyPrincipal, // gunakan email sebagai identifier
+      const result = (await actor.registerWithEmail(
         data.username,
         data.email,
         data.password,
-        data.confirmPassword
-      )) as string;
+        data.confirmPassword,
+        '',
+        ''
+      )) as { ok?: unknown; err?: unknown };
 
-      if (result.includes('success')) {
-        navigate('/');
-      } else {
-        setError(result);
+      if (result.err) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const errorMessage: any = {
+          PasswordsDoNotMatch: 'Password is not match!',
+          AlreadyExists: 'Account has already exist!',
+        };
+        setError(errorMessage[Object.keys(result.err)[0]]);
+        setIsLoading(false);
+        return;
       }
+
+      setIsAuthenticated(true);
+      setPrincipal(Principal.from(result?.ok?.principal).toText());
+      setWalletType('EMAIL');
+      navigate('/');
     } catch (error) {
       console.error('Registration error:', error);
       setError('Registration failed. Please try again.');
