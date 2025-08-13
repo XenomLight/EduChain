@@ -1,21 +1,23 @@
 import * as React from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '@/lib/auth';
+import { useAuth } from '@/hooks/useAuth';
 import AuthLayout from '@/components/AuthLayout';
 import Input from '@/components/ui/Input';
+import Button from '@/components/ui/Button';
 import google from '@/assets/icons/google.svg';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
 
 export default function Register() {
-  const { actor, login, principal } = useAuth();
+  const { actor, setIsAuthenticated, setPrincipal, setWalletType } = useAuth();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState('');
   const [data, setData] = React.useState({
     email: '',
     username: '',
     password: '',
     confirmPassword: '',
   });
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [error, setError] = React.useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({
@@ -40,20 +42,20 @@ export default function Register() {
     try {
       // Register biasa tanpa wallet - gunakan principal dummy atau email sebagai ID
       const dummyPrincipal = `email:${data.email}`;
-      
+
       if (!actor) {
         setError('Backend connection failed. Please try again.');
         setIsLoading(false);
         return;
       }
 
-      const result = await actor.Register(
+      const result = (await actor.Register(
         dummyPrincipal, // gunakan email sebagai identifier
         data.username,
         data.email,
         data.password,
         data.confirmPassword
-      ) as string;
+      )) as string;
 
       if (result.includes('success')) {
         navigate('/');
@@ -69,31 +71,20 @@ export default function Register() {
   };
 
   const handleWalletRegister = async () => {
-    setError('');
     setIsLoading(true);
-    
     try {
-      await login(); // Connect wallet dulu
-      
-      // Setelah connect, register dengan principal asli
-      if (principal && principal !== '2vxsx-fae') {
-        const result = await actor?.Register(
-          principal, // pakai principal dari wallet
-          data.username,
-          data.email,
-          data.password,
-          data.confirmPassword
-        ) as string;
-
-        if (result.includes('success')) {
-          navigate('/');
-        } else {
-          setError(result);
-        }
+      const success = await authService.loginWithInternetIdentity();
+      if (success) {
+        setIsAuthenticated(authService.isAuthenticated);
+        setPrincipal(authService.principal);
+        setWalletType(authService.walletType);
+        navigate('/');
       }
+      return success;
     } catch (error) {
-      console.error("Internet Identity connection failed:", error);
-      setError('Internet Identity connection failed. Please try again.');
+      console.error('Internet Identity login failed:', error);
+      setError('Internet Identity login failed. Please try again.');
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -101,22 +92,22 @@ export default function Register() {
 
   return (
     <AuthLayout title="Register">
-      {/* Error Message */}
       {error && (
-        <div className="w-full max-w-sm md:max-w-lg bg-red-500/20 border border-red-500 text-red-200 px-4 py-2 rounded-lg text-center">
+        <div className="w-full max-w-sm rounded-lg border border-red-500 bg-red-500/20 px-4 py-2 text-center text-red-200 md:max-w-lg">
           {error}
         </div>
       )}
-
-      {/* Register Form */}
-      <form onSubmit={handleSubmit} className="w-full max-w-sm space-y-4 md:max-w-lg md:space-y-5">
+      <form
+        onSubmit={handleSubmit}
+        className="w-full max-w-sm space-y-4 md:max-w-lg md:space-y-5"
+      >
         <Input
           type="email"
           name="email"
           placeholder="Enter your email"
           value={data.email}
           onChange={handleChange}
-          className="bg-white/10 border-white/30 text-white placeholder:text-white/60 text-base py-3 px-4 md:text-lg md:py-4 md:px-6"
+          className="border-white/30 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/60 md:px-6 md:py-4 md:text-lg"
           required
         />
         <Input
@@ -125,7 +116,7 @@ export default function Register() {
           placeholder="Username"
           value={data.username}
           onChange={handleChange}
-          className="bg-white/10 border-white/30 text-white placeholder:text-white/60 text-base py-3 px-4 md:text-lg md:py-4 md:px-6"
+          className="border-white/30 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/60 md:px-6 md:py-4 md:text-lg"
           required
         />
         <Input
@@ -134,7 +125,7 @@ export default function Register() {
           placeholder="Password"
           value={data.password}
           onChange={handleChange}
-          className="bg-white/10 border-white/30 text-white placeholder:text-white/60 text-base py-3 px-4 md:text-lg md:py-4 md:px-6"
+          className="border-white/30 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/60 md:px-6 md:py-4 md:text-lg"
           required
         />
         <Input
@@ -143,55 +134,47 @@ export default function Register() {
           placeholder="Password Confirmation"
           value={data.confirmPassword}
           onChange={handleChange}
-          className="bg-white/10 border-white/30 text-white placeholder:text-white/60 text-base py-3 px-4 md:text-lg md:py-4 md:px-6"
+          className="border-white/30 bg-white/10 px-4 py-3 text-base text-white placeholder:text-white/60 md:px-6 md:py-4 md:text-lg"
           required
         />
-        
-        {/* Sign Up Button */}
         <div className="flex justify-center pt-2">
-          <button 
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-48 bg-[#2A8188] hover:bg-[#2A8188]/90 text-white text-base py-3 md:text-lg md:py-4 rounded-xl font-medium transition-colors disabled:opacity-50"
+            className="w-full cursor-pointer rounded-xl bg-[#2A8188] py-3 text-base font-medium text-white transition-colors hover:bg-[#2A8188]/90 disabled:opacity-50 md:py-4 md:text-lg"
           >
             {isLoading ? 'Signing Up...' : 'Sign Up'}
-          </button>
+          </Button>
         </div>
       </form>
-
-      {/* Divider */}
       <div className="flex w-full max-w-sm items-center md:max-w-lg">
         <div className="flex-1 border-t border-white/30"></div>
-        <span className="px-4 text-white/70 text-base md:px-6 md:text-lg">or</span>
+        <span className="px-4 text-base text-white/70 md:px-6 md:text-lg">
+          or
+        </span>
         <div className="flex-1 border-t border-white/30"></div>
       </div>
-
-      {/* Social Login Options */}
       <div className="flex w-full max-w-sm flex-col space-y-3 md:max-w-lg md:space-y-4">
-        {/* Google Button */}
-        <button 
+        <Button
           type="button"
-          className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-white px-6 py-3 text-lg font-medium text-black transition-all hover:bg-gray-100 md:gap-4 md:px-8 md:py-4 md:text-xl"
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-white px-6 py-3 text-lg font-medium text-black! transition-all hover:bg-gray-300! md:gap-4 md:px-8 md:py-4 md:text-xl"
         >
           <img src={google} alt="Google" className="h-5 w-5 md:h-6 md:w-6" />
-          Sign In With Google
-        </button>
-
-        {/* Internet Identity Button */}
-        <button
+          Continue with Google
+        </Button>
+        <Button
+          type="button"
+          className="flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-transparent px-6 py-3 text-lg font-medium text-white transition-all hover:bg-white/10 md:gap-4 md:px-8 md:py-4 md:text-xl"
           onClick={handleWalletRegister}
-          className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-white/30 bg-transparent px-6 py-3 text-lg font-medium text-white transition-all hover:bg-white/10 md:gap-4 md:px-8 md:py-4 md:text-xl"
         >
           <span className="text-xl md:text-2xl">🆔</span>
           Connect Internet Identity
-        </button>
+        </Button>
       </div>
-
-      {/* Login Link */}
-      <div className="text-center text-white/80 space-y-2 text-base md:space-y-3 md:text-lg">
+      <div className="mt-4 text-center">
         <p>
           Already have an account?{' '}
-          <Link to="/" className="text-blue-400 underline hover:text-blue-300">
+          <Link to="/auth/login" className="text-primary">
             Click here
           </Link>
         </p>
@@ -199,14 +182,3 @@ export default function Register() {
     </AuthLayout>
   );
 }
-
-
-
-
-
-
-
-
-
-
-

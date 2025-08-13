@@ -1,0 +1,41 @@
+name: Test deploy canister
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+  push:
+    branches:
+      - dev  
+  workflow_dispatch: #auto test
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+
+      - name: Install and source DFX
+        run: DFXVM_INIT_YES=true sh -ci "$(curl -fsSL https://sdk.dfinity.org/install.sh)"
+          
+      - name: Install frontend dependencies
+        run: cd src/frontend && npm install
+        
+      - name: Start local replica and deploy canister
+        run: |
+              source "$HOME/.local/share/dfx/env"
+              dfx start --clean --background
+              dfx deps pull
+              dfx deps init rdmx6-jaaaa-aaaaa-aaadq-cai --argument null
+              dfx deps deploy
+              dfx deploy
+              #bisa tambahin step test lainnya:
+              dfx stop

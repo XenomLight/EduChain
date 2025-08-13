@@ -1,21 +1,25 @@
 {
-  "canisters": {
-    "backend": {
-      "main": "src/backend/main.mo",
-      "type": "motoko"
-    },
-    "frontend": {
-      "dependencies": ["backend"],
-      "source": ["src/frontend/dist"],
-      "type": "assets",
-      "ignore": ["src/frontend/dist/.ic-assets.json5"]
-    }
-  },
-  "defaults": {
-    "build": {
-      "args": "",
-      "packtool": ""
-    }
-  },
-  "version": 1
+	"canisters": {
+		"backend": {
+			"main": "src/backend/main.mo",
+			"type": "motoko"
+		},
+		"frontend": {
+			"dependencies": ["backend"],
+			"source": ["src/frontend/dist"],
+			"type": "assets",
+			"ignore": ["src/frontend/dist/.ic-assets.json5"]
+		},
+		"internet_identity": {
+			"type": "pull",
+			"id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+		}
+	},
+	"defaults": {
+		"build": {
+			"args": "",
+			"packtool": ""
+		}
+	},
+	"version": 1
 }
