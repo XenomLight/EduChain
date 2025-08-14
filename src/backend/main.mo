@@ -393,9 +393,34 @@ actor {
   public shared (msg) func loginWithPrincipal(first_name: ?Text, last_name: ?Text, username: ?Text, email: ?Text): async ResultUser {
     let caller = msg.caller;
 
-    switch (users.get(msg.caller)) {
-        case (?user) #ok(user);
-        case null #err(#NotFound)
+    switch (users.get(caller)) {
+      case (?user) {
+        #ok(user)
+      };
+      case null {
+        // User does not exist, create new user with provided first/last name
+        let userId = nextUserId;
+        nextUserId += 1;
+        let now = getCurrentTime();
+        let newUser: User = {
+          user_id = userId;
+          principal = caller;
+          username = switch (username) { case (?u) u; case null "" };
+          email = email;
+          password_hash = null;
+          first_name = first_name;
+          last_name = last_name;
+          date_of_birth = null;
+          gender = null;
+          wallets = [];
+          created_at = now;
+          updated_at = now;
+        };
+        users.put(caller, newUser);
+        if (email != null) { usersByEmail.put(Option.get(email, ""), caller); };
+        if (username != null) { usernames.put(Option.get(username, ""), caller); };
+        #ok(newUser)
+      }
     }
   };
   public shared query (msg) func whoami(): async Principal {
