@@ -104,7 +104,7 @@ actor {
     level: Text;
     isFavorite: Bool;
     isPublished: Bool; 
-    progress: ?Nat;
+    progress: ?Nat; // ini tidak terpakai
     totalStudents: Nat;
     totalModules: Nat;
     totalLessons: Nat;
@@ -204,7 +204,13 @@ actor {
   // Course storage
   private stable var courseEntries: [(Text, Course)] = [];
   private var courses = HashMap.HashMap<Text, Course>(1, Text.equal, Text.hash);
-
+  //user progress on each course
+  private stable var userCourseProgressEntries: [((Principal, Text, Nat, Nat), Nat)] = [];
+  private var userProgress = HashMap.HashMap<(Principal, Text, Nat, Nat), Nat>(
+    1,
+    func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1 and a.2 == b.2 and a.3 == b.3,
+    func((p, c, m, k)) = Principal.hash(p) ^ Text.hash(c) ^ Hash.hash(m) ^ Hash.hash(k)
+  );  
   // Enrollment storage
   private stable var enrollmentEntries: [(Principal, Text, Enrollment)] = [];
   stable var stableEnrollments : [(Principal, Text, Enrollment)] = [];
@@ -384,8 +390,9 @@ actor {
         case null #err(#NotFound)
     }
   };
-  public shared (msg) func loginWithPrincipal(username: ?Text, email: ?Text): async ResultUser {
-    // Return current user if exists
+  public shared (msg) func loginWithPrincipal(first_name: ?Text, last_name: ?Text, username: ?Text, email: ?Text): async ResultUser {
+    let caller = msg.caller;
+
     switch (users.get(msg.caller)) {
         case (?user) #ok(user);
         case null #err(#NotFound)
@@ -440,12 +447,8 @@ actor {
     if (isEmailTaken(email)) return #err(#AlreadyExists);
     if (isUsernameTaken(username)) return #err(#AlreadyExists);
 
-    // Generate a deterministic principal from email
-    // Note: This is a simple approach for development
-    // In production, consider using a more robust identity provider
-    let principal = Principal.fromText("2vxsx-fae"); // Default anonymous principal for now
+    let principal = msg.caller;
 
-    // Periksa apakah principal sudah terdaftar
     switch (users.get(principal)) {
       case (?existingUser) {
         return #err(#AlreadyExists);
@@ -1130,7 +1133,16 @@ actor {
     }
   };
 
+  // === Users Course progress handler =====
+  public shared (msg) func setUserProgress(courseId: Text, modulId: Nat, kontenId: Nat, progress: Nat): async ResultBool {
+  let key = (msg.caller, courseId, modulId, kontenId);
+  userProgress.put(key, progress);
+  #ok(true)
+  };
 
+  public shared query func getUserProgress(user: Principal, courseId: Text, modulId: Nat, kontenId: Nat): async ?Nat {
+    userProgress.get((user, courseId, modulId, kontenId))
+  };
 
 
 
