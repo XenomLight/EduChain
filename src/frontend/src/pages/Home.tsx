@@ -1,6 +1,7 @@
 import Navbar from '../components/Navbar';
 import { PiHexagonThin } from 'react-icons/pi';
 import { motion } from 'framer-motion';
+import Footer from '../components/footer';
 
 const Home = () => {
   return (
@@ -25,9 +26,7 @@ const Home = () => {
 
         {/* Content */}
         <div className="relative z-10 mx-auto max-w-7xl">
-          <h1 className="text-3xl leading-tight font-bold sm:text-5xl lg:text-7xl 
-               bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] 
-               bg-clip-text text-transparent">
+          <h1 className="bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] bg-clip-text text-3xl leading-tight font-bold text-transparent sm:text-5xl lg:text-7xl">
             Revolutionizing Global Education <br /> with Blockchain Transparency
           </h1>
           <p className="mt-6 text-base text-gray-300 sm:text-lg">
@@ -216,7 +215,11 @@ const Home = () => {
                 </ul>
               </div>
               <div className="mt-auto">
-                <button className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
+                <button 
+                 onClick={() =>
+                    (window.location.href = `/qris?amount=0&desc=Start Learning`)
+                  }
+                className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
                   Start Learning
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
@@ -242,13 +245,20 @@ const Home = () => {
                   <li>✔ Payment via QRIS / ICP</li>
                   <li className="flex items-center gap-2">
                     ✔ Public URLs access control{' '}
-                    <span className="rounded border border-[#ACF3A6] px-1 py-0.5 text-[10px] text-[#ACF3A6]">Soon</span>
+                    <span className="rounded border border-[#ACF3A6] px-1 py-0.5 text-[10px] text-[#ACF3A6]">
+                      Soon
+                    </span>
                   </li>
                   <li>✔ Priority support</li>
                 </ul>
               </div>
               <div className="mt-auto">
-                <button className="mt-8 w-full rounded-full bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] py-3 font-semibold text-black transition hover:opacity-90">
+                <button
+                  onClick={() =>
+                    (window.location.href = `/qris?amount=472000&desc=Individual Course Access`)
+                  }
+                  className="mt-8 w-full rounded-full bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] py-3 font-semibold text-black transition hover:opacity-90"
+                >
                   Buy Individual Access
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
@@ -274,13 +284,19 @@ const Home = () => {
                   <li>✔ Payment via QRIS / ICP</li>
                   <li className="flex items-center gap-2">
                     ✔ Public URLs access control{' '}
-                    <span className="rounded border border-[#ACF3A6] px-1 py-0.5 text-[10px] text-[#ACF3A6]">Soon</span>
+                    <span className="rounded border border-[#ACF3A6] px-1 py-0.5 text-[10px] text-[#ACF3A6]">
+                      Soon
+                    </span>
                   </li>
                   <li>✔ Priority support</li>
                 </ul>
               </div>
               <div className="mt-auto">
-                <button className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
+                <button 
+                 onClick={() =>
+                    (window.location.href = `/qris?amount=570000&desc=Buy Monthly Plan`)
+                  }
+                className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
                   Buy Monthly Plan
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
@@ -316,7 +332,11 @@ const Home = () => {
                 </ul>
               </div>
               <div className="mt-auto">
-                <button className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
+                <button
+                onClick={() =>
+                    (window.location.href = `/qris?amount=3893000&desc=Buy Annual Plan`)
+                  }
+                className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
                   Buy Annual Plan
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
@@ -327,8 +347,12 @@ const Home = () => {
           </div>
         </div>
       </section>
+      {/* Footer */}
+      <Footer />
+
+      {/* Back to top button */}
     </div>
   );
 };
 
-export default Home;
+export default Home;

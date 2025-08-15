@@ -24,7 +24,7 @@ const Navbar = () => {
       <div className="flex items-center gap-3">
         <img src={logo} alt="Logo" className="h-10 object-contain" />
       </div>
-      {/* Right: Menu + Search + Auth */}
+      
       <div className="flex items-center gap-6 text-[#EEEEEE]">
         {[
           { name: 'Home', to: '/' },
