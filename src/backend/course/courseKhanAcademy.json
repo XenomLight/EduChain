@@ -1,0 +1,131 @@
+{
+  "data": {
+    "listTopPrograms": {
+      "__typename": "ListPrograms",
+      "complete": false,
+      "cursor": "ClIKIQoUdGltZV9kZXBlbmRlbnRfc2NvcmUSCSGNHL0T5ZuTQBIpag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJOIuc6KCwwYACAB",
+      "programs": [
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_603304270920771144926385",
+          "authorNickname": "ɴᴇᴡɴɪɴᴊᴀ",
+          "displayableSpinoffCount": 2,
+          "id": "4840463156953088",
+          "imagePath": "/computer-programming/till-final-breath-graphic-/4840463156953088/5250133512208384.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJO4gszMCAw",
+          "sumVotesIncremented": 56,
+          "translatedTitle": "Till Final Breath -GRAPHIC-",
+          "url": "/computer-programming/till-final-breath-graphic-/4840463156953088"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_337124640664758427043716",
+          "authorNickname": "NIKO",
+          "displayableSpinoffCount": 11,
+          "id": "5716187510259712",
+          "imagePath": "/computer-programming/rebooting/5716187510259712/6375009362952192.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJPw-dqTCgw",
+          "sumVotesIncremented": 58,
+          "translatedTitle": "rebooting...",
+          "url": "/computer-programming/rebooting/5716187510259712"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_714276242204949021450419",
+          "authorNickname": "✎Ace Rogers (Online)",
+          "displayableSpinoffCount": 5,
+          "id": "5901837891059712",
+          "imagePath": "/computer-programming/a-possible-intro-for-team-papernuke/5901837891059712/5486474447601664.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJO4i_a9Cgw",
+          "sumVotesIncremented": 25,
+          "translatedTitle": "A possible Intro for Team PaperNuke",
+          "url": "/computer-programming/a-possible-intro-for-team-papernuke/5901837891059712"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_453268912170521928426459",
+          "authorNickname": "monsimir",
+          "displayableSpinoffCount": 21,
+          "id": "5400839040843776",
+          "imagePath": "/computer-programming/hillside-home/5400839040843776/5510838790438912.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJOkjYHMCQw",
+          "sumVotesIncremented": 29,
+          "translatedTitle": "Hillside Home",
+          "url": "/computer-programming/hillside-home/5400839040843776"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_337124640664758427043716",
+          "authorNickname": "NIKO",
+          "displayableSpinoffCount": 0,
+          "id": "5747240165752832",
+          "imagePath": "/computer-programming/true-l202-lefevre-pads/5747240165752832/4853635309944832.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJOE2uKaCgw",
+          "sumVotesIncremented": 27,
+          "translatedTitle": "TRUE L20.2 Lefevre Pads",
+          "url": "/computer-programming/true-l202-lefevre-pads/5747240165752832"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_101904269317089495055459",
+          "authorNickname": "NL#Midsane",
+          "displayableSpinoffCount": 0,
+          "id": "4564311456661504",
+          "imagePath": "/computer-programming/new-program/4564311456661504/5708315623735296.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJOY-eaNCAw",
+          "sumVotesIncremented": 30,
+          "translatedTitle": "<New program>",
+          "url": "/computer-programming/new-program/4564311456661504"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_2342551348722616771196",
+          "authorNickname": "Joe H",
+          "displayableSpinoffCount": 0,
+          "id": "5816562884067328",
+          "imagePath": "/computer-programming/let-life-shine/5816562884067328/4647100600336384.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJOkocSqCgw",
+          "sumVotesIncremented": 10,
+          "translatedTitle": "Let Life Shine!",
+          "url": "/computer-programming/let-life-shine/5816562884067328"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_1161636173501911064328685",
+          "authorNickname": "Paperwad",
+          "displayableSpinoffCount": 3,
+          "id": "6726414670020608",
+          "imagePath": "/computer-programming/i-should-be-working-on-my-coc-project/6726414670020608/4915099857108992.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJOot7T5Cww",
+          "sumVotesIncremented": 37,
+          "translatedTitle": "I should be working on my CoC project",
+          "url": "/computer-programming/i-should-be-working-on-my-coc-project/6726414670020608"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_879429862105799252962492",
+          "authorNickname": "Promise",
+          "displayableSpinoffCount": 0,
+          "id": "6460291651256320",
+          "imagePath": "/computer-programming/a-sierpinskis-triangle-d/6460291651256320/6603790660976640.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJPonfO8Cww",
+          "sumVotesIncremented": 35,
+          "translatedTitle": "a Sierpinski's triangle :D",
+          "url": "/computer-programming/a-sierpinskis-triangle-d/6460291651256320"
+        },
+        {
+          "__typename": "Program",
+          "authorKaid": "kaid_1088685075013843225245914",
+          "authorNickname": "Ӿɛהּσהּ",
+          "displayableSpinoffCount": 4,
+          "id": "6239125330247680",
+          "imagePath": "/computer-programming/bals/6239125330247680/5012150246752256.png",
+          "key": "ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJOIuc6KCww",
+          "sumVotesIncremented": 65,
+          "translatedTitle": "Bals",
+          "url": "/computer-programming/bals/6239125330247680"
+        }
+      ]
+    }
+  }
+}

@@ -217,7 +217,7 @@ const Home = () => {
               <div className="mt-auto">
                 <button 
                  onClick={() =>
-                    (window.location.href = `/qris?amount=0&desc=Start Learning`)
+                    (window.location.href = `/qris?amount=1&desc=Start Learning`)
                   }
                 className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
                   Start Learning

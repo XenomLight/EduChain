@@ -11,6 +11,7 @@ import Careers from "./pages/Careers";
 import Pricing from "./pages/Pricing";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
+import CourseDetails from "./pages/CourseDetails";
 
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/pricing" element={<Pricing />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/privacy" element={<Privacy />} />
+        <Route path="/courses/:id" element={<CourseDetails />} />
         {/* Add more routes as needed */}     
       </Routes>
     </Router>
