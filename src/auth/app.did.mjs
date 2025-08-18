@@ -185,6 +185,15 @@ export const idlFactory = ({ IDL }) => {
   const ResultContents = IDL.Variant({ ok: IDL.Vec(Konten), err: Error });
   const ResultWallets = IDL.Variant({ ok: IDL.Vec(Wallet), err: Error });
   const ResultWallet = IDL.Variant({ ok: Wallet, err: Error });
+  
+  const ProfileUpdate = IDL.Record({
+    username: IDL.Opt(IDL.Text),
+    first_name: IDL.Opt(IDL.Text),
+    last_name: IDL.Opt(IDL.Text),
+    date_of_birth: IDL.Opt(IDL.Text),
+    gender: IDL.Opt(IDL.Text)
+  });
+  
   return IDL.Service({
 
     // USER
@@ -211,10 +220,28 @@ export const idlFactory = ({ IDL }) => {
       []
     ),
 
-    // Profile & Wallet
+    // Profile & Settings
     updateProfile: IDL.Func(
-      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Text), IDL.Opt(IDL.Text), IDL.Opt(IDL.Text)],
+      [ProfileUpdate],
       [ResultUser],
+      []
+    ),
+    
+    getProfile: IDL.Func(
+      [],
+      [ResultUser],
+      ['query']
+    ),
+    
+    changePassword: IDL.Func(
+      [IDL.Text, IDL.Text, IDL.Text], // currentPassword, newPassword, confirmPassword
+      [IDL.Variant({ ok: IDL.Null, err: Error })],
+      []
+    ),
+    
+    updateEmail: IDL.Func(
+      [IDL.Text, IDL.Text], // newEmail, password
+      [IDL.Variant({ ok: IDL.Null, err: Error })],
       []
     ),
     connectWallet: IDL.Func(
@@ -314,7 +341,18 @@ export const idlFactory = ({ IDL }) => {
     // PAYMENT HISTORY
     getMyPaymentHistory: IDL.Func([], [ResultPaymentHistory], ["query"]),
     getPaymentHistoryByCourse: IDL.Func([IDL.Text], [ResultPaymentHistory], ["query"]),
-    getPaymentHistoryByUserAndCourse: IDL.Func([IDL.Text], [ResultPaymentHistory], ["query"])
+    getPaymentHistoryByUserAndCourse: IDL.Func([IDL.Text], [ResultPaymentHistory], ["query"]),
+
+    // Sertifikat/NFT Whitelist
+    whitelistUserForCertificate: IDL.Func([
+      IDL.Text
+    ], [ResultBool], []),
+    isUserWhitelistedForCertificate: IDL.Func([
+      IDL.Principal, IDL.Text
+    ], [ResultBool], ["query"]),
+    enableCertificateAccess: IDL.Func([
+      IDL.Principal, IDL.Text
+    ], [ResultBool], []),
   });
 
 };

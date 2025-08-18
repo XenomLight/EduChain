@@ -3,7 +3,7 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2022",
     "lib": ["ES2022"],
-    "module": "CommonJS",
+    "module": "es2020",
     "skipLibCheck": true,
     "esModuleInterop": true,
 

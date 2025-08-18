@@ -9,10 +9,6 @@
 			"source": ["src/frontend/dist"],
 			"type": "assets",
 			"ignore": ["src/frontend/dist/.ic-assets.json5"]
-		},
-		"internet_identity": {
-			"type": "pull",
-			"id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
 		}
 	},
 	"defaults": {
