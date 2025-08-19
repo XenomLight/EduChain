@@ -188,7 +188,7 @@ dfx canister call backend getMyWallets '()'
 
 ### Connect New Wallet
 ```bash
-dfx canister call backend connectWallet '("0x123...", "plug")'  # address, walletType
+dfx canister call backend connectWallet '("0x123...", "plug")' 
 ```
 
 ## 🔍 Transaction History
