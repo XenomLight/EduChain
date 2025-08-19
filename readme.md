@@ -100,7 +100,7 @@ dfx canister call backend loginWithPrincipal '(opt "Nazriel", opt "Akbar", opt "
 
 ### Get All Courses (Paginated)
 ```bash
-dfx canister call backend getCourses '(1, 10, null)'  # page, pageSize, sortBy
+dfx canister call backend getCourses '(1, 10, null)' 
 ```
 
 ### Get Course by ID
@@ -110,7 +110,7 @@ dfx canister call backend getCourseById '("course-1")'
 
 ### Search Courses
 ```bash
-dfx canister call backend searchCourses '("blockchain", opt "technology", opt "all")'  # query, category, level
+dfx canister call backend searchCourses '("blockchain", opt "technology", opt "all")' 
 ```
 
 ## 💰 Payments & Enrollment
@@ -122,7 +122,7 @@ dfx canister call backend createTransaction '("course-1")'
 
 ### Confirm Payment
 ```bash
-dfx canister call backend confirmPayment '(1)'  # transactionId
+dfx canister call backend confirmPayment '(1)'  
 ```
 
 ### Enroll in Course
@@ -132,14 +132,34 @@ dfx canister call backend enrollUser '("course-1", "2025-08-18T10:00:00Z")'
 
 ## 📊 User Progress
 
+### Get My Enrolled Courses
+```bash
+dfx canister call backend getMyEnrolledCourses '()'  
+```
+
+### Get Course Content with Access Control
+```bash
+dfx canister call backend getCourseContent '("course-1")'  
+```
+
+### Check Course Access
+```bash
+dfx canister call backend hasAccess '(principal "aaaaa-aa", "course-1")'  
+```
+
+### Toggle Favorite Course
+```bash
+dfx canister call backend toggleFavorite '("course-1")'  
+```
+
 ### Update Course Progress
 ```bash
-dfx canister call backend updateCourseProgress '("course-1", 75)'  # courseId, progress (0-100)
+dfx canister call backend updateCourseProgress '("course-1", 75)'  
 ```
 
 ### Set User Progress for Module Content
 ```bash
-dfx canister call backend setUserProgress '("course-1", 1, 1, 100)'  # courseId, moduleId, contentId, progress
+dfx canister call backend setUserProgress '("course-1", 1, 1, 100)'  
 ```
 
 ## 🔐 Certificate & Access
