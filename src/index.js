@@ -46,6 +46,58 @@ await authClient.login({
       }
     }
 
+    // Profile Management
+    async function updateProfile(profileData) {
+      try {
+        const result = await actor.updateProfile({
+          username: profileData.username ? [profileData.username] : [],
+          first_name: profileData.firstName ? [profileData.firstName] : [],
+          last_name: profileData.lastName ? [profileData.lastName] : [],
+          date_of_birth: profileData.dateOfBirth ? [profileData.dateOfBirth] : [],
+          gender: profileData.gender ? [profileData.gender] : []
+        });
+        console.log("Profil berhasil diperbarui:", result);
+        return result;
+      } catch (err) {
+        console.error("Gagal memperbarui profil:", err);
+        throw err;
+      }
+    }
+
+    async function getProfile() {
+      try {
+        const result = await actor.getProfile();
+        console.log("Data profil:", result);
+        return result;
+      } catch (err) {
+        console.error("Gagal mengambil data profil:", err);
+        throw err;
+      }
+    }
+
+    async function changePassword(currentPassword, newPassword, confirmPassword) {
+      try {
+        const result = await actor.changePassword(currentPassword, newPassword, confirmPassword);
+        console.log("Password berhasil diubah:", result);
+        return result;
+      } catch (err) {
+        console.error("Gagal mengubah password:", err);
+        throw err;
+      }
+    }
+
+    async function updateEmail(newEmail, password) {
+      try {
+        const result = await actor.updateEmail(newEmail, password);
+        console.log("Email berhasil diubah:", result);
+        return result;
+      } catch (err) {
+        console.error("Gagal mengubah email:", err);
+        throw err;
+      }
+    }
+
+    // Authentication
     async function loginWithEmail(email, password) {
       try {
         const result = await actor.loginWithEmail(email, password);
@@ -169,6 +221,38 @@ await authClient.login({
       }
     }
 
+    // === NFT Certificate Whitelist Functions ===
+    async function whitelistUserForCertificate(courseId) {
+      try {
+        const result = await actor.whitelistUserForCertificate(courseId);
+        console.log("whitelistUserForCertificate result:", result);
+        return result;
+      } catch (err) {
+        console.log("whitelistUserForCertificate failed:", err);
+        return false;
+      }
+    }
+    async function isUserWhitelistedForCertificate(userPrincipal, courseId) {
+      try {
+        const result = await actor.isUserWhitelistedForCertificate(userPrincipal, courseId);
+        console.log("isUserWhitelistedForCertificate result:", result);
+        return result;
+      } catch (err) {
+        console.log("isUserWhitelistedForCertificate failed:", err);
+        return false;
+      }
+    }
+    async function enableCertificateAccess(userPrincipal, courseId) {
+      try {
+        const result = await actor.enableCertificateAccess(userPrincipal, courseId);
+        console.log("enableCertificateAccess result:", result);
+        return result;
+      } catch (err) {
+        console.log("enableCertificateAccess failed:", err);
+        return false;
+      }
+    }
+
     console.log("\n=== Starting EduTech Backend Test ===");
     
     try {
@@ -213,6 +297,55 @@ await authClient.login({
 
       console.log("\n9. Testing Update Progress...");
       await updateProgress("course-1", 50);
+      
+      console.log("\n10. Testing Profile Management...");
+      
+      // Test getProfile
+      console.log("\n10.1 Getting current profile...");
+      await getProfile();
+      
+      // Test updateProfile
+      console.log("\n10.2 Updating profile...");
+      await updateProfile({
+        username: "newusername",
+        firstName: "Updated",
+        lastName: "User",
+        dateOfBirth: "1990-01-01",
+        gender: "male"
+      });
+      
+      // Test changePassword
+      console.log("\n10.3 Changing password...");
+      await changePassword(
+        process.env.REGISTER_PASSWORD,
+        "newSecurePassword123!",
+        "newSecurePassword123!"
+      );
+      
+      // Test updateEmail
+      console.log("\n10.4 Updating email...");
+      await updateEmail(
+        "new.email@example.com",
+        "newSecurePassword123!"
+      );
+      
+      console.log("\n10.5 Verifying profile updates...");
+      await getProfile();
+      
+      // Restore original values for testing
+      console.log("\n10.6 Restoring original profile values...");
+      await updateProfile({
+        username: process.env.REGISTER_USERNAME,
+        firstName: "Test",
+        lastName: "User"
+      });
+      
+      await updateEmail(
+        process.env.REGISTER_EMAIL,
+        process.env.REGISTER_PASSWORD
+      );
+      
+      console.log("\n✅ All profile management tests completed successfully!");
       
       console.log("\n10. Testing Toggle Favorite...");
       await toggleFavorite("course-1");

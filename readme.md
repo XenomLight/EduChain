@@ -79,30 +79,134 @@ By combining the openness and security of decentralized technology with the ease
 
 ## Testing Endpoint Backend
 
-### Register (dengan principal)
+## 🔐 Authentication
 
+### Register New User
 ```bash
-### panggilan jika principal diketahui (biasanya dari frontend)
-
-dfx canister call backend RegisterWithPrincipal '(principal "aaaaa-aa", "user1", "user1@email.com", "password1", "password1")'
-
+dfx canister call backend registerWithEmail '("nazriel", "nazriel@gmail.com", "passnaz1", "passnaz1", "Nazriel", "Akbar")'
 ```
 
-###Login (dengan principal)
-
+### Login with Email
 ```bash
-dfx canister call backend registerWithEmail '("Nazriel", "Akbar", "nazriel", "nazriel@gmail.com", "passnaz1", "passnaz1")'
-dfx canister call backend Login '("nazriel@gmail.com", "passnaz1")'
+dfx canister call backend loginWithEmail '("nazriel@gmail.com", "passnaz1")'
 ```
 
-### kursus
-
+### Login with Principal (for wallet-based auth)
 ```bash
- dfx canister call backend getCourseById '(1)'
- dfx canister call backend addCourse
-  dfx canister call backend getCourses
-  # Sort by newest first
-dfx canister call backend getAllCourses '(1, 10, opt variant { newest })'
+dfx canister call backend loginWithPrincipal '(opt "Nazriel", opt "Akbar", opt "nazriel", opt "nazriel@gmail.com")'
+```
+
+## 📚 Course Management
+
+### Get All Courses (Paginated)
+```bash
+dfx canister call backend getCourses '(1, 10, null)' 
+```
+
+### Get Course by ID
+```bash
+dfx canister call backend getCourseById '("course-1")'
+```
+
+### Search Courses
+```bash
+dfx canister call backend searchCourses '("blockchain", opt "technology", opt "all")' 
+```
+
+## 💰 Payments & Enrollment
+
+### Create Transaction
+```bash
+dfx canister call backend createTransaction '("course-1")'
+```
+
+### Confirm Payment
+```bash
+dfx canister call backend confirmPayment '(1)'  
+```
+
+### Enroll in Course
+```bash
+dfx canister call backend enrollUser '("course-1", "2025-08-18T10:00:00Z")'
+```
+
+## 📊 User Progress
+
+### Get My Enrolled Courses
+```bash
+dfx canister call backend getMyEnrolledCourses '()'  
+```
+
+### Get Course Content with Access Control
+```bash
+dfx canister call backend getCourseContent '("course-1")'  
+```
+
+### Check Course Access
+```bash
+dfx canister call backend hasAccess '(principal "aaaaa-aa", "course-1")'  
+```
+
+### Toggle Favorite Course
+```bash
+dfx canister call backend toggleFavorite '("course-1")'  
+```
+
+### Update Course Progress
+```bash
+dfx canister call backend updateCourseProgress '("course-1", 75)'  
+```
+
+### Set User Progress for Module Content
+```bash
+dfx canister call backend setUserProgress '("course-1", 1, 1, 100)'  
+```
+
+## 🔐 Certificate & Access
+
+### Whitelist User for Certificate
+```bash
+dfx canister call backend whitelistUserForCertificate '("course-1")'
+```
+
+### Check Certificate Access
+```bash
+dfx canister call backend isUserWhitelistedForCertificate '(principal "aaaaa-aa", "course-1")'
+```
+
+## 👤 User Management
+
+### Get Current User
+```bash
+dfx canister call backend getMe '()'
+```
+
+### Get User's Wallets
+```bash
+dfx canister call backend getMyWallets '()'
+```
+
+### Connect New Wallet
+```bash
+dfx canister call backend connectWallet '("0x123...", "plug")' 
+```
+
+## 🔍 Transaction History
+
+### Get User's Transactions
+```bash
+dfx canister call backend getMyTransactions '()'
+```
+
+### Get Payment History
+```bash
+dfx canister call backend getMyPaymentHistory '()'
+```
+
+### Get Payment History by Course
+```bash
+dfx canister call backend getPaymentHistoryByCourse '("course-1")'
+```
 
 # Sort by oldest first
 dfx canister call backend getAllCourses '(1, 10, opt variant { oldest })'

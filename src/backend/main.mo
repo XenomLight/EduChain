@@ -104,7 +104,7 @@ actor {
     level: Text;
     isFavorite: Bool;
     isPublished: Bool; 
-    progress: ?Nat;
+    progress: ?Nat; // ini tidak terpakai
     totalStudents: Nat;
     totalModules: Nat;
     totalLessons: Nat;
@@ -189,7 +189,242 @@ actor {
   public type ResultTransaction = Result<Transaction, Error>;
   public type ResultPaymentHistory = Result<[PaymentHistory], Error>;
   public type ResultPaymentHistoryItem = Result<PaymentHistory, Error>;
+
+  // Type for profile updates
+  public type ProfileUpdate = {
+    username: ?Text;
+    first_name: ?Text;
+    last_name: ?Text;
+    date_of_birth: ?Text; // Format: "YYYY-MM-DD"
+    gender: ?Text; // "male", "female", "other"
+  };
+  // ========== PROFILE MANAGEMENT ==========
+  // Update user profile
+  public shared (msg) func updateProfile(updates: ProfileUpdate): async ResultUser {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Validate username if being updated
+        switch (updates.username) {
+          case (?newUsername) {
+            if (Text.size(newUsername) < 3) {
+              return #err(#InvalidState);
+            };
+            if (isUsernameTaken(newUsername) and newUsername != user.username) {
+              return #err(#AlreadyExists);
+            };
+          };
+          case null {};
+        };
+
+        // Validate date format if provided
+        switch (updates.date_of_birth) {
+          case (?date) {
+            // Simple date format validation (YYYY-MM-DD)
+            let parts = Text.split(date, #text "-");
+            let partsArray = Iter.toArray(parts);
+            if (partsArray.size() != 3) {
+              return #err(#InvalidState);
+            };
+          };
+          case null {};
+        };
+
+        // Validate gender if provided
+        switch (updates.gender) {
+          case (?gender) {
+            if (gender != "male" and gender != "female" and gender != "other") {
+              return #err(#InvalidState);
+            };
+          };
+          case null {};
+        };
+
+        // Update user fields with null checks
+        let newUsername = switch (updates.username) {
+          case (?u) u;
+          case null user.username;
+        };
+        
+        let newFirstName = switch (updates.first_name) {
+          case (?f) ?f;
+          case null user.first_name;
+        };
+        
+        let newLastName = switch (updates.last_name) {
+          case (?l) ?l;
+          case null user.last_name;
+        };
+        
+        let updatedUser: User = {
+          user_id = user.user_id;
+          principal = user.principal;
+          username = newUsername;
+          first_name = newFirstName;
+          last_name = newLastName;
+          email = user.email; // Email should be updated separately
+          password_hash = user.password_hash; // Password should be updated separately
+          date_of_birth = updates.date_of_birth;
+          gender = updates.gender;
+          wallets = user.wallets;
+          created_at = user.created_at;
+          updated_at = Time.now();
+        };
+
+        // Update username mapping if changed
+        if (updates.username != null and updates.username != ?user.username) {
+          usernames.delete(user.username);
+          usernames.put(updatedUser.username, msg.caller);  // Use Principal instead of user_id
+        };
+
+        users.put(msg.caller, updatedUser);
+        #ok(updatedUser);
+      };
+      case null { #err(#NotFound); };
+    };
+  };
+
+  // Get user profile data
+  public shared query (msg) func getProfile(): async ResultUser {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Create a sanitized version of the user data (without sensitive fields)
+        let profile: User = {
+          user_id = user.user_id;
+          principal = user.principal;
+          username = user.username;
+          first_name = user.first_name;
+          last_name = user.last_name;
+          email = user.email;
+          password_hash = null; // Never return password hash
+          date_of_birth = user.date_of_birth;
+          gender = user.gender;
+          wallets = user.wallets;
+          created_at = user.created_at;
+          updated_at = user.updated_at;
+        };
+        #ok(profile);
+      };
+      case null { #err(#NotFound); };
+    };
+  };
+
+  // Change user password
+  public shared (msg) func changePassword(
+    currentPassword: Text,
+    newPassword: Text,
+    confirmPassword: Text
+  ): async Result<(), Error> {
+    // Validate new password and confirmation match
+    if (newPassword != confirmPassword) {
+      return #err(#PasswordsDoNotMatch);
+    };
+
+    // Validate password strength
+    if (Text.size(newPassword) < 8) {
+      return #err(#InvalidState);
+    };
+
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Verify current password
+        switch (user.password_hash) {
+          case (?hash) {
+            if (hash != hashPassword(currentPassword)) {
+              return #err(#InvalidCredentials);
+            };
+          };
+          case null { return #err(#InvalidState); };
+        };
+
+        // Update password
+        let updatedUser: User = {
+          user_id = user.user_id;
+          principal = user.principal;
+          username = user.username;
+          first_name = user.first_name;
+          last_name = user.last_name;
+          email = user.email;
+          password_hash = ?hashPassword(newPassword);
+          date_of_birth = user.date_of_birth;
+          gender = user.gender;
+          wallets = user.wallets;
+          created_at = user.created_at;
+          updated_at = Time.now();
+        };
+
+        users.put(msg.caller, updatedUser);
+        #ok(());
+      };
+      case null { #err(#NotFound); };
+    };
+  };
+
+  // Update user email
+  public shared (msg) func updateEmail(
+    newEmail: Text,
+    password: Text
+  ): async Result<(), Error> {
+    // Basic email validation
+    if (not Text.contains(newEmail, #text "@") or not Text.contains(newEmail, #text ".")) {
+      return #err(#InvalidState);
+    };
+
+    // Check if email is already taken
+    if (isEmailTaken(newEmail)) {
+      return #err(#AlreadyExists);
+    };
+
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        // Verify password
+        switch (user.password_hash) {
+          case (?hash) {
+            if (hash != hashPassword(password)) {
+              return #err(#InvalidCredentials);
+            };
+          };
+          case null { return #err(#InvalidState); };
+        };
+
+        // Remove old email mapping if it exists
+        switch (user.email) {
+          case (?oldEmail) { usersByEmail.delete(oldEmail); };
+          case null {};
+        };
+
+        // Update user with new email
+        let updatedUser: User = {
+          user_id = user.user_id;
+          principal = user.principal;
+          username = user.username;
+          first_name = user.first_name;
+          last_name = user.last_name;
+          email = ?newEmail;
+          password_hash = user.password_hash;
+          date_of_birth = user.date_of_birth;
+          gender = user.gender;
+          wallets = user.wallets;
+          created_at = user.created_at;
+          updated_at = Time.now();
+        };
+
+        // Update email mapping
+        usersByEmail.put(newEmail, msg.caller);
+        users.put(msg.caller, updatedUser);
+        #ok(());
+      };
+      case null { #err(#NotFound); };
+    };
+  };
+
   // ========== STORAGE ==========
+  // Whitelist NFT per user per course (userPrincipal, courseId) -> Bool
+  private stable var certificateWhitelistEntries: [(Principal, Text, Bool)] = [];
+  private var certificateWhitelist = HashMap.HashMap<(Principal, Text), Bool>(1, func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1, func((p, c)) = Principal.hash(p) ^ Text.hash(c));
+
+  // Flag akses sertifikat per user per course (userPrincipal, courseId) -> Bool
+  private stable var certificateAccessEntries: [(Principal, Text, Bool)] = [];
+  private var certificateAccess = HashMap.HashMap<(Principal, Text), Bool>(1, func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1, func((p, c)) = Principal.hash(p) ^ Text.hash(c));
   private stable var nextUserId: Nat = 1;
   private stable var nextEnrollmentId: Nat = 1;
   private stable var nextTransactionId: Nat = 1;
@@ -204,7 +439,13 @@ actor {
   // Course storage
   private stable var courseEntries: [(Text, Course)] = [];
   private var courses = HashMap.HashMap<Text, Course>(1, Text.equal, Text.hash);
-
+  //user progress on each course
+  private stable var userCourseProgressEntries: [((Principal, Text, Nat, Nat), Nat)] = [];
+  private var userProgress = HashMap.HashMap<(Principal, Text, Nat, Nat), Nat>(
+    1,
+    func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1 and a.2 == b.2 and a.3 == b.3,
+    func((p, c, m, k)) = Principal.hash(p) ^ Text.hash(c) ^ Hash.hash(m) ^ Hash.hash(k)
+  );  
   // Enrollment storage
   private stable var enrollmentEntries: [(Principal, Text, Enrollment)] = [];
   stable var stableEnrollments : [(Principal, Text, Enrollment)] = [];
@@ -230,30 +471,6 @@ actor {
   private var userPaymentHistories = HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
 
   // ========== WALLET & PROFILE FUNCTIONS ==========
-  
-  // Update profil pengguna
-  public shared (msg) func updateProfile(
-    firstName: ?Text,
-    lastName: ?Text,
-    dateOfBirth: ?Text,
-    gender: ?Text
-  ): async Result.Result<User, Error> {
-    switch (users.get(msg.caller)) {
-      case (?user) {
-        let updatedUser: User = {
-          user with
-          first_name = firstName;
-          last_name = lastName;
-          date_of_birth = dateOfBirth;
-          gender = gender;
-          updated_at = Time.now();
-        };
-        users.put(msg.caller, updatedUser);
-        #ok(updatedUser);
-      };
-      case null { #err(#NotFound); };
-    };
-  };
 
   // Hubungkan wallet baru
   public shared (msg) func connectWallet(
@@ -384,11 +601,51 @@ actor {
         case null #err(#NotFound)
     }
   };
-  public shared (msg) func loginWithPrincipal(username: ?Text, email: ?Text): async ResultUser {
-    // Return current user if exists
-    switch (users.get(msg.caller)) {
-        case (?user) #ok(user);
-        case null #err(#NotFound)
+  public shared (msg) func loginWithPrincipal(first_name: ?Text, last_name: ?Text, username: ?Text, email: ?Text): async ResultUser {
+    let caller = msg.caller;
+
+    switch (users.get(caller)) {
+      case (?user) {
+        // Ensure user has a password set
+        let updatedUser = switch (user.password_hash) {
+          case (null) {
+            // Set default password if not set
+            let defaultPassword = "default_" # Principal.toText(caller);
+            { user with 
+              password_hash = ?hashPassword(defaultPassword);
+              updated_at = getCurrentTime();
+            }
+          };
+          case (_) user;
+        };
+        users.put(caller, updatedUser);
+        #ok(updatedUser)
+      };
+      case null {
+        // User does not exist, create new user with provided first/last name
+        let userId = nextUserId;
+        nextUserId += 1;
+        let now = getCurrentTime();
+        let defaultPassword = "default_" # Principal.toText(caller);
+        let newUser: User = {
+          user_id = userId;
+          principal = caller;
+          username = switch (username) { case (?u) u; case null "" };
+          email = email;
+          password_hash = ?hashPassword(defaultPassword);
+          first_name = first_name;
+          last_name = last_name;
+          date_of_birth = null;
+          gender = null;
+          wallets = [];
+          created_at = now;
+          updated_at = now;
+        };
+        users.put(caller, newUser);
+        if (email != null) { usersByEmail.put(Option.get(email, ""), caller); };
+        if (username != null) { usernames.put(Option.get(username, ""), caller); };
+        #ok(newUser)
+      }
     }
   };
   public shared query (msg) func whoami(): async Principal {
@@ -440,12 +697,8 @@ actor {
     if (isEmailTaken(email)) return #err(#AlreadyExists);
     if (isUsernameTaken(username)) return #err(#AlreadyExists);
 
-    // Generate a deterministic principal from email
-    // Note: This is a simple approach for development
-    // In production, consider using a more robust identity provider
-    let principal = Principal.fromText("2vxsx-fae"); // Default anonymous principal for now
+    let principal = msg.caller;
 
-    // Periksa apakah principal sudah terdaftar
     switch (users.get(principal)) {
       case (?existingUser) {
         return #err(#AlreadyExists);
@@ -708,6 +961,40 @@ actor {
   };
 
   // ========== ENROLLMENT ==========
+  // Fungsi whitelist user agar bisa akses sertifikat/mint NFT
+  public shared (msg) func whitelistUserForCertificate(courseId: Text): async ResultBool {
+    switch (users.get(msg.caller)) {
+      case (?user) {
+        let key = (msg.caller, courseId);
+        certificateWhitelist.put(key, true);
+        certificateAccess.put(key, true);
+        #ok(true)
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
+  // Fungsi cek whitelist user untuk akses sertifikat/NFT
+  public shared query (msg) func isUserWhitelistedForCertificate(user: Principal, courseId: Text): async ResultBool {
+    let key = (user, courseId);
+    switch (certificateWhitelist.get(key)) {
+      case (?true) #ok(true);
+      case _ #ok(false)
+    }
+  };
+
+  // Fungsi enable akses sertifikat manual (opsional)
+  public shared (msg) func enableCertificateAccess(user: Principal, courseId: Text): async ResultBool {
+    switch (users.get(msg.caller)) {
+      case (?_) {
+        let key = (user, courseId);
+        certificateAccess.put(key, true);
+        #ok(true)
+      };
+      case null #err(#Unauthorized)
+    }
+  };
+
   public shared (msg) func enrollUser(
     courseId: Text,
     enrollmentDate: Text
@@ -1130,7 +1417,16 @@ actor {
     }
   };
 
+  // === Users Course progress handler =====
+  public shared (msg) func setUserProgress(courseId: Text, modulId: Nat, kontenId: Nat, progress: Nat): async ResultBool {
+  let key = (msg.caller, courseId, modulId, kontenId);
+  userProgress.put(key, progress);
+  #ok(true)
+  };
 
+  public shared query func getUserProgress(user: Principal, courseId: Text, modulId: Nat, kontenId: Nat): async ?Nat {
+    userProgress.get((user, courseId, modulId, kontenId))
+  };
 
 
 
