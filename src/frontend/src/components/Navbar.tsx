@@ -33,7 +33,7 @@ const Navbar = () => {
       </div>
       
       <div className="flex items-center gap-6 text-[#EEEEEE]">
-        {[{ name: 'Home', to: '/' }, { name: 'Courses', to: '/courses' }, { name: 'Partners', to: '/partners' }].map((link) => (
+        {[{ name: 'Home', to: '/' }, { name: 'Courses', to: '/courses' }, { name: 'Partners', to: '/partners' }, { name: 'Settings', to: '/settings/profile' }].map((link) => (
           <Link
             key={link.name}
             to={link.to}
