@@ -606,8 +606,20 @@ actor {
 
     switch (users.get(caller)) {
       case (?user) {
-        // Update user info if needed
-        #ok(user)
+        // Ensure user has a password set
+        let updatedUser = switch (user.password_hash) {
+          case (null) {
+            // Set default password if not set
+            let defaultPassword = "default_" # Principal.toText(caller);
+            { user with 
+              password_hash = ?hashPassword(defaultPassword);
+              updated_at = getCurrentTime();
+            }
+          };
+          case (_) user;
+        };
+        users.put(caller, updatedUser);
+        #ok(updatedUser)
       };
       case null {
         // User does not exist, create new user with provided first/last name
