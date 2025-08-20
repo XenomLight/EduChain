@@ -18,6 +18,7 @@ import Privacy from './pages/Privacy';
 import CourseDetails from './pages/CourseDetails';
 import TransactionHistory from './pages/settings/HistoryTransaksi';
 
+
 function App() {
   return (
     <Router>
@@ -37,6 +38,7 @@ function App() {
         <Route path="/courses/:id" element={<CourseDetails />} />
         <Route path="/settings/profile" element={<ProfileSetting />} />
         <Route path="/settings/wallet" element={<WalletSetting />} />
+       
         <Route
           path="/settings/configuration"
           element={<ConfigurationSetting />}
