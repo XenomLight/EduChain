@@ -161,12 +161,22 @@ export const useAuth = () => {
   }
 
   async function logout() {
-    if (!authClient) return;
+    if (!authClient) {
+      return {
+        status: 'error',
+        message: 'Logout error!',
+      };
+    }
 
     await authClient.logout();
     localStorage.removeItem('principal');
     localStorage.removeItem('walletType');
     init();
+
+    return {
+      status: 'success',
+      message: 'Account logged out successfully!',
+    };
   }
 
   return {

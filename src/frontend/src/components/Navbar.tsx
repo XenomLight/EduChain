@@ -29,7 +29,7 @@ const Navbar = () => {
         setIsAuthenticated(authService.isAuthenticated);
         setPrincipal(authService.principal);
         setWalletType(authService.walletType);
-        navigate('/');
+        navigate('/dashboard');
       }
       return success;
     } catch (error) {
@@ -43,7 +43,12 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      await logout();
+      const { status, message } = await logout();
+      if (status !== 'success') {
+        alert(message);
+        return;
+      }
+      navigate('/');
     } catch (error) {
       console.error('Internet Identity logout failed:', error);
     }
