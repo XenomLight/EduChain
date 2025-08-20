@@ -1,6 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import {useState, useEffect } from 'react';
 import SettingsLayout from '@/components/SettingsLayout';
 import { useAuth } from '@/hooks/useAuth';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/footer';
 
 type User = {
   username: string;
@@ -11,11 +13,12 @@ type User = {
   principal?: any;
 };
 
+
 export default function Profile() {
   const { actor, principal, isAuthenticated } = useAuth();
-  const [avatar, setAvatar] = useState('https://d17ivq9b7rppb3.cloudfront.net/small/avatar/pp.jpg');
+  //const [avatar, setAvatar] = useState('https://d17ivq9b7rppb3.cloudfront.net/small/avatar/pp.jpg');
   const [userData, setUserData] = useState<User | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  //const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
   const fetchUser = async () => {
@@ -34,23 +37,34 @@ export default function Profile() {
 }, [isAuthenticated, actor]);
 
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const url = URL.createObjectURL(e.target.files[0]);
-      setAvatar(url);
-    }
-  };
+  // const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   if (e.target.files && e.target.files[0]) {
+  //     const url = URL.createObjectURL(e.target.files[0]);
+  //     setAvatar(url);
+  //   }
+  // };
 
   if (!isAuthenticated) {
-    return <p className="text-white">Please log in to view your profile.</p>;
-  }
+  return (
+    <div className="h-screen flex flex-col text-white">
+      <Navbar />
+      <div className="flex-1 flex justify-center items-center">
+        <p className="text-white text-lg">
+          Please log in to view your profile.
+        </p>
+      </div>
+      <Footer />
+      <Navbar />
+    </div>
+  );
+}
 
   return (
     <SettingsLayout title="Profile">
       <form className="rounded-2xl border border-gray-800 p-8 space-y-4 mb-20 shadow">
         <h4 className="text-3xl font-semibold">User Profile</h4>
 
-        {/* Foto Diri */}
+        {/* Foto Diri
         <div>
           <label className="block font-medium mb-2">Foto Diri</label>
           <div className="flex items-center gap-6">
@@ -75,7 +89,7 @@ export default function Profile() {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Principal ID */}
         <div>
@@ -86,10 +100,11 @@ export default function Profile() {
             id="principalID"
             name="principalID"
             type="text"
-            className="rounded-2xl border border-gray-800 w-full border-2 border-black p-2 rounded text-sm"
+            className="text-gray-500 rounded-2xl border border-gray-800 w-full border-2 border-black p-2 rounded text-sm"
             value={principal ??''}
             readOnly
           />
+          <div className="text-xs text-gray-500 mt-1">Not to change</div>
         </div>
 
         {/* First Name */}

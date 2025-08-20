@@ -5,7 +5,7 @@ import Home from './pages/Home';
 import ProfileSetting from './pages/settings/ProfileSetting';
 import WalletSetting from './pages/settings/walletSetting';
 import ConfigurationSetting from './pages/settings/configurationSetting';
-import Logout from './pages/settings/logOut';
+import Logout from './pages/settings/logOutSetting';
 import Courses from './pages/Courses';
 import Qris from './pages/Qris';
 import About from './pages/About';

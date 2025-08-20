@@ -1,9 +1,8 @@
 import SettingsLayout from "@/components/SettingsLayout";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { useState } from 'react';
 
-export default function Logout() {
+export default function LogoutSetting() {
   const { logout } = useAuth();
   const navigate = useNavigate();
   
@@ -19,7 +18,7 @@ export default function Logout() {
   return (
     <div className="w-full">
         <SettingsLayout>
-             <div className="rounded-2xl border border-gray-800 p-5rounded-lg shadow p-8 space-y-6">
+             <div className="rounded-2xl border border-gray-800 p-5 rounded-lg shadow p-8 space-y-6">
       <h1 className="mb-6 text-3xl font-semibold">Log Out</h1>
       <p className="text-gray-500 mb-6">Yakin mau keluar dari akun?</p>
       <button
