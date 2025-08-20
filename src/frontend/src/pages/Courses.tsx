@@ -34,13 +34,22 @@ const Courses = () => {
         );
         const data = await res.json();
 
-        const programs = data.data.listTopPrograms.programs.map((p: any) => ({
-          id: p.id,
-          title: p.translatedTitle,
-          description: `By ${p.authorNickname} • Votes: ${p.sumVotesIncremented}`,
-          image: `https://www.khanacademy.org${p.imagePath}`,
-          url: `https://www.khanacademy.org${p.url}`,
-        }));
+        const programs = data.data.listTopPrograms.programs.map(
+          (p: {
+            id: string;
+            translatedTitle: string;
+            authorNickname: string;
+            sumVotesIncremented: string;
+            imagePath: string;
+            url: string;
+          }) => ({
+            id: p.id,
+            title: p.translatedTitle,
+            description: `By ${p.authorNickname} • Votes: ${p.sumVotesIncremented}`,
+            image: `https://www.khanacademy.org${p.imagePath}`,
+            url: `https://www.khanacademy.org${p.url}`,
+          })
+        );
 
         setCategories([
           {
