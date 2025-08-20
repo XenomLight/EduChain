@@ -685,6 +685,7 @@ actor {
     }
   };
 
+  // Fungsi untuk mendaftarkan pengguna baru dengan email
   public shared (msg) func registerWithEmail(
     username: Text,
     email: Text,
@@ -693,12 +694,22 @@ actor {
     firstName: Text,
     lastName: Text
   ): async ResultUser {
+    // Validasi input
+    if (Text.size(username) < 3) return #err(#InvalidCredentials);
+    if (Text.size(email) < 5 or not Text.contains(email, #text("@"))) return #err(#InvalidCredentials);
+    if (Text.size(password) < 6) return #err(#InvalidCredentials);
     if (password != confirmPassword) return #err(#PasswordsDoNotMatch);
-    if (isEmailTaken(email)) return #err(#AlreadyExists);
+    
+
+    let normalizedEmail = Text.map(email, Prim.charToLower);
+    
+    // Cek  apakah data nya double data
+    if (isEmailTaken(normalizedEmail)) return #err(#AlreadyExists);
     if (isUsernameTaken(username)) return #err(#AlreadyExists);
 
     let principal = msg.caller;
-
+    
+    // Cek apakah principal sudah terdaftar
     switch (users.get(principal)) {
       case (?existingUser) {
         return #err(#AlreadyExists);
@@ -706,15 +717,17 @@ actor {
       case null {}; // Lanjutkan registrasi
     };
 
+    // Generate ID pengguna baru
     let userId = nextUserId;
     nextUserId += 1;
-    let now = getCurrentTime();
+    let now = Time.now();
     
+    // Buat user baru
     let newUser: User = {
       user_id = userId;
       principal = principal;
       username = username;
-      email = ?email;
+      email = ?normalizedEmail;
       password_hash = ?hashPassword(password);
       first_name = ?firstName;
       last_name = ?lastName;
@@ -725,12 +738,18 @@ actor {
       updated_at = now;
     };
 
-    // Simpan data user
-    users.put(principal, newUser);
-    usersByEmail.put(email, principal);
-    usernames.put(username, principal);
-    
-    #ok(newUser)
+    try {
+      // Simpan data user
+      users.put(principal, newUser);
+      usersByEmail.put(normalizedEmail, principal);
+      usernames.put(username, principal);
+      
+      Debug.print("User berhasil didaftarkan: " # Principal.toText(principal));
+      #ok(newUser)
+    } catch (e) {
+      Debug.print("Gagal mendaftarkan user: " # debug_show(e));
+      #err(#InvalidState)
+    }
   };
 
   public shared (msg) func updateCourse(
