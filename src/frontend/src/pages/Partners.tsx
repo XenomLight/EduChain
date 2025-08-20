@@ -60,12 +60,10 @@ const partners: Partner[] = [
 const Partners: React.FC = () => {
   return (
     <div className="relative">
-      {/* Navbar fixed di atas */}
+      
       <div className="fixed top-0 left-0 w-full z-50">
         <Navbar />
       </div>
-
-      {/* Konten utama dengan padding-top sesuai tinggi navbar */}
       <div className="pt-28 p-10">
         <h1 className="text-3xl font-bold mb-6 text-center">Partnership Providers</h1>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
