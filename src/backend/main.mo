@@ -23,7 +23,6 @@ actor {
     #AlreadyExists;
     #NotFound;
     #InvalidCredentials;
-    #PasswordsDoNotMatch;
     #Unauthorized;
     #IdAlreadyExists;
     #InvalidState;
@@ -141,8 +140,7 @@ actor {
     first_name: ?Text;
     last_name: ?Text;
     email: ?Text;
-    password_hash: ?Text;
-    date_of_birth: ?Text; // Format: "YYYY-MM-DD"
+     date_of_birth: ?Text; // Format: "YYYY-MM-DD"
     gender: ?Text; // "male", "female", "other"
     wallets: [Wallet]; // Daftar wallet yang terhubung
     created_at: Int;
@@ -262,7 +260,6 @@ actor {
           first_name = newFirstName;
           last_name = newLastName;
           email = user.email; // Email should be updated separately
-          password_hash = user.password_hash; // Password should be updated separately
           date_of_birth = updates.date_of_birth;
           gender = updates.gender;
           wallets = user.wallets;
@@ -295,7 +292,6 @@ actor {
           first_name = user.first_name;
           last_name = user.last_name;
           email = user.email;
-          password_hash = null; // Never return password hash
           date_of_birth = user.date_of_birth;
           gender = user.gender;
           wallets = user.wallets;
@@ -308,61 +304,10 @@ actor {
     };
   };
 
-  // Change user password
-  public shared (msg) func changePassword(
-    currentPassword: Text,
-    newPassword: Text,
-    confirmPassword: Text
-  ): async Result<(), Error> {
-    // Validate new password and confirmation match
-    if (newPassword != confirmPassword) {
-      return #err(#PasswordsDoNotMatch);
-    };
-
-    // Validate password strength
-    if (Text.size(newPassword) < 8) {
-      return #err(#InvalidState);
-    };
-
-    switch (users.get(msg.caller)) {
-      case (?user) {
-        // Verify current password
-        switch (user.password_hash) {
-          case (?hash) {
-            if (hash != hashPassword(currentPassword)) {
-              return #err(#InvalidCredentials);
-            };
-          };
-          case null { return #err(#InvalidState); };
-        };
-
-        // Update password
-        let updatedUser: User = {
-          user_id = user.user_id;
-          principal = user.principal;
-          username = user.username;
-          first_name = user.first_name;
-          last_name = user.last_name;
-          email = user.email;
-          password_hash = ?hashPassword(newPassword);
-          date_of_birth = user.date_of_birth;
-          gender = user.gender;
-          wallets = user.wallets;
-          created_at = user.created_at;
-          updated_at = Time.now();
-        };
-
-        users.put(msg.caller, updatedUser);
-        #ok(());
-      };
-      case null { #err(#NotFound); };
-    };
-  };
 
   // Update user email
   public shared (msg) func updateEmail(
     newEmail: Text,
-    password: Text
   ): async Result<(), Error> {
     // Basic email validation
     if (not Text.contains(newEmail, #text "@") or not Text.contains(newEmail, #text ".")) {
@@ -376,16 +321,6 @@ actor {
 
     switch (users.get(msg.caller)) {
       case (?user) {
-        // Verify password
-        switch (user.password_hash) {
-          case (?hash) {
-            if (hash != hashPassword(password)) {
-              return #err(#InvalidCredentials);
-            };
-          };
-          case null { return #err(#InvalidState); };
-        };
-
         // Remove old email mapping if it exists
         switch (user.email) {
           case (?oldEmail) { usersByEmail.delete(oldEmail); };
@@ -400,7 +335,6 @@ actor {
           first_name = user.first_name;
           last_name = user.last_name;
           email = ?newEmail;
-          password_hash = user.password_hash;
           date_of_birth = user.date_of_birth;
           gender = user.gender;
           wallets = user.wallets;
@@ -562,77 +496,30 @@ actor {
     usernames.get(username) != null
   };
 
- private func hashPassword(password: Text): Text {
-  // Simple hash function for development
-  // In production, use a proper password hashing library
-  var hash : Nat32 = 0;
-  for (c in Text.toIter(password)) {
-    hash := hash *% 31 +% Char.toNat32(c);
-    hash := hash +% (hash << 10);
-    hash := hash ^ (hash >> 6);
-  };
-  hash := hash +% (hash << 3);
-  hash := hash ^ (hash >> 11);
-  hash := hash +% (hash << 15);
-  Nat32.toText(hash);
+  // ========== USER Authentication ==========
+  public shared query (msg) func whoami(): async Principal {
+    msg.caller
   };
 
-  // ========== USER MANAGEMENT ==========
-  public shared (msg) func loginWithEmail(email: Text, password: Text): async ResultUser {
-    switch (usersByEmail.get(email)) {
-        case (?principal) {
-            switch (users.get(principal)) {
-                case (?user) {
-                    // Verify password
-                    switch (user.password_hash) {
-                        case (?hash) {
-                            if (hash == hashPassword(password)) {
-                                #ok(user)
-                            } else {
-                                #err(#InvalidCredentials)
-                            }
-                        };
-                        case null #err(#InvalidCredentials)
-                    }
-                };
-                case null #err(#NotFound)
-            }
-        };
-        case null #err(#NotFound)
-    }
-  };
   public shared (msg) func loginWithPrincipal(first_name: ?Text, last_name: ?Text, username: ?Text, email: ?Text): async ResultUser {
     let caller = msg.caller;
 
     switch (users.get(caller)) {
       case (?user) {
-        // Ensure user has a password set
-        let updatedUser = switch (user.password_hash) {
-          case (null) {
-            // Set default password if not set
-            let defaultPassword = "default_" # Principal.toText(caller);
-            { user with 
-              password_hash = ?hashPassword(defaultPassword);
-              updated_at = getCurrentTime();
-            }
-          };
-          case (_) user;
-        };
+        let updatedUser = { user with updated_at = getCurrentTime() };
         users.put(caller, updatedUser);
         #ok(updatedUser)
       };
       case null {
-        // User does not exist, create new user with provided first/last name
+        // User does not exist, create new user with provided info
         let userId = nextUserId;
         nextUserId += 1;
         let now = getCurrentTime();
-        let defaultPassword = "default_" # Principal.toText(caller);
         let newUser: User = {
           user_id = userId;
           principal = caller;
           username = switch (username) { case (?u) u; case null "" };
           email = email;
-          password_hash = ?hashPassword(defaultPassword);
           first_name = first_name;
           last_name = last_name;
           date_of_birth = null;
@@ -648,9 +535,7 @@ actor {
       }
     }
   };
-  public shared query (msg) func whoami(): async Principal {
-    msg.caller
-  };
+
   public shared query (msg) func getModulesWithAccess(courseId: Text): async ResultModules {
     switch (courses.get(courseId)) {
       case (?course) {
@@ -682,73 +567,6 @@ actor {
         }
       };
       case null #err(#NotFound)
-    }
-  };
-
-  // Fungsi untuk mendaftarkan pengguna baru dengan email
-  public shared (msg) func registerWithEmail(
-    username: Text,
-    email: Text,
-    password: Text,
-    confirmPassword: Text,
-    firstName: Text,
-    lastName: Text
-  ): async ResultUser {
-    // Validasi input
-    if (Text.size(username) < 3) return #err(#InvalidCredentials);
-    if (Text.size(email) < 5 or not Text.contains(email, #text("@"))) return #err(#InvalidCredentials);
-    if (Text.size(password) < 6) return #err(#InvalidCredentials);
-    if (password != confirmPassword) return #err(#PasswordsDoNotMatch);
-    
-
-    let normalizedEmail = Text.map(email, Prim.charToLower);
-    
-    // Cek  apakah data nya double data
-    if (isEmailTaken(normalizedEmail)) return #err(#AlreadyExists);
-    if (isUsernameTaken(username)) return #err(#AlreadyExists);
-
-    let principal = msg.caller;
-    
-    // Cek apakah principal sudah terdaftar
-    switch (users.get(principal)) {
-      case (?existingUser) {
-        return #err(#AlreadyExists);
-      };
-      case null {}; // Lanjutkan registrasi
-    };
-
-    // Generate ID pengguna baru
-    let userId = nextUserId;
-    nextUserId += 1;
-    let now = Time.now();
-    
-    // Buat user baru
-    let newUser: User = {
-      user_id = userId;
-      principal = principal;
-      username = username;
-      email = ?normalizedEmail;
-      password_hash = ?hashPassword(password);
-      first_name = ?firstName;
-      last_name = ?lastName;
-      date_of_birth = null;
-      gender = null;
-      wallets = [];
-      created_at = now;
-      updated_at = now;
-    };
-
-    try {
-      // Simpan data user
-      users.put(principal, newUser);
-      usersByEmail.put(normalizedEmail, principal);
-      usernames.put(username, principal);
-      
-      Debug.print("User berhasil didaftarkan: " # Principal.toText(principal));
-      #ok(newUser)
-    } catch (e) {
-      Debug.print("Gagal mendaftarkan user: " # debug_show(e));
-      #err(#InvalidState)
     }
   };
 
@@ -1217,23 +1035,6 @@ actor {
     }
   };
 
-
-  public shared (msg) func updateCourseProgress(courseId: Text, progress: Nat): async ResultBool {
-    switch (users.get(msg.caller)) {
-      case (?user) {
-        let enrollmentKey = (msg.caller, courseId);
-        switch (enrollments.get(enrollmentKey)) {
-          case (?enrollment) {
-            // Update course progress logic here
-            #ok(true)
-          };
-          case null #err(#Unauthorized)
-        }
-      };
-      case null #err(#Unauthorized)
-    }
-  };
-
   public shared (msg) func toggleFavorite(courseId: Text): async ResultBool {
     switch (users.get(msg.caller)) {
       case (?user) {
@@ -1367,6 +1168,19 @@ actor {
       case null #err(#Unauthorized)
     }
   };
+
+public shared query (msg) func getMyCourses(): async [Course] {
+  let myCourses = Buffer.Buffer<Course>(0);
+  for (((userPrincipal, courseId), _) in enrollments.entries()) {
+    if (userPrincipal == msg.caller) {
+      switch (courses.get(courseId)) {
+        case (?course) myCourses.add(course);
+        case null {};
+      }
+    }
+  };
+  Buffer.toArray(myCourses)
+};
 
   // Get payment history by course
   public shared query (msg) func getPaymentHistoryByCourse(courseId: Text): async ResultPaymentHistory {
