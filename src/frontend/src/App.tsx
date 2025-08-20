@@ -17,7 +17,9 @@ import Pricing from './pages/Pricing';
 import Terms from './pages/Terms';
 import Privacy from './pages/Privacy';
 import CourseDetails from './pages/CourseDetails';
+import Partners from './pages/Partners';
 import TransactionHistory from './pages/settings/HistoryTransaksi';
+
 
 function App() {
   return (
@@ -39,6 +41,8 @@ function App() {
         <Route path="/courses/:id" element={<CourseDetails />} />
         <Route path="/settings/profile" element={<ProfileSetting />} />
         <Route path="/settings/wallet" element={<WalletSetting />} />
+        <Route path="/partners" element={<Partners />} />
+       
         <Route
           path="/settings/configuration"
           element={<ConfigurationSetting />}

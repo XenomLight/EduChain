@@ -19,35 +19,46 @@ interface CourseCategory {
 
 const Courses = () => {
   const [categories, setCategories] = useState<CourseCategory[]>([]);
+  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Ambil query search dari URL
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await fetch(
+        // 1. Khan Academy
+        const khanRes = await fetch(
           'http://localhost:3001/api/courses/khanacademy'
         );
-        const data = await res.json();
-
-        const programs = data.data.listTopPrograms.programs.map(
-          (p: {
-            id: string;
-            translatedTitle: string;
-            authorNickname: string;
-            sumVotesIncremented: string;
-            imagePath: string;
-            url: string;
-          }) => ({
+        const khanData = await khanRes.json();
+        const khanPrograms: Course[] =
+          khanData.data.listTopPrograms.programs.map((p: any) => ({
             id: p.id,
             title: p.translatedTitle,
             description: `By ${p.authorNickname} • Votes: ${p.sumVotesIncremented}`,
             image: `https://www.khanacademy.org${p.imagePath}`,
             url: `https://www.khanacademy.org${p.url}`,
+          }));
+
+        // 2. Coursera
+        const courseraRes = await fetch(
+          'http://localhost:3001/api/courses/coursera'
+        );
+        const courseraData = await courseraRes.json();
+
+        const courseraCourses: Course[] = courseraData.elements.map(
+          (c: any) => ({
+            id: c.id,
+            title: c.name,
+            description: c.description || 'Coursera course',
+            image:
+              c.photoUrl ||
+              c.extraMetadata?.definition?.promoPhoto ||
+              '/src/assets/image/coursera.png',
+            url: `https://www.coursera.org/learn/${c.slug}`,
           })
         );
 
@@ -71,10 +82,9 @@ const Courses = () => {
               },
             ],
           },
-          {
-            name: 'Khan Academy',
-            courses: programs,
-          },
+          { name: 'Khan Academy', courses: khanPrograms },
+          { name: 'Coursera', courses: courseraCourses },
+          // Tambahkan kategori lain jika perlu
         ]);
       } catch (err) {
         console.error('Error fetching courses:', err);
@@ -84,7 +94,6 @@ const Courses = () => {
     fetchData();
   }, []);
 
-  // Filter kategori berdasarkan search query
   const filteredCategories = categories.map((cat) => ({
     ...cat,
     courses: cat.courses.filter(
@@ -94,12 +103,18 @@ const Courses = () => {
     ),
   }));
 
+  const toggleExpand = (categoryName: string) => {
+    setExpandedCategories((prev) =>
+      prev.includes(categoryName)
+        ? prev.filter((c) => c !== categoryName)
+        : [...prev, categoryName]
+    );
+  };
+
   return (
     <div>
-      {/* Navbar fixed */}
       <Navbar />
 
-      {/* Konten */}
       <div className="container mx-auto px-4 py-8 pt-24">
         {filteredCategories.map(
           (category) =>
@@ -109,7 +124,10 @@ const Courses = () => {
                   {category.name}
                 </h2>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {category.courses.map((course) => (
+                  {(expandedCategories.includes(category.name)
+                    ? category.courses
+                    : category.courses.slice(0, 12)
+                  ).map((course) => (
                     <div
                       key={course.id}
                       className="group relative cursor-pointer overflow-hidden rounded-2xl shadow-lg shadow-black/40"
@@ -119,7 +137,6 @@ const Courses = () => {
                         backgroundPosition: 'center',
                       }}
                     >
-                      {/* Overlay hitam transparan */}
                       <div className="absolute inset-0">
                         <div
                           className="h-full w-full bg-cover bg-center blur-sm brightness-75"
@@ -128,7 +145,6 @@ const Courses = () => {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-black/5 to-transparent transition group-hover:from-black/30"></div>
                       </div>
 
-                      {/* Konten */}
                       <div className="relative flex h-full flex-col justify-between p-6 text-white">
                         <div>
                           <h3 className="text-xl font-bold">{course.title}</h3>
@@ -141,17 +157,30 @@ const Courses = () => {
                             onClick={() => navigate(`/courses/${course.id}`)}
                             className="mt-2 text-sm font-medium text-[#24ABEC] hover:underline"
                           >
-                            Click for details
+                            Go to course
                           </button>
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {/* tombol See more */}
+                {category.courses.length > 12 && (
+                  <div className="mt-6 flex justify-center">
+                    <button
+                      onClick={() => toggleExpand(category.name)}
+                      className="rounded-lg bg-[#2A8188] px-6 py-2 text-white hover:bg-[#1a90c9]"
+                    >
+                      {expandedCategories.includes(category.name)
+                        ? 'See Less'
+                        : 'See More'}
+                    </button>
+                  </div>
+                )}
               </div>
             )
         )}
-
         <Footer />
       </div>
     </div>
