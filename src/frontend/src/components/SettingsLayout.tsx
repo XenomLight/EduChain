@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import * as React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/footer';
+import { useNavigate } from "react-router-dom";
 
 export type SettingsLayoutProps = {
   children: React.ReactNode;
@@ -12,10 +13,19 @@ export type SettingsLayoutProps = {
 
 
 export default function SettingsLayout({ children, title }: SettingsLayoutProps) {
+  const navigate = useNavigate();
+
   return (
     <div className=" container mx-auto px-4 py-8">
       <Navbar />
+       
       <main className=" flex min-h-screen w-full pt-30 space-y-4">
+        <button
+      onClick={() => navigate(-1)} // kembali ke halaman sebelumnya
+      className="rounded-2xl border border-gray-800 p-5 hidden md:flex flex-col w-32 bg-black/70 p-6 rounded-lg h-full mr-5 hover:bg-white/10 border-l-4 transition"
+    >
+      ⬅ Back
+    </button>
         {/* Sidebar */}
         <aside className="rounded-2xl border border-gray-800 p-5 hidden md:flex flex-col w-64 bg-black/70 p-6 rounded-lg h-full">
         <h2 className="mb-6 text-3xl font-semibold">Settings</h2>
