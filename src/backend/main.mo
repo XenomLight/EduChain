@@ -485,7 +485,7 @@ actor {
 
   // ========== HELPER FUNCTIONS ==========
   private func getCurrentTime(): Int {
-    Time.now() / 1_000_000_000; // Convert to seconds
+    Time.now() / 1_000_000_000 + 25_200; // Convert to seconds 25_200 GMT+7 (seharusnya)
   };
 
   private func isEmailTaken(email: Text): Bool {
@@ -875,11 +875,33 @@ actor {
   ): async Result.Result<Transaction, Error> {
     switch (users.get(msg.caller)) {
       case (?user) {
-        // Check if course exists
         switch (courses.get(courseId)) {
           case null return #err(#NotFound);
           case (?course) {
-            // Create transaction
+            if (course.price == 0) {
+              // Free course: 
+              let enrollResult = await enrollUser(courseId, Int.toText(getCurrentTime()));
+              switch (enrollResult) {
+                case (#ok(_)) {
+                  //ga disimpan di database
+                  return #ok({
+                    transaksi_id = 0;
+                    user_id = user.user_id;
+                    course_id = courseId;
+                    harga_transaksi = 0;
+                    currency = course.currency;
+                    tanggal_transaksi = getCurrentTime();
+                    status = "completed";
+                    payment_method = "free";
+                    payment_proof = null;
+                  });
+                };
+                case (#err(e)) return #err(e);
+              }
+            };
+
+            // Paid course: 
+
             let transactionId = nextTransactionId;
             nextTransactionId += 1;
 
@@ -895,22 +917,15 @@ actor {
               payment_proof = null;
             };
 
-            // Store transaction
             transactions.put(transactionId, transaction);
 
-            // Create or update user's transaction list
             let existingTxns = switch (userTransactions.get(user.user_id)) {
               case (?txns) { Buffer.fromArray<Nat>(txns) };
               case null { Buffer.Buffer<Nat>(0) };
             };
-            
-            // Add new transaction ID
             existingTxns.add(transactionId);
-            
-            // Store updated transaction list
             userTransactions.put(user.user_id, existingTxns.toArray());
 
-            // Create PaymentHistory entry
             let paymentHistoryId = nextPaymentHistoryId;
             nextPaymentHistoryId += 1;
 
@@ -930,10 +945,8 @@ actor {
               enrollment_status = "not_enrolled";
             };
 
-            // Store payment history
             paymentHistories.put(paymentHistoryId, paymentHistory);
 
-            // Update user's payment history list
             let existingHistories = switch (userPaymentHistories.get(msg.caller)) {
               case (?histories) { Buffer.fromArray<Nat>(histories) };
               case null { Buffer.Buffer<Nat>(0) };
