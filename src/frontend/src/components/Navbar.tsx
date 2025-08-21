@@ -70,7 +70,10 @@ const Navbar = () => {
 
       <div className="flex items-center gap-6 text-[#EEEEEE]">
         {[
-          { name: 'Home', to: '/' },
+          {
+            name: isAuthenticated ? 'Dashboard' : 'Home',
+            to: isAuthenticated ? '/dashboard' : '/',
+          },
           { name: 'Courses', to: '/courses' },
           { name: 'Partners', to: '/partners' },
           { name: 'Settings', to: '/settings/profile' },
