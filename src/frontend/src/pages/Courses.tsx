@@ -4,6 +4,28 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Footer from '../components/footer';
 import Navbar from '@/components/Navbar';
 
+interface KhanAcademyProgram {
+  id: string;
+  translatedTitle: string;
+  authorNickname: string;
+  sumVotesIncremented: number;
+  imagePath: string;
+  url: string;
+}
+
+interface CourseraCourse {
+  id: string;
+  name: string;
+  description?: string;
+  photoUrl?: string;
+  extraMetadata?: {
+    definition?: {
+      promoPhoto?: string;
+    };
+  };
+  slug: string;
+}
+
 interface Course {
   id: string;
   title: string;
@@ -35,7 +57,7 @@ const Courses = () => {
         );
         const khanData = await khanRes.json();
         const khanPrograms: Course[] =
-          khanData.data.listTopPrograms.programs.map((p: any) => ({
+          khanData.data.listTopPrograms.programs.map((p: KhanAcademyProgram) => ({
             id: p.id,
             title: p.translatedTitle,
             description: `By ${p.authorNickname} • Votes: ${p.sumVotesIncremented}`,
@@ -50,7 +72,7 @@ const Courses = () => {
         const courseraData = await courseraRes.json();
 
         const courseraCourses: Course[] = courseraData.elements.map(
-          (c: any) => ({
+          (c: CourseraCourse) => ({
             id: c.id,
             title: c.name,
             description: c.description || 'Coursera course',
