@@ -4,6 +4,28 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Footer from '../components/footer';
 import Navbar from '@/components/Navbar';
 
+interface KhanAcademyProgram {
+  id: string;
+  translatedTitle: string;
+  authorNickname: string;
+  sumVotesIncremented: number;
+  imagePath: string;
+  url: string;
+}
+
+interface CourseraCourse {
+  id: string;
+  name: string;
+  description?: string;
+  photoUrl?: string;
+  extraMetadata?: {
+    definition?: {
+      promoPhoto?: string;
+    };
+  };
+  slug: string;
+}
+
 interface Course {
   id: string;
   title: string;
@@ -16,7 +38,6 @@ interface CourseCategory {
   name: string;
   courses: Course[];
 }
-
 const Courses = () => {
   const [categories, setCategories] = useState<CourseCategory[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -25,23 +46,68 @@ const Courses = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+   
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text;
 
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return parts.map((part, index) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <span key={index} className="bg-yellow-300 text-black font-semibold">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
         // 1. Khan Academy
-        const khanRes = await fetch(
-          'http://localhost:3001/api/courses/khanacademy'
-        );
-        const khanData = await khanRes.json();
-        const khanPrograms: Course[] =
-          khanData.data.listTopPrograms.programs.map((p: any) => ({
-            id: p.id,
-            title: p.translatedTitle,
-            description: `By ${p.authorNickname} • Votes: ${p.sumVotesIncremented}`,
-            image: `https://www.khanacademy.org${p.imagePath}`,
-            url: `https://www.khanacademy.org${p.url}`,
-          }));
+        let khanPrograms: Course[] = [];
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik
+        
+        try {
+          const khanRes = await fetch('http://localhost:3001/api/courses/khanacademy', {
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!khanRes.ok) {
+            throw new Error(`HTTP error! status: ${khanRes.status}`);
+          }
+          
+          const khanData = await khanRes.json();
+          
+          if (!khanData?.data?.listTopPrograms?.programs) {
+            throw new Error('Format data tidak valid dari Khan Academy');
+          }
+          
+          khanPrograms = khanData.data.listTopPrograms.programs
+            .filter((p: unknown): p is KhanAcademyProgram => 
+              !!p && 
+              typeof p === 'object' && 
+              p !== null &&
+              'id' in p && 
+              'translatedTitle' in p
+            )
+            .map((p: KhanAcademyProgram) => ({
+              id: p.id,
+              title: p.translatedTitle,
+              description: `By ${p.authorNickname || 'Unknown'} • Votes: ${p.sumVotesIncremented || 0}`,
+              image: p.imagePath ? `https://www.khanacademy.org${p.imagePath}` : '/images/placeholder-course.jpg',
+              url: p.url ? `https://www.khanacademy.org${p.url}` : '#',
+            }));
+        } catch (khanError) {
+          console.error('Error fetching Khan Academy:', khanError);
+          
+          // Hanya tampilkan error di console, biarkan array kosong
+          // Aplikasi akan tetap menampilkan bagian lain yang berhasil di-load
+          khanPrograms = [];
+        }
 
         // 2. Coursera
         const courseraRes = await fetch(
@@ -50,7 +116,7 @@ const Courses = () => {
         const courseraData = await courseraRes.json();
 
         const courseraCourses: Course[] = courseraData.elements.map(
-          (c: any) => ({
+          (c: CourseraCourse) => ({
             id: c.id,
             title: c.name,
             description: c.description || 'Coursera course',
@@ -94,12 +160,12 @@ const Courses = () => {
     fetchData();
   }, []);
 
-  const filteredCategories = categories.map((cat) => ({
-    ...cat,
-    courses: cat.courses.filter(
-      (c) =>
-        c.title.toLowerCase().includes(searchQuery) ||
-        c.description.toLowerCase().includes(searchQuery)
+  const filteredCategories = categories.map((category) => ({
+    ...category,
+    courses: category.courses.filter(
+      (course) =>
+        course.title.toLowerCase().includes(searchQuery) ||
+        course.description.toLowerCase().includes(searchQuery)
     ),
   }));
 
@@ -110,13 +176,28 @@ const Courses = () => {
         : [...prev, categoryName]
     );
   };
+   
+  const sortedCategories = filteredCategories.map((cat) => {
+    const exactMatches = cat.courses.filter(
+      (c) =>
+        c.title.toLowerCase().startsWith(searchQuery) ||
+        c.description.toLowerCase().startsWith(searchQuery)
+    );
+    const partialMatches = cat.courses.filter(
+      (c) =>
+        !exactMatches.includes(c) &&
+        (c.title.toLowerCase().includes(searchQuery) ||
+          c.description.toLowerCase().includes(searchQuery))
+    );
+    return { ...cat, courses: [...exactMatches, ...partialMatches] };
+  });
 
   return (
     <div>
       <Navbar />
 
       <div className="container mx-auto px-4 py-8 pt-24">
-        {filteredCategories.map(
+        {sortedCategories.map(
           (category) =>
             category.courses.length > 0 && (
               <div key={category.name} className="mb-12">
@@ -148,9 +229,9 @@ const Courses = () => {
                       <div className="relative flex h-full flex-col justify-between p-6 text-white">
                         <div>
                           <h3 className="text-xl font-bold">{course.title}</h3>
+                           {highlightText(course.title, searchQuery)}
                           <p className="text-gray-300">{course.description}</p>
                         </div>
-
                         <div>
                           <p className="mt-4 text-2xl font-bold">Free</p>
                           <button

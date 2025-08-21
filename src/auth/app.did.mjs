@@ -1,362 +1,290 @@
 export const idlFactory = ({ IDL }) => {
-  const Error = IDL.Variant({
-    AlreadyExists: IDL.Null,
-    NotFound: IDL.Null,
-    InvalidCredentials: IDL.Null,
-    PasswordsDoNotMatch: IDL.Null,
-    Unauthorized: IDL.Null,
-    IdAlreadyExists: IDL.Null,
-    InvalidState: IDL.Null
-  });
-
   const Konten = IDL.Record({
-    id: IDL.Nat,
-    title: IDL.Text,
-    content_type: IDL.Text,
-    content_url: IDL.Opt(IDL.Text),
-    duration: IDL.Opt(IDL.Nat),
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'updated_at' : IDL.Int,
+    'duration' : IDL.Opt(IDL.Nat),
+    'content_url' : IDL.Opt(IDL.Text),
+    'content_type' : IDL.Text,
+    'created_at' : IDL.Int,
   });
-
   const Modul = IDL.Record({
-    id: IDL.Nat,
-    title: IDL.Text,
-    description: IDL.Opt(IDL.Text),
-    order: IDL.Nat,
-    contents: IDL.Vec(Konten),
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'updated_at' : IDL.Int,
+    'contents' : IDL.Vec(Konten),
+    'order' : IDL.Nat,
+    'description' : IDL.Opt(IDL.Text),
+    'created_at' : IDL.Int,
   });
-
   const Course = IDL.Record({
-    id: IDL.Text,
-    title: IDL.Text,
-    provider: IDL.Text,
-    category: IDL.Text,
-    price: IDL.Nat,
-    priceDiscount: IDL.Opt(IDL.Nat),
-    currency: IDL.Text,
-    rating: IDL.Float,
-    totalRatings: IDL.Nat,
-    thumbnail: IDL.Text,
-    duration: IDL.Nat,
-    durationText: IDL.Text,
-    modules: IDL.Vec(Modul),
-    description: IDL.Text,
-    level: IDL.Text,
-    isFavorite: IDL.Bool,
-    progress: IDL.Opt(IDL.Nat),
-    totalStudents: IDL.Nat,
-    totalModules: IDL.Nat,
-    totalLessons: IDL.Nat,
-    totalDuration: IDL.Nat,
-    bannerImage: IDL.Opt(IDL.Text),
-    learningOutcomes: IDL.Vec(IDL.Text),
-    requirements: IDL.Vec(IDL.Text),
-    whatYouGet: IDL.Vec(IDL.Text),
-    tags: IDL.Vec(IDL.Text)
+    'id' : IDL.Text,
+    'totalRatings' : IDL.Nat,
+    'durationText' : IDL.Text,
+    'title' : IDL.Text,
+    'updated_at' : IDL.Int,
+    'duration' : IDL.Nat,
+    'totalLessons' : IDL.Nat,
+    'thumbnail' : IDL.Text,
+    'isPublished' : IDL.Bool,
+    'instructor' : IDL.Text,
+    'totalDuration' : IDL.Nat,
+    'tags' : IDL.Vec(IDL.Text),
+    'totalStudents' : IDL.Nat,
+    'description' : IDL.Text,
+    'whatYouGet' : IDL.Vec(IDL.Text),
+    'isFavorite' : IDL.Bool,
+    'created_at' : IDL.Int,
+    'level' : IDL.Text,
+    'progress' : IDL.Opt(IDL.Nat),
+    'learningOutcomes' : IDL.Vec(IDL.Text),
+    'currency' : IDL.Text,
+    'totalModules' : IDL.Nat,
+    'category' : IDL.Text,
+    'bannerImage' : IDL.Opt(IDL.Text),
+    'rating' : IDL.Float64,
+    'priceDiscount' : IDL.Opt(IDL.Nat),
+    'price' : IDL.Nat,
+    'requirements' : IDL.Vec(IDL.Text),
+    'modules' : IDL.Vec(Modul),
+  });
+  const Error = IDL.Variant({
+    'IdAlreadyExists' : IDL.Null,
+    'NotFound' : IDL.Null,
+    'InvalidCredentials' : IDL.Null,
+    'Unauthorized' : IDL.Null,
+    'AlreadyExists' : IDL.Null,
+    'InvalidState' : IDL.Null,
+  });
+  const ResultCourse = IDL.Variant({ 'ok' : Course, 'err' : Error });
+  const Transaction = IDL.Record({
+    'status' : IDL.Text,
+    'tanggal_transaksi' : IDL.Int,
+    'harga_transaksi' : IDL.Nat,
+    'transaksi_id' : IDL.Nat,
+    'user_id' : IDL.Nat,
+    'payment_method' : IDL.Text,
+    'course_id' : IDL.Text,
+    'currency' : IDL.Text,
+    'payment_proof' : IDL.Opt(IDL.Text),
   });
   const Enrollment = IDL.Record({
-    user_id: IDL.Principal,
-    course_id: IDL.Text,
-    enrollment_date: IDL.Int,
-    status: IDL.Text,
+    'status' : IDL.Text,
+    'updated_at' : IDL.Int,
+    'enrollment_date' : IDL.Text,
+    'created_at' : IDL.Int,
+    'user_id' : IDL.Principal,
+    'course_id' : IDL.Text,
   });
-
-  const Transaction = IDL.Record({
-    transaksi_id: IDL.Nat,
-    user_id: IDL.Nat,
-    course_id: IDL.Text,
-    amount: IDL.Nat,
-    currency: IDL.Text,
-    transaction_date: IDL.Int,
-    status: IDL.Text,
-    payment_method: IDL.Text,
-    payment_proof: IDL.Opt(IDL.Text)
-  });
-
-  const PaymentHistory = IDL.Record({
-    id: IDL.Nat,
-    user_principal: IDL.Principal,
-    user_id: IDL.Nat,
-    course_id: IDL.Text,
-    course_title: IDL.Text,
-    transaction_id: IDL.Nat,
-    payment_method: IDL.Text,
-    amount: IDL.Nat,
-    currency: IDL.Text,
-    status: IDL.Text,
-
-    completed_at: IDL.Opt(IDL.Int),
-    enrollment_status: IDL.Text
-  });
-
-
-  const ContentUpdate = IDL.Record({
-    id: IDL.Nat,
-    title: IDL.Opt(IDL.Text),
-    content_type: IDL.Opt(IDL.Text),
-    content_url: IDL.Opt(IDL.Text),
-    duration: IDL.Opt(IDL.Nat)
-  });
-
-  const ModuleUpdate = IDL.Record({
-    id: IDL.Nat,
-    title: IDL.Opt(IDL.Text),
-    description: IDL.Opt(IDL.Text),
-    order: IDL.Opt(IDL.Nat),
-    contents: IDL.Opt(IDL.Vec(ContentUpdate))
-  });
-
-  const CourseUpdate = IDL.Record({
-    title: IDL.Opt(IDL.Text),
-    provider: IDL.Opt(IDL.Text),
-    category: IDL.Opt(IDL.Text),
-    price: IDL.Opt(IDL.Nat),
-    priceDiscount: IDL.Opt(IDL.Nat),
-    currency: IDL.Opt(IDL.Text),
-    thumbnail: IDL.Opt(IDL.Text),
-    bannerImage: IDL.Opt(IDL.Text),
-    description: IDL.Opt(IDL.Text),
-    level: IDL.Opt(IDL.Text),
-    learningOutcomes: IDL.Opt(IDL.Vec(IDL.Text)),
-    requirements: IDL.Opt(IDL.Vec(IDL.Text)),
-    whatYouGet: IDL.Opt(IDL.Vec(IDL.Text)),
-    tags: IDL.Opt(IDL.Vec(IDL.Text)),
-    isPublished: IDL.Opt(IDL.Bool),
-    duration: IDL.Opt(IDL.Nat),
-    durationText: IDL.Opt(IDL.Text),
-    totalStudents: IDL.Opt(IDL.Nat),
-    totalModules: IDL.Opt(IDL.Nat),
-    totalLessons: IDL.Opt(IDL.Nat),
-    totalDuration: IDL.Opt(IDL.Nat),
-    modules: IDL.Opt(IDL.Vec(ModuleUpdate))
-  });
-
-  // Di dalam IDL.Service
-  updateCourse: IDL.Func(
-    [IDL.Text, CourseUpdate],
-    [IDL.Variant({ ok: Course, err: Error })],
-    []
-  )
-  const Wallet = IDL.Record({
-    address: IDL.Text,
-    wallet_type: IDL.Text,
-    is_primary: IDL.Bool,
-    connected_at: IDL.Int
-  });
-
-  const User = IDL.Record({
-    user_id: IDL.Nat,
-    principal: IDL.Principal,
-    username: IDL.Text,
-    first_name: IDL.Opt(IDL.Text),
-    last_name: IDL.Opt(IDL.Text),
-    email: IDL.Opt(IDL.Text),
-    password_hash: IDL.Opt(IDL.Text),
-    date_of_birth: IDL.Opt(IDL.Text),
-    gender: IDL.Opt(IDL.Text),
-    wallets: IDL.Vec(Wallet),
-  });
-
-  const ResultUser = IDL.Variant({
-    ok: User,
-    err: Error
-  });
-
-  const ResultCourse = IDL.Variant({
-    ok: Course,
-    err: Error
-  });
-  const ResultEnrollment = IDL.Variant({
-    ok: Enrollment,
-    err: Error
-  });
-  const ResultTransaction = IDL.Variant({ ok: Transaction, err: Error });
-  const ResultTransactions = IDL.Variant({ ok: IDL.Vec(Transaction), err: Error });
-  const ResultPaymentHistory = IDL.Variant({ ok: IDL.Vec(PaymentHistory), err: Error });
-  const ResultPaymentHistoryItem = IDL.Variant({ ok: PaymentHistory, err: Error });
-  const ResultPaymentConfirmation = IDL.Variant({
-    ok: IDL.Record({
-      transaction: Transaction,
-      enrollment: IDL.Opt(Enrollment)
+  const Result__1_5 = IDL.Variant({
+    'ok' : IDL.Record({
+      'transaction' : Transaction,
+      'enrollment' : IDL.Opt(Enrollment),
     }),
-    err: Error
+    'err' : Error,
   });
-  const ResultBool = IDL.Variant({ ok: IDL.Bool, err: Error });
-  const ResultModules = IDL.Variant({ ok: IDL.Vec(Modul), err: Error });
-  const ResultContents = IDL.Variant({ ok: IDL.Vec(Konten), err: Error });
-  const ResultWallets = IDL.Variant({ ok: IDL.Vec(Wallet), err: Error });
-  const ResultWallet = IDL.Variant({ ok: Wallet, err: Error });
-  
+  const Wallet = IDL.Record({
+    'connected_at' : IDL.Int,
+    'is_primary' : IDL.Bool,
+    'address' : IDL.Text,
+    'wallet_type' : IDL.Text,
+  });
+  const Result__1_4 = IDL.Variant({ 'ok' : Wallet, 'err' : Error });
+  const Result__1_3 = IDL.Variant({ 'ok' : Transaction, 'err' : Error });
+  const ResultBool = IDL.Variant({ 'ok' : IDL.Bool, 'err' : Error });
+  const ResultEnrollment = IDL.Variant({ 'ok' : Enrollment, 'err' : Error });
+  const ResultContents = IDL.Variant({ 'ok' : IDL.Vec(Konten), 'err' : Error });
+  const User = IDL.Record({
+    'updated_at' : IDL.Int,
+    'principal' : IDL.Principal,
+    'username' : IDL.Text,
+    'created_at' : IDL.Int,
+    'user_id' : IDL.Nat,
+    'email' : IDL.Opt(IDL.Text),
+    'wallets' : IDL.Vec(Wallet),
+    'gender' : IDL.Opt(IDL.Text),
+    'first_name' : IDL.Opt(IDL.Text),
+    'last_name' : IDL.Opt(IDL.Text),
+    'date_of_birth' : IDL.Opt(IDL.Text),
+  });
+  const ResultUser = IDL.Variant({ 'ok' : User, 'err' : Error });
+  const ResultModules = IDL.Variant({ 'ok' : IDL.Vec(Modul), 'err' : Error });
+  const PaymentHistory = IDL.Record({
+    'id' : IDL.Nat,
+    'transaction_id' : IDL.Nat,
+    'status' : IDL.Text,
+    'user_principal' : IDL.Principal,
+    'course_title' : IDL.Text,
+    'created_at' : IDL.Int,
+    'user_id' : IDL.Nat,
+    'payment_method' : IDL.Text,
+    'course_id' : IDL.Text,
+    'currency' : IDL.Text,
+    'completed_at' : IDL.Opt(IDL.Int),
+    'amount' : IDL.Nat,
+    'enrollment_status' : IDL.Text,
+  });
+  const ResultPaymentHistory = IDL.Variant({
+    'ok' : IDL.Vec(PaymentHistory),
+    'err' : Error,
+  });
+  const Result__1_2 = IDL.Variant({
+    'ok' : IDL.Vec(Transaction),
+    'err' : Error,
+  });
+  const Result__1_1 = IDL.Variant({ 'ok' : IDL.Vec(Wallet), 'err' : Error });
+  const ContentUpdate = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Opt(IDL.Text),
+    'duration' : IDL.Opt(IDL.Nat),
+    'content_url' : IDL.Opt(IDL.Text),
+    'content_type' : IDL.Opt(IDL.Text),
+  });
+  const ModuleUpdate = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Opt(IDL.Text),
+    'contents' : IDL.Opt(IDL.Vec(ContentUpdate)),
+    'order' : IDL.Opt(IDL.Nat),
+    'description' : IDL.Opt(IDL.Text),
+  });
+  const CourseUpdate = IDL.Record({
+    'durationText' : IDL.Opt(IDL.Text),
+    'title' : IDL.Opt(IDL.Text),
+    'duration' : IDL.Opt(IDL.Nat),
+    'totalLessons' : IDL.Opt(IDL.Nat),
+    'thumbnail' : IDL.Opt(IDL.Text),
+    'isPublished' : IDL.Opt(IDL.Bool),
+    'totalDuration' : IDL.Opt(IDL.Nat),
+    'tags' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'totalStudents' : IDL.Opt(IDL.Nat),
+    'description' : IDL.Opt(IDL.Text),
+    'whatYouGet' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'level' : IDL.Opt(IDL.Text),
+    'learningOutcomes' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'currency' : IDL.Opt(IDL.Text),
+    'totalModules' : IDL.Opt(IDL.Nat),
+    'bannerImage' : IDL.Opt(IDL.Text),
+    'priceDiscount' : IDL.Opt(IDL.Nat),
+    'price' : IDL.Opt(IDL.Nat),
+    'requirements' : IDL.Opt(IDL.Vec(IDL.Text)),
+    'modules' : IDL.Opt(IDL.Vec(ModuleUpdate)),
+  });
+  const Result__1 = IDL.Variant({ 'ok' : Course, 'err' : Error });
+  const Result = IDL.Variant({ 'ok' : IDL.Null, 'err' : Error });
   const ProfileUpdate = IDL.Record({
-    username: IDL.Opt(IDL.Text),
-    first_name: IDL.Opt(IDL.Text),
-    last_name: IDL.Opt(IDL.Text),
-    date_of_birth: IDL.Opt(IDL.Text),
-    gender: IDL.Opt(IDL.Text)
+    'username' : IDL.Opt(IDL.Text),
+    'gender' : IDL.Opt(IDL.Text),
+    'first_name' : IDL.Opt(IDL.Text),
+    'last_name' : IDL.Opt(IDL.Text),
+    'date_of_birth' : IDL.Opt(IDL.Text),
   });
-  
   return IDL.Service({
-
-    // USER
-    loginWithPrincipal: IDL.Func(
-      [IDL.Opt(IDL.Text), IDL.Opt(IDL.Text)],
-      [ResultUser],
-      []
-    ),
-    hasAccess: IDL.Func(
-      [IDL.Principal, IDL.Text],
-      [ResultBool],
-      ["query"]
-    ),
-
-    registerWithEmail: IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
-      [ResultUser],
-      []
-    ),
-
-    loginWithEmail: IDL.Func(
-      [IDL.Text, IDL.Text],
-      [ResultUser],
-      []
-    ),
-
-    // Profile & Settings
-    updateProfile: IDL.Func(
-      [ProfileUpdate],
-      [ResultUser],
-      []
-    ),
-    
-    getProfile: IDL.Func(
-      [],
-      [ResultUser],
-      ['query']
-    ),
-    
-    changePassword: IDL.Func(
-      [IDL.Text, IDL.Text, IDL.Text], // currentPassword, newPassword, confirmPassword
-      [IDL.Variant({ ok: IDL.Null, err: Error })],
-      []
-    ),
-    
-    updateEmail: IDL.Func(
-      [IDL.Text, IDL.Text], // newEmail, password
-      [IDL.Variant({ ok: IDL.Null, err: Error })],
-      []
-    ),
-    connectWallet: IDL.Func(
-      [IDL.Text, IDL.Text],
-      [ResultWallet],
-      []
-    ),
-    getMyWallets: IDL.Func(
-      [],
-      [ResultWallets],
-      ['query']
-    ),
-    setPrimaryWallet: IDL.Func(
-      [IDL.Text],
-      [ResultWallets],
-      []
-    ),
-
-    getMe: IDL.Func([], [ResultUser], ["query"]),
-
-    whoami: IDL.Func([], [IDL.Principal], ["query"]),
-    enrollUser: IDL.Func(
-      [IDL.Text, IDL.Text],
-      [ResultEnrollment],
-      []
-    ),
-    // COURSE
-    getCourses: IDL.Func(
-      [IDL.Nat, IDL.Nat, IDL.Opt(IDL.Variant({
-        newest: IDL.Null,
-        popular: IDL.Null,
-        rating: IDL.Null,
-        priceHighToLow: IDL.Null,
-        priceLowToHigh: IDL.Null
-      }))],
-      [IDL.Vec(Course)],
-      ["query"]
-    ),
-
-    getCourseById: IDL.Func([IDL.Text], [ResultCourse], ["query"]),
-    deleteCourse: IDL.Func([IDL.Text], [ResultBool], []),
-    searchCourses: IDL.Func(
-      [IDL.Text, IDL.Opt(IDL.Text), IDL.Opt(IDL.Text), IDL.Opt(IDL.Float), IDL.Opt(IDL.Nat), IDL.Nat, IDL.Nat],
-      [IDL.Vec(Course)],
-      ["query"]
-    ),
-    // getModulebyCourseID: IDL.Func([IDL.Text], [IDL.Opt(IDL.Vec(Modul))], ["query"]),
-    enrollUser: IDL.Func(
-      [IDL.Text, IDL.Text],
-      [ResultEnrollment],
-      []
-
-    ),
-    // ADMIN
-    addCourse: IDL.Func(
-      [
-        IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Nat,
-        IDL.Opt(IDL.Nat), IDL.Text, IDL.Text, IDL.Text,
-        IDL.Text, IDL.Vec(Modul), IDL.Nat, IDL.Opt(IDL.Text),
-        IDL.Vec(IDL.Text), IDL.Vec(IDL.Text), IDL.Vec(IDL.Text), IDL.Vec(IDL.Text)
-      ],
-      [ResultCourse],
-      []),
-
-    // Set course price - Admin only
-    setCoursePrice: IDL.Func([
-      IDL.Text, IDL.Nat, IDL.Text
-    ], [ResultCourse], []),
-    updateCourseProgress: IDL.Func(
-      [IDL.Text, IDL.Nat],
-      [ResultBool],
-      []
-    ),
-    toggleFavorite: IDL.Func(
-      [IDL.Text],
-      [ResultBool],
-      []),
-    // Get modules with access control
-    getModulesWithAccess: IDL.Func([IDL.Text], [ResultModules], ["query"]),
-
-    // Get course content with access control
-    getCourseContent: IDL.Func([IDL.Text, IDL.Nat], [ResultContents], ["query"]),
-
-    // TRANSACTIONS & PAYMENTS
-    createTransaction: IDL.Func(
-      [IDL.Text],
-      [ResultTransaction],
-      []
-    ),
-    confirmPayment: IDL.Func(
-      [IDL.Nat],
-      [ResultPaymentConfirmation],
-      []
-    ),
-    getMyTransactions: IDL.Func([], [ResultTransactions], ["query"]),
-
-    // PAYMENT HISTORY
-    getMyPaymentHistory: IDL.Func([], [ResultPaymentHistory], ["query"]),
-    getPaymentHistoryByCourse: IDL.Func([IDL.Text], [ResultPaymentHistory], ["query"]),
-    getPaymentHistoryByUserAndCourse: IDL.Func([IDL.Text], [ResultPaymentHistory], ["query"]),
-
-    // Sertifikat/NFT Whitelist
-    whitelistUserForCertificate: IDL.Func([
-      IDL.Text
-    ], [ResultBool], []),
-    isUserWhitelistedForCertificate: IDL.Func([
-      IDL.Principal, IDL.Text
-    ], [ResultBool], ["query"]),
-    enableCertificateAccess: IDL.Func([
-      IDL.Principal, IDL.Text
-    ], [ResultBool], []),
+    'addCourse' : IDL.Func(
+        [IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Text, IDL.Nat],
+        [ResultCourse],
+        [],
+      ),
+    'confirmPayment' : IDL.Func([IDL.Nat], [Result__1_5], []),
+    'connectWallet' : IDL.Func([IDL.Text, IDL.Text], [Result__1_4], []),
+    'createTransaction' : IDL.Func([IDL.Text], [Result__1_3], []),
+    'deleteCourse' : IDL.Func([IDL.Text], [ResultBool], []),
+    'enableCertificateAccess' : IDL.Func(
+        [IDL.Principal, IDL.Text],
+        [ResultBool],
+        [],
+      ),
+    'enrollUser' : IDL.Func([IDL.Text, IDL.Text], [ResultEnrollment], []),
+    'getCourseById' : IDL.Func([IDL.Text], [ResultCourse], ['query']),
+    'getCourseContent' : IDL.Func(
+        [IDL.Text, IDL.Nat],
+        [ResultContents],
+        ['query'],
+      ),
+    'getCourses' : IDL.Func(
+        [
+          IDL.Nat,
+          IDL.Nat,
+          IDL.Opt(
+            IDL.Variant({
+              'priceLowToHigh' : IDL.Null,
+              'popular' : IDL.Null,
+              'newest' : IDL.Null,
+              'priceHighToLow' : IDL.Null,
+              'rating' : IDL.Null,
+            })
+          ),
+        ],
+        [IDL.Vec(Course)],
+        ['query'],
+      ),
+    'getMe' : IDL.Func([], [ResultUser], ['query']),
+    'getModulesWithAccess' : IDL.Func([IDL.Text], [ResultModules], ['query']),
+    'getMyCourses' : IDL.Func([], [IDL.Vec(Course)], ['query']),
+    'getMyPaymentHistory' : IDL.Func([], [ResultPaymentHistory], ['query']),
+    'getMyTransactions' : IDL.Func([], [Result__1_2], ['query']),
+    'getMyWallets' : IDL.Func([], [Result__1_1], ['query']),
+    'getPaymentHistoryByCourse' : IDL.Func(
+        [IDL.Text],
+        [ResultPaymentHistory],
+        ['query'],
+      ),
+    'getPaymentHistoryByUserAndCourse' : IDL.Func(
+        [IDL.Text],
+        [ResultPaymentHistory],
+        ['query'],
+      ),
+    'getProfile' : IDL.Func([], [ResultUser], ['query']),
+    'getUserProgress' : IDL.Func(
+        [IDL.Principal, IDL.Text, IDL.Nat, IDL.Nat],
+        [IDL.Opt(IDL.Nat)],
+        ['query'],
+      ),
+    'hasAccess' : IDL.Func([IDL.Principal, IDL.Text], [ResultBool], ['query']),
+    'isUserWhitelistedForCertificate' : IDL.Func(
+        [IDL.Principal, IDL.Text],
+        [ResultBool],
+        ['query'],
+      ),
+    'loginWithPrincipal' : IDL.Func(
+        [
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Text),
+        ],
+        [ResultUser],
+        [],
+      ),
+    'searchCourses' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Text),
+          IDL.Opt(IDL.Float64),
+          IDL.Opt(IDL.Nat),
+          IDL.Nat,
+          IDL.Nat,
+        ],
+        [IDL.Vec(Course)],
+        ['query'],
+      ),
+    'setCoursePrice' : IDL.Func(
+        [IDL.Text, IDL.Nat, IDL.Text],
+        [ResultCourse],
+        [],
+      ),
+    'setPrimaryWallet' : IDL.Func([IDL.Text], [Result__1_1], []),
+    'setUserProgress' : IDL.Func(
+        [IDL.Text, IDL.Nat, IDL.Nat, IDL.Nat],
+        [ResultBool],
+        [],
+      ),
+    'toggleFavorite' : IDL.Func([IDL.Text], [ResultBool], []),
+    'updateCourse' : IDL.Func([IDL.Text, CourseUpdate], [Result__1], []),
+    'updateEmail' : IDL.Func([IDL.Text], [Result], []),
+    'updateProfile' : IDL.Func([ProfileUpdate], [ResultUser], []),
+    'whitelistUserForCertificate' : IDL.Func([IDL.Text], [ResultBool], []),
+    'whoami' : IDL.Func([], [IDL.Principal], ['query']),
   });
-
 };
-
-export const init = ({ IDL }) => {
-  return [];
-};
+export const init = ({ IDL }) => { return []; };
