@@ -19,6 +19,9 @@ const Dashboard = () => {
   });
   const [firstName, setFirstName] = React.useState('');
   const [lastName, setLastName] = React.useState('');
+  const [courses, setCourses] = React.useState<
+    { title: string; instructor: string }[]
+  >([]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setData({
@@ -52,7 +55,6 @@ const Dashboard = () => {
         setIsLoading(false);
         return;
       }
-      console.log(data);
       const { status, message } = await loginWithPrincipal(data);
       if (status !== 'success') {
         setError(message);
@@ -84,6 +86,12 @@ const Dashboard = () => {
 
         setFirstName(ok?.first_name[0] || '');
         setLastName(ok?.last_name[0] || '');
+
+        const result = (await actor.getMyCourses()) as {
+          title: string;
+          instructor: string;
+        }[];
+        setCourses(result);
       })();
     }
   }, [actor]);
@@ -172,21 +180,29 @@ const Dashboard = () => {
             <div className="md:col-span-2">
               <div className="mb-12">
                 <h2 className="mb-4 text-xl">My Course</h2>
+                {courses?.length == 0 && (
+                  <div className="text-center">You have no course</div>
+                )}
                 <div className="flex items-center justify-between">
-                  <div className="w-80 text-center">
-                    <div className="mb-2 h-40 w-full bg-gray-300"></div>
-                    <div className="mb-2">
-                      <div className="">Javascript Beginner #1</div>
-                      <div className="">by Google</div>
-                    </div>
-                    <div className="progress-container">
-                      <div
-                        className="progress-bar"
-                        style={{ width: '55%' }}
-                      ></div>
-                    </div>
-                    <div className="">55% Complete</div>
-                  </div>
+                  {courses &&
+                    courses?.map((val, key) => {
+                      return (
+                        <div className="w-80 text-center" key={key}>
+                          <div className="mb-2 h-40 w-full bg-gray-300"></div>
+                          <div className="mb-2">
+                            <div className="">{val?.title}</div>
+                            <div className="">by {val?.instructor}</div>
+                          </div>
+                          <div className="progress-container">
+                            <div
+                              className="progress-bar"
+                              style={{ width: '55%' }}
+                            ></div>
+                          </div>
+                          <div className="">55% Complete</div>
+                        </div>
+                      );
+                    })}
                 </div>
               </div>
               <div className="mb-12">
