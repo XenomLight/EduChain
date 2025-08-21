@@ -38,7 +38,6 @@ interface CourseCategory {
   name: string;
   courses: Course[];
 }
-
 const Courses = () => {
   const [categories, setCategories] = useState<CourseCategory[]>([]);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
@@ -52,18 +51,49 @@ const Courses = () => {
     const fetchData = async () => {
       try {
         // 1. Khan Academy
-        const khanRes = await fetch(
-          'http://localhost:3001/api/courses/khanacademy'
-        );
-        const khanData = await khanRes.json();
-        const khanPrograms: Course[] =
-          khanData.data.listTopPrograms.programs.map((p: KhanAcademyProgram) => ({
-            id: p.id,
-            title: p.translatedTitle,
-            description: `By ${p.authorNickname} • Votes: ${p.sumVotesIncremented}`,
-            image: `https://www.khanacademy.org${p.imagePath}`,
-            url: `https://www.khanacademy.org${p.url}`,
-          }));
+        let khanPrograms: Course[] = [];
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // Timeout 5 detik
+        
+        try {
+          const khanRes = await fetch('http://localhost:3001/api/courses/khanacademy', {
+            signal: controller.signal
+          });
+          
+          clearTimeout(timeoutId);
+          
+          if (!khanRes.ok) {
+            throw new Error(`HTTP error! status: ${khanRes.status}`);
+          }
+          
+          const khanData = await khanRes.json();
+          
+          if (!khanData?.data?.listTopPrograms?.programs) {
+            throw new Error('Format data tidak valid dari Khan Academy');
+          }
+          
+          khanPrograms = khanData.data.listTopPrograms.programs
+            .filter((p: unknown): p is KhanAcademyProgram => 
+              !!p && 
+              typeof p === 'object' && 
+              p !== null &&
+              'id' in p && 
+              'translatedTitle' in p
+            )
+            .map((p: KhanAcademyProgram) => ({
+              id: p.id,
+              title: p.translatedTitle,
+              description: `By ${p.authorNickname || 'Unknown'} • Votes: ${p.sumVotesIncremented || 0}`,
+              image: p.imagePath ? `https://www.khanacademy.org${p.imagePath}` : '/images/placeholder-course.jpg',
+              url: p.url ? `https://www.khanacademy.org${p.url}` : '#',
+            }));
+        } catch (khanError) {
+          console.error('Error fetching Khan Academy:', khanError);
+          
+          // Hanya tampilkan error di console, biarkan array kosong
+          // Aplikasi akan tetap menampilkan bagian lain yang berhasil di-load
+          khanPrograms = [];
+        }
 
         // 2. Coursera
         const courseraRes = await fetch(
