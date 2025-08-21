@@ -76,7 +76,7 @@ const Navbar = () => {
             className={({ isActive }) =>
               `group relative transition ${isActive ? 'text-white' : 'text-[#EEEEEE]'}`
             }
-            end={link.to === '/'} // penting! biar "/" gak aktif di semua route
+            end={link.to === '/'} 
           >
             {({ isActive }) => (
               <>
@@ -167,3 +167,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
