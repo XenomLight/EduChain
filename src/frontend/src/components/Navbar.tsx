@@ -1,4 +1,5 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import logo from '../assets/icons/eduChain.svg';
 import { useAuth } from '@/hooks/useAuth';
@@ -69,14 +70,27 @@ const Navbar = () => {
           { name: 'Partners', to: '/partners' },
           { name: 'Settings', to: '/settings/profile' },
         ].map((link) => (
-          <Link
+          <NavLink
             key={link.name}
             to={link.to}
-            className="group relative transition hover:text-white"
+            className={({ isActive }) =>
+              `group relative transition ${isActive ? 'text-white' : 'text-[#EEEEEE]'}`
+            }
+            end={link.to === '/'} // penting! biar "/" gak aktif di semua route
           >
-            {link.name}
-            <span className="absolute -bottom-1 left-0 h-[2px] w-0 bg-[#2A8188] transition-all duration-300 group-hover:w-full"></span>
-          </Link>
+            {({ isActive }) => (
+              <>
+                {link.name}
+                <span
+                  className={`absolute -bottom-1 left-0 h-[2px] bg-[#2A8188] ${
+                    isActive
+                      ? 'w-full transition-none'
+                      : 'w-0 transition-all duration-300 group-hover:w-full'
+                  }`}
+                ></span>
+              </>
+            )}
+          </NavLink>
         ))}
 
         {/* Search */}

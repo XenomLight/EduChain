@@ -25,7 +25,21 @@ const Courses = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const searchQuery = searchParams.get('search')?.toLowerCase() || '';
+   
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text;
 
+    const parts = text.split(new RegExp(`(${query})`, 'gi'));
+    return parts.map((part, index) =>
+      part.toLowerCase() === query.toLowerCase() ? (
+        <span key={index} className="bg-yellow-300 text-black font-semibold">
+          {part}
+        </span>
+      ) : (
+        part
+      )
+    );
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -94,12 +108,12 @@ const Courses = () => {
     fetchData();
   }, []);
 
-  const filteredCategories = categories.map((cat) => ({
-    ...cat,
-    courses: cat.courses.filter(
-      (c) =>
-        c.title.toLowerCase().includes(searchQuery) ||
-        c.description.toLowerCase().includes(searchQuery)
+  const filteredCategories = categories.map((category) => ({
+    ...category,
+    courses: category.courses.filter(
+      (course) =>
+        course.title.toLowerCase().includes(searchQuery) ||
+        course.description.toLowerCase().includes(searchQuery)
     ),
   }));
 
@@ -110,13 +124,28 @@ const Courses = () => {
         : [...prev, categoryName]
     );
   };
+   
+  const sortedCategories = filteredCategories.map((cat) => {
+    const exactMatches = cat.courses.filter(
+      (c) =>
+        c.title.toLowerCase().startsWith(searchQuery) ||
+        c.description.toLowerCase().startsWith(searchQuery)
+    );
+    const partialMatches = cat.courses.filter(
+      (c) =>
+        !exactMatches.includes(c) &&
+        (c.title.toLowerCase().includes(searchQuery) ||
+          c.description.toLowerCase().includes(searchQuery))
+    );
+    return { ...cat, courses: [...exactMatches, ...partialMatches] };
+  });
 
   return (
     <div>
       <Navbar />
 
       <div className="container mx-auto px-4 py-8 pt-24">
-        {filteredCategories.map(
+        {sortedCategories.map(
           (category) =>
             category.courses.length > 0 && (
               <div key={category.name} className="mb-12">
@@ -148,9 +177,9 @@ const Courses = () => {
                       <div className="relative flex h-full flex-col justify-between p-6 text-white">
                         <div>
                           <h3 className="text-xl font-bold">{course.title}</h3>
+                           {highlightText(course.title, searchQuery)}
                           <p className="text-gray-300">{course.description}</p>
                         </div>
-
                         <div>
                           <p className="mt-4 text-2xl font-bold">Free</p>
                           <button
