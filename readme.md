@@ -25,10 +25,9 @@ EduChain addresses these issues by leveraging a decentralized education ecosyste
 -   **Decentralized Credentials:** All certificates are issued and stored on-chain, making them tamper-proof and instantly verifiable from anywhere in the world.
 -   **Multiple Payment Methods:** Pay for courses using ICP tokens, QRIS (Indonesia), PayPal, and other digital payment options.
 -   **Inclusive Login Options:**
-    -   **Web3:** Plug Wallet, Internet Identity for blockchain-native access.
-    -   **Web2:** Email/password, Google login for traditional users.
+    -   **Web3:** Internet Identity for blockchain-native access.
 -   **Curated Learning Modules:** Access industry-relevant content from trusted educational partners.
--   **Automated Certification:** Upon completing a course, learners receive smart contract-powered certificates directly to their accounts, eliminating the need for centralized credential storage.
+-   **Automated Certification:** Upon completing a course, learners receive smart contract-powered certificates to their accounts, eliminating the need for centralized credential storage.
 -   **Partnerships:** Plans to collaborate with top educational providers like Dicoding, Harisenin.com, and others for diverse content.
 
 ---
@@ -48,6 +47,7 @@ EduChain addresses these issues by leveraging a decentralized education ecosyste
 By combining the openness and security of decentralized technology with the ease-of-use of traditional e-learning, EduChain empowers learners to:
 
 **Learn. Earn. On-chain.**
+
 
 
 
