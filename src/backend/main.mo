@@ -17,7 +17,7 @@ import Time "mo:base/Time";
 import Char "mo:base/Char";
 import Float "mo:base/Float";
 
-actor {
+persistent actor {
   // ========== TYPES ==========
   public type Error = {
     #AlreadyExists;
@@ -1378,62 +1378,109 @@ public shared query func certificateTokens(): async [Nat] {
 
 
   // ========== SYSTEM FUNCTIONS ==========
-  system func preupgrade() {
+    system func preupgrade() {
     userEntries := Iter.toArray(users.entries());
     courseEntries := Iter.toArray(courses.entries());
-    // Convert enrollment entries to the correct format for stable storage
-    stableEnrollments := Array.map<((Principal, Text), Enrollment), (Principal, Text, Enrollment)>(
-    Iter.toArray(enrollments.entries()),
-    func((key, value)) = (key.0, key.1, value)
+  
+    // Save enrollments
+    enrollmentEntries := Array.map<((Principal, Text), Enrollment), (Principal, Text, Enrollment)>(
+      Iter.toArray(enrollments.entries()),
+      func((key, value)) = (key.0, key.1, value)
     );
+  
+    // Save certificate whitelist
+    certificateWhitelistEntries := Array.map<((Principal, Text), Bool), (Principal, Text, Bool)>(
+      Iter.toArray(certificateWhitelist.entries()),
+      func((key, value)) = (key.0, key.1, value)
+    );
+  
+    // Save certificate access
+    certificateAccessEntries := Array.map<((Principal, Text), Bool), (Principal, Text, Bool)>(
+      Iter.toArray(certificateAccess.entries()),
+      func((key, value)) = (key.0, key.1, value)
+    );
+  
+    // Save user course progress
+    userCourseProgressEntries := Iter.toArray(userProgress.entries());
+  
     certificateNFTEntries := Iter.toArray(certificateNFTs.entries());
     transactionEntries := Iter.toArray(transactions.entries());
     paymentHistoryEntries := Iter.toArray(paymentHistories.entries());
   };
-
+  
   system func postupgrade() {
     // Rebuild users
     users := HashMap.fromIter<Principal, User>(userEntries.vals(), userEntries.size(), Principal.equal, Principal.hash);
-    
+  
     // Rebuild courses
     courses := HashMap.fromIter<Text, Course>(courseEntries.vals(), courseEntries.size(), Text.equal, Text.hash);
-    
+  
+    // Rebuild enrollments
     enrollments := HashMap.fromIter<(Principal, Text), Enrollment>(
-    Array.map<(Principal, Text, Enrollment), ((Principal, Text), Enrollment)>(
-      enrollmentEntries,
-      func((userId, courseId, enrollment)) = ((userId, courseId), enrollment)
-    ).vals(),
-    enrollmentEntries.size(),
-    func(a: (Principal, Text), b: (Principal, Text)): Bool { 
-      Principal.equal(a.0, b.0) and a.1 == b.1 
-    },
-    func((p, c): (Principal, Text)): Hash.Hash {
-      let h1 = Principal.hash(p);
-      let h2 = Text.hash(c);
-      h1 ^ h2
-    }
+      Array.map<(Principal, Text, Enrollment), ((Principal, Text), Enrollment)>(
+        enrollmentEntries,
+        func((userId, courseId, enrollment)) = ((userId, courseId), enrollment)
+      ).vals(),
+      enrollmentEntries.size(),
+      func(a: (Principal, Text), b: (Principal, Text)): Bool {
+        Principal.equal(a.0, b.0) and a.1 == b.1
+      },
+      func((p, c): (Principal, Text)): Hash.Hash {
+        let h1 = Principal.hash(p);
+        let h2 = Text.hash(c);
+        h1 ^ h2
+      }
     );
-    // =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
-
+  
+    // Restore certificate whitelist
+    certificateWhitelist := HashMap.fromIter<(Principal, Text), Bool>(
+      Array.map<(Principal, Text, Bool), ((Principal, Text), Bool)>(
+        certificateWhitelistEntries,
+        func((p, c, b)) = ((p, c), b)
+      ).vals(),
+      certificateWhitelistEntries.size(),
+      func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1,
+      func((p, c)) = Principal.hash(p) ^ Text.hash(c)
+    );
+    certificateWhitelistEntries := [];
+  
+    // Restore certificate access
+    certificateAccess := HashMap.fromIter<(Principal, Text), Bool>(
+      Array.map<(Principal, Text, Bool), ((Principal, Text), Bool)>(
+        certificateAccessEntries,
+        func((p, c, b)) = ((p, c), b)
+      ).vals(),
+      certificateAccessEntries.size(),
+      func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1,
+      func((p, c)) = Principal.hash(p) ^ Text.hash(c)
+    );
+    certificateAccessEntries := [];
+  
+    // Restore user course progress
+    userProgress := HashMap.fromIter<(Principal, Text, Nat, Nat), Nat>(
+      userCourseProgressEntries.vals(),
+      userCourseProgressEntries.size(),
+      func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1 and a.2 == b.2 and a.3 == b.3,
+      func((p, c, m, k)) = Principal.hash(p) ^ Text.hash(c) ^ Hash.hash(m) ^ Hash.hash(k)
+    );
+    userCourseProgressEntries := [];
+  
     certificateNFTs := HashMap.fromIter<Nat, CertificateNFT>(certificateNFTEntries.vals(), certificateNFTEntries.size(), Nat.equal, Hash.hash);
-
-    // Rebuild transactions
+  
     transactions := HashMap.fromIter<Nat, Transaction>(transactionEntries.vals(), transactionEntries.size(), Nat.equal, Hash.hash);
-    
-    // Rebuild payment histories
+  
     paymentHistories := HashMap.fromIter<Nat, PaymentHistory>(paymentHistoryEntries.vals(), paymentHistoryEntries.size(), Nat.equal, Hash.hash);
-
-    // Rebuild user payment histories index
+  
     userPaymentHistories := HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
     for ((id, history) in paymentHistories.entries()) {
-    let existingHistories = switch (userPaymentHistories.get(history.user_principal)) {
-      case (?histories) { Buffer.fromArray<Nat>(histories) };
-      case null { Buffer.Buffer<Nat>(0) };
+      let existingHistories = switch (userPaymentHistories.get(history.user_principal)) {
+        case (?histories) { Buffer.fromArray<Nat>(histories) };
+        case null { Buffer.Buffer<Nat>(0) };
+      };
+      existingHistories.add(id);
+      userPaymentHistories.put(history.user_principal, Buffer.toArray(existingHistories));
     };
-    existingHistories.add(id);
-    userPaymentHistories.put(history.user_principal, Buffer.toArray(existingHistories));
-    };
-// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
+  
     userNFTs := HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
     for ((id, nft) in certificateNFTs.entries()) {
       let existingNFTs = switch (userNFTs.get(nft.owner)) {
@@ -1443,11 +1490,9 @@ public shared query func certificateTokens(): async [Nat] {
       existingNFTs.add(id);
       userNFTs.put(nft.owner, Buffer.toArray(existingNFTs));
     };
-
-  certificateNFTEntries := [];
-// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
-
-    // Clear temporary storage
+  
+    certificateNFTEntries := [];
+    
     userEntries := [];
     courseEntries := [];
     enrollmentEntries := [];
