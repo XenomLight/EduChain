@@ -174,8 +174,27 @@ actor {
     completed_at: ?Int;
     enrollment_status: Text; // "enrolled", "not_enrolled"
   };
+// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
+  public type TokenId = Nat;
+  public type Metadata = Blob;
+  public type MintResult = {
+    token_id: TokenId;
+    owner: Principal;
+    metadata: Metadata;
+  };
+  public type CertificateNFT = {
+    nft_id: Nat;
+    owner: Principal;
+    course_id: Text;
+    minted_at: Int;
+    metadata: Text; // You can store metadata or a URI here
+  };
 
-
+  private stable var certificateNFTEntries: [(Nat, CertificateNFT)] = [];
+  private flexible var certificateNFTs = HashMap.HashMap<Nat, CertificateNFT>(1, Nat.equal, Hash.hash);
+  private flexible var userNFTs = HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
+  private stable var nextNFTId: Nat = 1;
+// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
 
   public type Result<T, E> = { #ok: T; #err: E };
   public type ResultUser = Result<User, Error>;
@@ -354,11 +373,11 @@ actor {
   // ========== STORAGE ==========
   // Whitelist NFT per user per course (userPrincipal, courseId) -> Bool
   private stable var certificateWhitelistEntries: [(Principal, Text, Bool)] = [];
-  private var certificateWhitelist = HashMap.HashMap<(Principal, Text), Bool>(1, func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1, func((p, c)) = Principal.hash(p) ^ Text.hash(c));
+  private flexible var certificateWhitelist = HashMap.HashMap<(Principal, Text), Bool>(1, func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1, func((p, c)) = Principal.hash(p) ^ Text.hash(c));
 
   // Flag akses sertifikat per user per course (userPrincipal, courseId) -> Bool
   private stable var certificateAccessEntries: [(Principal, Text, Bool)] = [];
-  private var certificateAccess = HashMap.HashMap<(Principal, Text), Bool>(1, func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1, func((p, c)) = Principal.hash(p) ^ Text.hash(c));
+  private flexible var certificateAccess = HashMap.HashMap<(Principal, Text), Bool>(1, func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1, func((p, c)) = Principal.hash(p) ^ Text.hash(c));
   private stable var nextUserId: Nat = 1;
   private stable var nextEnrollmentId: Nat = 1;
   private stable var nextTransactionId: Nat = 1;
@@ -366,16 +385,16 @@ actor {
 
   // User storage
   private stable var userEntries: [(Principal, User)] = [];
-  private var users = HashMap.HashMap<Principal, User>(1, Principal.equal, Principal.hash);
-  private var usersByEmail = HashMap.HashMap<Text, Principal>(1, Text.equal, Text.hash);
-  private var usernames = HashMap.HashMap<Text, Principal>(1, Text.equal, Text.hash);
+  private flexible var users = HashMap.HashMap<Principal, User>(1, Principal.equal, Principal.hash);
+  private flexible var usersByEmail = HashMap.HashMap<Text, Principal>(1, Text.equal, Text.hash);
+  private flexible var usernames = HashMap.HashMap<Text, Principal>(1, Text.equal, Text.hash);
 
   // Course storage
   private stable var courseEntries: [(Text, Course)] = [];
-  private var courses = HashMap.HashMap<Text, Course>(1, Text.equal, Text.hash);
+  private flexible var courses = HashMap.HashMap<Text, Course>(1, Text.equal, Text.hash);
   //user progress on each course
   private stable var userCourseProgressEntries: [((Principal, Text, Nat, Nat), Nat)] = [];
-  private var userProgress = HashMap.HashMap<(Principal, Text, Nat, Nat), Nat>(
+  private flexible var userProgress = HashMap.HashMap<(Principal, Text, Nat, Nat), Nat>(
     1,
     func(a, b) = Principal.equal(a.0, b.0) and a.1 == b.1 and a.2 == b.2 and a.3 == b.3,
     func((p, c, m, k)) = Principal.hash(p) ^ Text.hash(c) ^ Hash.hash(m) ^ Hash.hash(k)
@@ -383,7 +402,7 @@ actor {
   // Enrollment storage
   private stable var enrollmentEntries: [(Principal, Text, Enrollment)] = [];
   stable var stableEnrollments : [(Principal, Text, Enrollment)] = [];
-  private var enrollments = HashMap.HashMap<(Principal, Text), Enrollment>(1, 
+  private flexible var enrollments = HashMap.HashMap<(Principal, Text), Enrollment>(1, 
     func(a: (Principal, Text), b: (Principal, Text)): Bool { 
       Principal.equal(a.0, b.0) and a.1 == b.1 
     },
@@ -396,13 +415,13 @@ actor {
 
   // Transaction storage
   private stable var transactionEntries: [(Nat, Transaction)] = [];
-  private var transactions = HashMap.HashMap<Nat, Transaction>(1, Nat.equal, Hash.hash);
-  private var userTransactions = HashMap.HashMap<Nat, [Nat]>(1, Nat.equal, Hash.hash);
+  private flexible var transactions = HashMap.HashMap<Nat, Transaction>(1, Nat.equal, Hash.hash);
+  private flexible var userTransactions = HashMap.HashMap<Nat, [Nat]>(1, Nat.equal, Hash.hash);
 
   // Payment history storage
   private stable var paymentHistoryEntries: [(Nat, PaymentHistory)] = [];
-  private var paymentHistories = HashMap.HashMap<Nat, PaymentHistory>(1, Nat.equal, Hash.hash);
-  private var userPaymentHistories = HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
+  private flexible var paymentHistories = HashMap.HashMap<Nat, PaymentHistory>(1, Nat.equal, Hash.hash);
+  private flexible var userPaymentHistories = HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
 
   // ========== WALLET & PROFILE FUNCTIONS ==========
 
@@ -831,6 +850,46 @@ actor {
       case null #err(#Unauthorized)
     }
   };
+  // =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
+
+  public shared (msg) func mintCertificateNFT(courseId: Text, metadata: Text): async Result.Result<CertificateNFT, Error> {
+    let key = (msg.caller, courseId);
+    switch (certificateWhitelist.get(key)) {
+      case (?true) {
+        // Check if already minted for this user and course
+        for ((_, nft) in certificateNFTs.entries()) {
+          if (nft.owner == msg.caller and nft.course_id == courseId) {
+            return #err(#AlreadyExists);
+          }
+        };
+
+        let nftId = nextNFTId;
+        nextNFTId += 1;
+        let now = getCurrentTime();
+        let newNFT: CertificateNFT = {
+          nft_id = nftId;
+          owner = msg.caller;
+          course_id = courseId;
+          minted_at = now;
+          metadata = metadata;
+        };
+        certificateNFTs.put(nftId, newNFT);
+
+        // Index for user
+        let existingNFTs = switch (userNFTs.get(msg.caller)) {
+          case (?ids) { Buffer.fromArray<Nat>(ids) };
+          case null { Buffer.Buffer<Nat>(0) };
+        };
+        existingNFTs.add(nftId);
+        userNFTs.put(msg.caller, Buffer.toArray(existingNFTs));
+
+        return #ok(newNFT);
+      };
+      case _ return #err(#Unauthorized);
+    }
+  };
+
+  // =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
 
   public shared (msg) func enrollUser(
     courseId: Text,
@@ -924,7 +983,7 @@ actor {
               case null { Buffer.Buffer<Nat>(0) };
             };
             existingTxns.add(transactionId);
-            userTransactions.put(user.user_id, existingTxns.toArray());
+            userTransactions.put(user.user_id, Buffer.toArray(existingTxns));
 
             let paymentHistoryId = nextPaymentHistoryId;
             nextPaymentHistoryId += 1;
@@ -952,7 +1011,7 @@ actor {
               case null { Buffer.Buffer<Nat>(0) };
             };
             existingHistories.add(paymentHistoryId);
-            userPaymentHistories.put(msg.caller, existingHistories.toArray());
+            userPaymentHistories.put(msg.caller, Buffer.toArray(existingHistories));
 
             #ok(transaction)
           }
@@ -1194,6 +1253,48 @@ public shared query (msg) func getMyCourses(): async [Course] {
   };
   Buffer.toArray(myCourses)
 };
+// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
+
+public shared query (msg) func getMyCertificateNFTs(): async [CertificateNFT] {
+  switch (userNFTs.get(msg.caller)) {
+    case (?ids) {
+      Array.mapFilter<Nat, CertificateNFT>(
+        ids,
+        func(id: Nat): ?CertificateNFT { certificateNFTs.get(id) }
+      )
+    };
+    case null [];
+  }
+};
+
+public shared query func getCertificatesByCourse(courseId: Text): async [CertificateNFT] {
+  let result = Buffer.Buffer<CertificateNFT>(0);
+  for ((_, nft) in certificateNFTs.entries()) {
+    if (nft.course_id == courseId) {
+      result.add(nft);
+    }
+  };
+  Buffer.toArray(result)
+};
+
+public shared query func certificateOwnerOf(nftId: Nat): async ?Principal {
+  switch (certificateNFTs.get(nftId)) {
+    case (?nft) ?nft.owner;
+    case null null;
+  }
+};
+
+public shared query func certificateTokenMetadata(nftId: Nat): async ?Text {
+  switch (certificateNFTs.get(nftId)) {
+    case (?nft) ?nft.metadata;
+    case null null;
+  }
+};
+
+public shared query func certificateTokens(): async [Nat] {
+  Iter.toArray(certificateNFTs.keys());
+};
+// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
 
   // Get payment history by course
   public shared query (msg) func getPaymentHistoryByCourse(courseId: Text): async ResultPaymentHistory {
@@ -1285,7 +1386,7 @@ public shared query (msg) func getMyCourses(): async [Course] {
     Iter.toArray(enrollments.entries()),
     func((key, value)) = (key.0, key.1, value)
     );
-
+    certificateNFTEntries := Iter.toArray(certificateNFTs.entries());
     transactionEntries := Iter.toArray(transactions.entries());
     paymentHistoryEntries := Iter.toArray(paymentHistories.entries());
   };
@@ -1297,7 +1398,7 @@ public shared query (msg) func getMyCourses(): async [Course] {
     // Rebuild courses
     courses := HashMap.fromIter<Text, Course>(courseEntries.vals(), courseEntries.size(), Text.equal, Text.hash);
     
-     enrollments := HashMap.fromIter<(Principal, Text), Enrollment>(
+    enrollments := HashMap.fromIter<(Principal, Text), Enrollment>(
     Array.map<(Principal, Text, Enrollment), ((Principal, Text), Enrollment)>(
       enrollmentEntries,
       func((userId, courseId, enrollment)) = ((userId, courseId), enrollment)
@@ -1312,7 +1413,10 @@ public shared query (msg) func getMyCourses(): async [Course] {
       h1 ^ h2
     }
     );
-  
+    // =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
+
+    certificateNFTs := HashMap.fromIter<Nat, CertificateNFT>(certificateNFTEntries.vals(), certificateNFTEntries.size(), Nat.equal, Hash.hash);
+
     // Rebuild transactions
     transactions := HashMap.fromIter<Nat, Transaction>(transactionEntries.vals(), transactionEntries.size(), Nat.equal, Hash.hash);
     
@@ -1329,6 +1433,19 @@ public shared query (msg) func getMyCourses(): async [Course] {
     existingHistories.add(id);
     userPaymentHistories.put(history.user_principal, Buffer.toArray(existingHistories));
     };
+// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
+    userNFTs := HashMap.HashMap<Principal, [Nat]>(1, Principal.equal, Principal.hash);
+    for ((id, nft) in certificateNFTs.entries()) {
+      let existingNFTs = switch (userNFTs.get(nft.owner)) {
+        case (?ids) { Buffer.fromArray<Nat>(ids) };
+        case null { Buffer.Buffer<Nat>(0) };
+      };
+      existingNFTs.add(id);
+      userNFTs.put(nft.owner, Buffer.toArray(existingNFTs));
+    };
+
+  certificateNFTEntries := [];
+// =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
 
     // Clear temporary storage
     userEntries := [];
