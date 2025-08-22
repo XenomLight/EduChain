@@ -1,5 +1,7 @@
 # EduChain
 
+![EduChain Demo](https://i.imgflip.com/a3v5zy.gif)
+
 **EduChain** is an integrated education platform built on the Internet Computer Protocol (ICP) blockchain, designed to revolutionize how people learn and verify achievements globally. The platform enables users to pay for courses using ICP tokens or digital payment methods like QRIS (for Indonesian users), PayPal, and more.
 
 ---
