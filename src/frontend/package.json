@@ -20,7 +20,7 @@
     "@dfinity/auth-client": "^2.4.1",
     "@dfinity/identity": "^2.4.1",
     "@dfinity/principal": "^2.4.1",
-    "@tailwindcss/vite": "^4.1.11",
+    "@tailwindcss/vite": "^4.1.12",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
     "lucide-react": "^0.539.0",
