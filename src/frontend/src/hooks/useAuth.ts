@@ -160,16 +160,68 @@ export const useAuth = () => {
     };
   }
 
+  async function loginWithPrincipal({
+    firstName,
+    lastName,
+    username,
+    email,
+  }: {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+  }) {
+    if (!actor) init();
+
+    const first_name = firstName;
+    const last_name = lastName;
+
+    const result = (await actor?.loginWithPrincipal(
+      first_name,
+      last_name,
+      username,
+      email
+    )) as {
+      ok?: {
+        principal: unknown;
+      };
+      err?: unknown;
+    };
+
+    if (result.err) {
+      return {
+        status: 'error',
+        message: '`loginWithPrincipal` error!',
+      };
+    }
+
+    return {
+      status: 'success',
+      message: 'Account login successfully!',
+    };
+  }
+
   async function logout() {
-    if (!authClient) return;
+    if (!authClient) {
+      return {
+        status: 'error',
+        message: 'Logout error!',
+      };
+    }
 
     await authClient.logout();
     localStorage.removeItem('principal');
     localStorage.removeItem('walletType');
     init();
+
+    return {
+      status: 'success',
+      message: 'Account logged out successfully!',
+    };
   }
 
   return {
+    loginWithPrincipal,
     loginWithEmail,
     registerWithEmail,
     logout,
