@@ -2,8 +2,51 @@ import Navbar from '../components/Navbar';
 import { PiHexagonThin } from 'react-icons/pi';
 import { motion } from 'framer-motion';
 import Footer from '../components/footer';
+import { useAuth } from '@/hooks/useAuth';
+import React from 'react';
+import { authService } from '@/lib/auth';
 
 const Home = () => {
+  const {
+      setIsAuthenticated,
+      setPrincipal,
+      setWalletType,
+      isAuthenticated
+    } = useAuth();
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
+  // helper utk semua paket
+const handleBuy = async (amount: number, desc: string) => {
+  if (!isAuthenticated) {
+    const success = await handleLogin();
+    if (!success) return; // gagal login
+  }
+
+  // kalau sudah login → langsung redirect
+  window.location.href = `/qris?amount=${amount}&desc=${encodeURIComponent(desc)}`;
+};
+
+
+  const handleLogin = async () => {
+      // authService
+      setIsLoading(true);
+      try {
+        const success = await authService.loginWithInternetIdentity();
+        if (success) {
+          setIsAuthenticated(authService.isAuthenticated);
+          setPrincipal(authService.principal);
+          setWalletType(authService.walletType);
+        }
+        return success;
+      } catch (error) {
+        console.error('Internet Identity login failed:', error);
+        alert('Internet Identity login failed. Please try again.');
+        return false;
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
       <Navbar />
@@ -215,12 +258,12 @@ const Home = () => {
                 </ul>
               </div>
               <div className="mt-auto">
-                <button 
-                 onClick={() =>
-                    (window.location.href = `/qris?amount=1&desc=Start Learning`)
-                  }
-                className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
-                  Start Learning
+                <button
+                  onClick={() => handleBuy(1, "Start Learning")}
+                  className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black"
+                  disabled={isLoading}
+                >
+                  {isAuthenticated ? "Start Learning" : isLoading ? "Loading..." : "Login to Start"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for beginners wanting to try the platform
@@ -254,12 +297,11 @@ const Home = () => {
               </div>
               <div className="mt-auto">
                 <button
-                  onClick={() =>
-                    (window.location.href = `/qris?amount=472000&desc=Individual Course Access`)
-                  }
+                  onClick={() => handleBuy(472000, "Buy Individual Course Access")}
                   className="mt-8 w-full rounded-full bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] py-3 font-semibold text-black transition hover:opacity-90"
+                  disabled={isLoading}
                 >
-                  Buy Individual Access
+                  {isAuthenticated ? "Buy Individual Access" : isLoading ? "Loading..." : "Buy Individual Access"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for focused learning on one skill
@@ -292,12 +334,12 @@ const Home = () => {
                 </ul>
               </div>
               <div className="mt-auto">
-                <button 
-                 onClick={() =>
-                    (window.location.href = `/qris?amount=570000&desc=Buy Monthly Plan`)
-                  }
-                className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
-                  Buy Monthly Plan
+               <button
+                  onClick={() => handleBuy(570000, "Buy Monthly Plan")}
+                  className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black"
+                  disabled={isLoading}
+                >
+                  {isAuthenticated ? "Buy Monthly Plan" : isLoading ? "Loading..." : "Buy Monthly Plan"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for learners exploring multiple skills
@@ -333,11 +375,11 @@ const Home = () => {
               </div>
               <div className="mt-auto">
                 <button
-                onClick={() =>
-                    (window.location.href = `/qris?amount=3893000&desc=Buy Annual Plan`)
-                  }
-                className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black">
-                  Buy Annual Plan
+                  onClick={() => handleBuy(3893000, "Buy Annual Plan")}
+                  className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black"
+                  disabled={isLoading}
+                >
+                  {isAuthenticated ? "Buy Annual Plan" : isLoading ? "Loading..." : "Buy Annual Plan"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for committed learners & professionals
