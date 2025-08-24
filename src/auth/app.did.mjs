@@ -247,10 +247,10 @@ export const idlFactory = ({ IDL }) => {
       ),
     'loginWithPrincipal' : IDL.Func(
         [
-          IDL.Opt(IDL.Text),
-          IDL.Opt(IDL.Text),
-          IDL.Opt(IDL.Text),
-          IDL.Opt(IDL.Text),
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
+          IDL.Text,
         ],
         [ResultUser],
         [],

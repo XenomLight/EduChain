@@ -6,6 +6,7 @@ import ProfileSetting from './pages/settings/ProfileSetting';
 import WalletSetting from './pages/settings/walletSetting';
 import ConfigurationSetting from './pages/settings/configurationSetting';
 import Logout from './pages/settings/logOutSetting';
+import Dashboard from './pages/Dashboard';
 import Courses from './pages/Courses';
 import Qris from './pages/Qris';
 import About from './pages/About';
@@ -25,6 +26,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<Courses />} />
         {/* <Route path="/auth/login" element={<Login />} />
         <Route path="/auth/register" element={<Register />} /> */}
