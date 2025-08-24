@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import logo from '../assets/icons/eduChain.svg';
+import logo from '../assets/icons/educhain..svg';
 import { useAuth } from '@/hooks/useAuth';
 import Button from './ui/Button';
 import React, { useState } from 'react';
