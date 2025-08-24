@@ -112,8 +112,9 @@ const Navbar = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
-          <button
+          <button 
             type="button"
+            aria-label="Search"
             className="rounded-md bg-[#2A8188] px-3 py-1 transition hover:bg-[#246d73]"
             onClick={handleSearch}
           >
@@ -123,6 +124,7 @@ const Navbar = () => {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"

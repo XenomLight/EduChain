@@ -195,7 +195,6 @@ const Courses = () => {
   return (
     <div>
       <Navbar />
-
       <div className="container mx-auto px-4 py-8 pt-24">
         {sortedCategories.map(
           (category) =>
