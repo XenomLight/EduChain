@@ -7,7 +7,7 @@ import {
   FaYoutube,
   FaTimes,
 } from 'react-icons/fa';
-import logo from '../assets/icons/eduChain.svg';
+import logo from '../assets/icons/educhain..svg';
 import { Link } from 'react-router-dom';
 
 const Footer: React.FC = () => {
