@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { icpMaterials } from '../data/icpMaterials';
+import { icpVideos } from '../data/icpVideos';
 
 interface KhanProgram {
   id: string;
@@ -24,6 +25,7 @@ const CourseDetail = () => {
   const [khanCourse, setKhanCourse] = useState<KhanProgram | null>(null);
   const [courseraCourse, setCourseraCourse] = useState<CourseraCourse | null>(null);
   const [currentMaterial, setCurrentMaterial] = useState(icpMaterials[0]);
+  const [videoIndex, setVideoIndex] = useState(0);
 
   useEffect(() => {
     if (!id) return;
@@ -134,7 +136,7 @@ const CourseDetail = () => {
 
         {/* Right Sidebar */}
         <div className="w-full md:w-80 p-4 md:p-6 bg-white/90 shadow-lg rounded-2xl backdrop-blur-md mt-4 md:mt-0">
-          <h3 className="text-lg font-bold text-gray-800 mb-4">Materials List</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">Materials Courses</h3>
           <ul className="space-y-3">
             {icpMaterials.map((m) => (
               <li
@@ -167,6 +169,109 @@ const CourseDetail = () => {
       </div>
     );
   }
+
+// --- ICP VIDEOS (video-blockchain) ---
+if (id === 'video-blockchain') {
+  const totalVideos = icpVideos.length;
+  const currentVideo = icpVideos[videoIndex] || icpVideos[0];
+
+  return (
+    <div className="flex flex-col md:flex-row min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      {/* Left Section */}
+      <div className="flex-1 p-4 md:p-6">
+        <div className="rounded-2xl bg-white shadow-lg backdrop-blur-md p-4 md:p-6">
+          <iframe
+            src={currentVideo.url.replace('watch?v=', 'embed/')}
+            className="w-full h-80 md:h-[36rem] rounded-xl shadow-md"
+            title={currentVideo.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+
+          <h2 className="mt-4 text-2xl md:text-3xl font-bold text-gray-800">
+            {currentVideo.title}
+          </h2>
+
+          {currentVideo.duration && (
+            <p className="mt-1 text-gray-600">Duration: {currentVideo.duration}</p>
+          )}
+
+          {currentVideo.description && (
+            <p className="mt-3 text-gray-700">{currentVideo.description}</p>
+          )}
+
+          {/* Progress + Navigation */}
+          <div className="mt-6 space-y-6">
+            <div className="p-3 rounded-lg bg-purple-50 border border-purple-100">
+              <h4 className="text-md font-medium mb-1 text-gray-800">Watching Progress</h4>
+              <div className="w-full bg-gray-200 rounded-full h-3">
+                <div
+                  className="bg-purple-500 h-3 rounded-full transition-all duration-500"
+                  style={{ width: `${((videoIndex + 1) / totalVideos) * 100}%` }}
+                />
+              </div>
+              <p className="text-gray-700 text-sm mt-1">
+                {videoIndex + 1} / {totalVideos} videos watched
+              </p>
+            </div>
+
+            <div className="flex justify-between">
+              {videoIndex > 0 && (
+                <button
+                  className="px-4 py-2 rounded-lg bg-gray-100 text-gray-800 hover:bg-gray-200 transition"
+                  onClick={() => setVideoIndex(videoIndex - 1)}
+                >
+                  ← Previous
+                </button>
+              )}
+
+              {videoIndex < totalVideos - 1 && (
+                <button
+                  className="px-4 py-2 rounded-lg bg-purple-500 text-white hover:bg-purple-600 transition"
+                  onClick={() => setVideoIndex(videoIndex + 1)}
+                >
+                  Next →
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Right Sidebar */}
+      <div className="w-full md:w-80 p-4 md:p-6 bg-white/90 shadow-lg rounded-2xl backdrop-blur-md mt-4 md:mt-0">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">Course Videos</h3>
+        <ul className="space-y-3">
+          {icpVideos.map((v, i) => (
+            <li
+              key={v.id}
+              className={`cursor-pointer p-3 rounded-lg flex justify-between items-center transition ${
+                i === videoIndex
+                  ? 'bg-gradient-to-r from-purple-400 to-purple-600 text-white shadow-md'
+                  : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+              }`}
+              onClick={() => setVideoIndex(i)}
+            >
+              <span>{v.title}</span>
+              {v.duration && <span className="text-sm font-medium">{v.duration}</span>}
+            </li>
+          ))}
+        </ul>
+
+        <div className="mt-6">
+          <Link
+            to="/courses"
+            className="block text-center py-2 px-4 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition"
+          >
+            Back to Courses
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 
   // --- KHAN ACADEMY ---
   if (khanCourse) {

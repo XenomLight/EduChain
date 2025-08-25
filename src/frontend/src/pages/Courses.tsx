@@ -136,14 +136,14 @@ const Courses = () => {
                 id: 'ppt-blockchain',
                 title: 'ICP & Blockchain PPT',
                 description: 'Slide pembelajaran dasar ICP dan Blockchain',
-                image: '/images/icp-ppt.jpg',
+                image: '/src/assets/image/icpxbc.png',
                 url: '/courses/icp-ppt',
               },
               {
                 id: 'video-blockchain',
                 title: 'ICP & Blockchain Video',
                 description: 'Video tutorial lengkap ICP dan Blockchain',
-                image: '/images/icp-video.jpg',
+                image: '/src/assets/image/icpxbc.png',
                 url: '/courses/icp-video',
               },
             ],
@@ -195,7 +195,6 @@ const Courses = () => {
   return (
     <div>
       <Navbar />
-
       <div className="container mx-auto px-4 py-8 pt-24">
         {sortedCategories.map(
           (category) =>

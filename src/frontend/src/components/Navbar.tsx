@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
-import logo from '../assets/icons/eduChain.svg';
+import logo from '../assets/icons/educhain..svg';
 import { useAuth } from '@/hooks/useAuth';
 import Button from './ui/Button';
 import React, { useState } from 'react';
@@ -112,8 +112,9 @@ const Navbar = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
           />
-          <button
+          <button 
             type="button"
+            aria-label="Search"
             className="rounded-md bg-[#2A8188] px-3 py-1 transition hover:bg-[#246d73]"
             onClick={handleSearch}
           >
@@ -123,6 +124,7 @@ const Navbar = () => {
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
+              aria-hidden="true"
             >
               <path
                 strokeLinecap="round"
