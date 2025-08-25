@@ -7,7 +7,7 @@
     "dev:frontend": "vite",
     "dev:backend": "tsc -b --watch",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && cp src/assets/.ic-assets.json5 dist/",
     "build:prod": "tsc -b && vite build --mode production",
     "preview": "vite preview",
     "lint": "eslint .",

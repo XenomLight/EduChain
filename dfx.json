@@ -7,8 +7,7 @@
 		"frontend": {
 			"dependencies": ["backend"],
 			"source": ["src/frontend/dist"],
-			"type": "assets",
-			"ignore": ["src/frontend/dist/.ic-assets.json5"]
+			"type": "assets"
 		},
 		"internet_identity": {
 			"type": "pull",
