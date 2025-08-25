@@ -892,8 +892,7 @@ persistent actor {
   // =======!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!DUMMY NFT CERTIFICATE, CHANGIN TO RUST ICRC SOONB
 
   public shared (msg) func enrollUser(
-    courseId: Text,
-    enrollmentDate: Text
+    courseId: Text
   ): async ResultEnrollment {
     switch (users.get(msg.caller)) {
       case (?user) {
@@ -911,7 +910,7 @@ persistent actor {
             let enrollment: Enrollment = {
               user_id = msg.caller;
               course_id = courseId;
-              enrollment_date = enrollmentDate;
+              enrollment_date = Int.toText(getCurrentTime());
               status = "active";
               created_at = now;
               updated_at = now;
@@ -939,7 +938,7 @@ persistent actor {
           case (?course) {
             if (course.price == 0) {
               // Free course: 
-              let enrollResult = await enrollUser(courseId, Int.toText(getCurrentTime()));
+              let enrollResult = await enrollUser(courseId);
               switch (enrollResult) {
                 case (#ok(_)) {
                   //ga disimpan di database
@@ -1063,7 +1062,7 @@ persistent actor {
             };
 
             // Enroll user in the course
-            let enrollmentResult = await enrollUser(txn.course_id, Int.toText(getCurrentTime()));
+            let enrollmentResult = await enrollUser(txn.course_id);
             let enrollment = switch (enrollmentResult) {
               case (#ok(enroll)) ?enroll;
               case (#err(_)) null; // Log error but don't fail
