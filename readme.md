@@ -41,13 +41,26 @@ EduChain addresses these issues by leveraging a decentralized education ecosyste
 5. **Earn Credentials:** Receive on-chain certificates after completing modules.
 
 ---
+## Data Storage
 
+EduChain stores user data, course data, and certificate NFT data directly on-chain for security and transparency.  
+Currently, some features use APIs for dummy data during development and testing.
+
+---
+
+## NFT Certificates
+
+EduChain currently uses the [DIP-721] NFT standard for on-chain certificates.  
+In the future, we plan to migrate to the [ICRC] NFT standard for broader interoperability and advanced features.
+
+---
 ## Vision
 
 By combining the openness and security of decentralized technology with the ease-of-use of traditional e-learning, EduChain empowers learners to:
 
 **Learn. Earn. On-chain.**
 
+For development purposes, you can read `readmeDEV.md`
 
 
 

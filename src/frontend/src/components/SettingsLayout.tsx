@@ -3,6 +3,11 @@ import * as React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/footer';
 import { useNavigate } from "react-router-dom";
+import profilsvg from '../assets/icons/profile.svg';
+import walletsvg from '../assets/icons/wallet 4.svg';
+import configurationsvg from '../assets/icons/Configuration.svg';
+import transachistorysvg from '../assets/icons/transachistory.svg';
+import logoutsvg from '../assets/icons/logout.svg';
 
 export type SettingsLayoutProps = {
   children: React.ReactNode;
@@ -31,11 +36,11 @@ export default function SettingsLayout({ children, title }: SettingsLayoutProps)
         <h2 className="mb-6 text-3xl font-semibold">Settings</h2>
         <div className="flex flex-col gap-2">
           {[
-            { title: "Profil", href: "/settings/profile", img: "/src/assets/icons/profile.svg" },
-            { title: "Wallet", href: "/settings/wallet", img: "/src/assets/icons/wallet 4.svg" },
-            { title: "Configuration", href: "/settings/configuration", img: "/src/assets/icons/Configuration.svg" },
-            { title: "Transaction History", href: "/settings/transaction-history", img: "/src/assets/icons/transachistory.svg" },
-            { title: "Log Out", href: "/settings/logout", img: "/src/assets/icons/logout.svg" },
+            { title: "Profil", href: "/settings/profile", img: profilsvg },
+            { title: "Wallet", href: "/settings/wallet", img: walletsvg },
+            { title: "Configuration", href: "/settings/configuration", img: configurationsvg },
+            { title: "Transaction History", href: "/settings/transaction-history", img: transachistorysvg },
+            { title: "Log Out", href: "/settings/logout", img: logoutsvg },
           ].map((item, i) => (
             <Link
               key={i}
