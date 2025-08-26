@@ -23,7 +23,7 @@ export default function Privacy() {
         </Psec>
 
         <Psec title="Storage & Retention">
-          Web2 data is stored encrypted. On-chain certificate proofs are stored
+          On-chain certificate proofs are stored
           permanently on the ICP blockchain.
         </Psec>
 
@@ -33,7 +33,7 @@ export default function Privacy() {
         </Psec>
 
         <Psec title="Your Rights">
-          Access, correct, or delete your Web2 data; for on-chain data, we can
+          Access or correct your data; for on-chain data, we can
           add correction notes but cannot delete transactions.
         </Psec>
       </main>

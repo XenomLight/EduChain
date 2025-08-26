@@ -26,8 +26,8 @@ export default function Features() {
             desc="Pay for courses with ICP tokens, QRIS (Indonesia), PayPal, and more — flexible and secure."
           />
           <FeatureCard
-            title="Inclusive Login (Web2 & Web3)"
-            desc="Login with Plug Wallet/Internet Identity or with Email/Password & Google."
+            title="Decentralized Login (Internet Identity)"
+            desc="Login securely using Internet Identity - no passwords, no third-party accounts"
           />
           <FeatureCard
             title="Curated Learning Modules"
@@ -46,7 +46,7 @@ export default function Features() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold">How It Works</h2>
           <ol className="list-decimal list-inside text-gray-300 space-y-2">
-            <li>Sign Up: choose Internet Identity (Web3) or Email/Google (Web2).</li>
+            <li>Sign Up: Internet Identity (Web3).</li>
             <li>Browse Courses: explore both global & local modules.</li>
             <li>Pay Securely: select ICP, QRIS, PayPal, and other supported methods.</li>
             <li>Learn: access interactive, industry-relevant content.</li>

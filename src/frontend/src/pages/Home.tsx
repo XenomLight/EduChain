@@ -4,6 +4,14 @@ import { motion } from 'framer-motion';
 import Footer from '../components/footer';
 import { useAuth } from '@/hooks/useAuth';
 import React from 'react';
+import certificartesvg from '../assets/icons/certificate.svg';
+import paymentsvg from '../assets/icons/payment.svg';
+import contentsvg from '../assets/icons/content.svg';
+import web3svg from '../assets/icons/web3.svg';
+import registersvg from '../assets/icons/register.svg';
+import enrollsvg from '../assets/icons/enroll.svg';
+import completesvg from '../assets/icons/complete.svg';
+
 import { authService } from '@/lib/auth';
 
 const Home = () => {
@@ -154,16 +162,16 @@ const handleBuy = async (amount: number, desc: string) => {
           </p>
           <div className="grid justify-items-center gap-8 sm:grid-cols-2 md:grid-cols-4">
             {[
-              { title: 'Register', img: '/src/assets/icons/register.svg' },
+              { title: 'Register', img: registersvg },
               {
                 title: 'Enroll in Course',
-                img: '/src/assets/icons/enroll.svg',
+                img: enrollsvg,
               },
               {
                 title: 'Complete & Learn',
-                img: '/src/assets/icons/complete.svg',
+                img: completesvg,
               },
-              { title: 'Web3 & Web2 Login', img: '/src/assets/icons/web3.svg' },
+              { title: 'Earn Certificates', img: web3svg },
             ].map((item, i) => (
               <div
                 key={i}
@@ -198,17 +206,17 @@ const handleBuy = async (amount: number, desc: string) => {
             {[
               {
                 title: 'On-Chain Certificates',
-                img: '/src/assets/icons/certificate.svg',
+                img: certificartesvg
               },
               {
                 title: 'Multi-Payment Options',
-                img: '/src/assets/icons/payment.svg',
+                img: paymentsvg,
               },
               {
                 title: 'Curated Content',
-                img: '/src/assets/icons/content.svg',
+                img: contentsvg,
               },
-              { title: 'Web3 & Web2 Login', img: '/src/assets/icons/web2.svg' },
+              { title: 'Web3 Login', img: web3svg },
             ].map((item, i) => (
               <div
                 key={i}
@@ -239,7 +247,7 @@ const handleBuy = async (amount: number, desc: string) => {
             For individuals and teams. 30-days money back guarantee.
           </p>
 
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
             {/* Free Access */}
             <div className="flex flex-col rounded-xl bg-[#1A1A1A] p-8 shadow-lg">
               <div>
@@ -250,9 +258,10 @@ const handleBuy = async (amount: number, desc: string) => {
                   Rp 0 <span className="text-sm font-normal">/once</span>
                 </p>
                 <ul className="mt-6 space-y-2 text-sm text-gray-300">
-                  <li>✔ Free NFT learning materials</li>
+                  <li>✔ Access to Free learning materials</li>
                   <li>✔ Introduction to NFT & blockchain fundamentals</li>
-                  <li>✔ No certificate included</li>
+                  <li>✔ On-chain digital certificate (NFT)</li>
+                  <li>✔ Certificate included</li>
                   <li>✔ Can be showcased on LinkedIn portfolio</li>
                   <li>✔ Payment via QRIS / ICP</li>
                 </ul>
@@ -275,13 +284,14 @@ const handleBuy = async (amount: number, desc: string) => {
             <div className="flex flex-col rounded-xl bg-[#1A1A1A] p-8 shadow-lg">
               <div>
                 <h3 className="mb-2 bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] bg-clip-text font-bold text-transparent">
-                  Individual Course Access
+                  EduChain Pro Access
                 </h3>
                 <p className="text-3xl font-bold text-white">
                   Rp 472,000 <span className="text-sm font-normal">/month</span>
                 </p>
                 <ul className="mt-6 space-y-2 text-sm text-gray-300">
-                  <li>✔ Full access to 1 selected course</li>
+                  <li>✔ Full access to 1000+ courses</li>
+                  <li>✔ Limit of 2 concurrently enrolled premium courses</li>
                   <li>✔ On-chain digital certificate (NFT)</li>
                   <li>✔ On-chain tracked module progress</li>
                   <li>✔ Can be showcased on LinkedIn portfolio</li>
@@ -297,11 +307,11 @@ const handleBuy = async (amount: number, desc: string) => {
               </div>
               <div className="mt-auto">
                 <button
-                  onClick={() => handleBuy(472000, "Buy Individual Course Access")}
+                  onClick={() => handleBuy(472000, "Buy Pro Course Access")}
                   className="mt-8 w-full rounded-full bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] py-3 font-semibold text-black transition hover:opacity-90"
                   disabled={isLoading}
                 >
-                  {isAuthenticated ? "Buy Individual Access" : isLoading ? "Loading..." : "Buy Individual Access"}
+                  {isAuthenticated ? "Buy Pro Access" : isLoading ? "Loading..." : "Buy Pro Access"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for focused learning on one skill
@@ -313,14 +323,15 @@ const handleBuy = async (amount: number, desc: string) => {
             <div className="flex flex-col rounded-xl bg-[#1A1A1A] p-8 shadow-lg">
               <div>
                 <h3 className="mb-2 bg-gradient-to-r from-[#514EFF] via-[#DC77FF] to-[#FFD541] bg-clip-text font-bold text-transparent">
-                  Monthly Subscription
+                  EduChain Pro Plus
                 </h3>
                 <p className="text-3xl font-bold text-white">
                   Rp 570,000 <span className="text-sm font-normal">/month</span>
                 </p>
                 <ul className="mt-6 space-y-2 text-sm text-gray-300">
-                  <li>✔ Unlimited access to hundreds of courses</li>
-                  <li>✔ Unlimited on-chain digital certificates (NFT)</li>
+                  <li>✔ Full access to 1000+ courses</li>
+                  <li>✔ Limit of 4 concurrently enrolled premium courses</li>
+                  <li>✔ On-chain digital certificate (NFT)</li>
                   <li>✔ On-chain tracked module progress</li>
                   <li>✔ Can be showcased on LinkedIn portfolio</li>
                   <li>✔ Payment via QRIS / ICP</li>
@@ -335,11 +346,11 @@ const handleBuy = async (amount: number, desc: string) => {
               </div>
               <div className="mt-auto">
                <button
-                  onClick={() => handleBuy(570000, "Buy Monthly Plan")}
+                  onClick={() => handleBuy(570000, "Buy Pro Plus Plan")}
                   className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black"
                   disabled={isLoading}
                 >
-                  {isAuthenticated ? "Buy Monthly Plan" : isLoading ? "Loading..." : "Buy Monthly Plan"}
+                  {isAuthenticated ? "Buy Pro Plus Plan" : isLoading ? "Loading..." : "Buy Pro Plus Plan"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for learners exploring multiple skills
@@ -347,7 +358,7 @@ const handleBuy = async (amount: number, desc: string) => {
               </div>
             </div>
 
-            {/* LocalCan for teams */}
+            {/* LocalCan for teams 
             <div className="flex flex-col rounded-xl bg-[#1A1A1A] p-8 shadow-lg">
               <div>
                 <h3 className="mb-2 bg-gradient-to-r from-[#514EFF] via-[#C96852] to-[#FFD541] bg-clip-text font-bold text-transparent">
@@ -385,7 +396,7 @@ const handleBuy = async (amount: number, desc: string) => {
                   Best for committed learners & professionals
                 </p>
               </div>
-            </div>
+            </div>*/}
           </div>
         </div>
       </section>

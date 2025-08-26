@@ -21,43 +21,47 @@ export default function Pricing() {
             title="Starter"
             price="Free"
             items={[
-              "SFree NFT learning materials",
+              "Access to Free learning materials",
               "Introduction to NFT & blockchain fundamentals",
-              "No certificate included",
+              "On-chain digital certificate (NFT)",
+              "Certificate included",
               "Can be showcased on LinkedIn portfolio",
               "Payment via QRIS / ICP",
             ]}
           />
           <Plan
-            title="Buy Individual Access"
+            title="Buy Pro Access"
             price="Rp 472.000/Month"
             items={[
-              "Full access to 1 selected course",
+              "Full access to 1000+ courses",
+              "Limit of 2 concurrently enrolled premium courses",
               "On-chain digital certificate (NFT)",
               "On-chain tracked module progress",
               "Can be showcased on LinkedIn portfolio",
               "Payment via QRIS / ICP",
-              "Public URLs access control",
+              "Public URLs access control (Soon)",
               "Priority support",
 
             ]}
             highlight
           />
           <Plan
-            title="Buy Monthly Plan"
-            price="$Rp 570.000/Month"
+            title="Buy Pro Plus Access"
+            price="Rp 570.000/Month"
             items={[
-              "Unlimited access to hundreds of courses",
-              "Unlimited on-chain digital certificates (NFT)",
+              "Full access to 1000+ courses",
+              "Limit of 4 concurrently enrolled premium courses",
+              "On-chain digital certificate (NFT)",
               "On-chain tracked module progress",
               "Can be showcased on LinkedIn portfolio",
               "Payment via QRIS / ICP",
-              "Public URLs access control",
+              "Public URLs access control (Soon)",
               "Priority support",
             ]}
           />
+          {/*
           <Plan
-            title="Buy Annual Plan"
+            title="Buy P Plan"
             price="Rp 3.893.000/Year"
             items={[
               "All Full Access features, premium certificates",
@@ -70,6 +74,7 @@ export default function Pricing() {
               "Priority support",
             ]}
             />
+            */}
         </div>
 
         <section className="space-y-3">

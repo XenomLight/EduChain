@@ -13,7 +13,7 @@ export default function Terms() {
         </p>
 
         <Section title="Account & Access">
-          Users may register via Web2 (Email/Google) or Web3 (Internet Identity/Plug).
+          Users may register via Web3 (Internet Identity).
           You are responsible for keeping your credentials secure.
         </Section>
 
