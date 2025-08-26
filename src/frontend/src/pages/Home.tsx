@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Footer from '../components/footer';
 import { useAuth } from '@/hooks/useAuth';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 import certificartesvg from '../assets/icons/certificate.svg';
 import paymentsvg from '../assets/icons/payment.svg';
 import contentsvg from '../assets/icons/content.svg';
@@ -13,59 +13,59 @@ import registersvg from '../assets/icons/register.svg';
 import enrollsvg from '../assets/icons/enroll.svg';
 import completesvg from '../assets/icons/complete.svg';
 
-import { authService } from '@/lib/auth';
+// import { authService } from '@/lib/auth';
 
 const Home = () => {
   const {
-      setIsAuthenticated,
-      setPrincipal,
-      setWalletType,
+      // setIsAuthenticated,
+      // setPrincipal,
+      // setWalletType,
       isAuthenticated
     } = useAuth();
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const navigate = useNavigate();
+  const [isLoading, /*setIsLoading*/] = React.useState<boolean>(false);
+  // const navigate = useNavigate();
   
 
   // helper utk semua paket
-const handleBuy = async (amount: number, desc: string) => {
-  if (!isAuthenticated) {
-    const success = await handleLogin();
-    if (!success) return; // gagal login
-  }
+//   const handleBuy = async (amount: number, desc: string) => {
+//   if (!isAuthenticated) {
+//     const success = await handleLogin();
+//     if (!success) return; // gagal login
+//   }
 
-  // kalau sudah login → langsung redirect
-  window.location.href = `/qris?amount=${amount}&desc=${encodeURIComponent(desc)}`;
-};
+//   // kalau sudah login → langsung redirect
+//   window.location.href = `/qris?amount=${amount}&desc=${encodeURIComponent(desc)}`;
+// };
 
 
-  const handleLogin = async () => {
-      // authService
-      setIsLoading(true);
-      try {
+  // const handleLogin = async () => {
+  //     // authService
+  //     setIsLoading(true);
+  //     try {
 
-         const hasLoggedInBefore = localStorage.getItem("hasLoggedInBefore");
+  //        const hasLoggedInBefore = localStorage.getItem("hasLoggedInBefore");
 
-    if (!hasLoggedInBefore) {
-      // User pertama kali login → arahkan ke halaman login lokal
-      navigate("/auth/login");
-      return;
-    }
+  //   if (!hasLoggedInBefore) {
+  //     // User pertama kali login → arahkan ke halaman login lokal
+  //     navigate("/auth/login");
+  //     return;
+  //   }
 
-        const success = await authService.loginWithInternetIdentity();
-        if (success) {
-          setIsAuthenticated(authService.isAuthenticated);
-          setPrincipal(authService.principal);
-          setWalletType(authService.walletType);
-        }
-        return success;
-      } catch (error) {
-        console.error('Internet Identity login failed:', error);
-        alert('Internet Identity login failed. Please try again.');
-        return false;
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  //       const success = await authService.loginWithInternetIdentity();
+  //       if (success) {
+  //         setIsAuthenticated(authService.isAuthenticated);
+  //         setPrincipal(authService.principal);
+  //         setWalletType(authService.walletType);
+  //       }
+  //       return success;
+  //     } catch (error) {
+  //       console.error('Internet Identity login failed:', error);
+  //       alert('Internet Identity login failed. Please try again.');
+  //       return false;
+  //     } finally {
+  //       setIsLoading(false);
+  //     }
+  //   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-black text-white">
