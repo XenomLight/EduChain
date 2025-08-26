@@ -43,14 +43,6 @@ const Home = () => {
   //     setIsLoading(true);
   //     try {
 
-  //        const hasLoggedInBefore = localStorage.getItem("hasLoggedInBefore");
-
-  //   if (!hasLoggedInBefore) {
-  //     // User pertama kali login → arahkan ke halaman login lokal
-  //     navigate("/auth/login");
-  //     return;
-  //   }
-
   //       const success = await authService.loginWithInternetIdentity();
   //       if (success) {
   //         setIsAuthenticated(authService.isAuthenticated);
@@ -284,7 +276,7 @@ const Home = () => {
                   className="mt-8 w-full rounded-full border border-white py-3 transition"
                   disabled={isLoading}
                 >
-                  {isAuthenticated ? "Start Learning" : isLoading ? "Loading..." : "Login to Start"}
+                  {isAuthenticated ? "Coming Soon" : isLoading ? "Loading..." : "Coming Soon"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for beginners wanting to try the platform
@@ -323,7 +315,7 @@ const Home = () => {
                   className="mt-8 w-full rounded-full bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] py-3 font-semibold text-black transition"
                   disabled={isLoading}
                 >
-                  {isAuthenticated ? "Buy Pro Access" : isLoading ? "Loading..." : "Buy Pro Access"}
+                  {isAuthenticated ? "Coming Soon" : isLoading ? "Loading..." : "Coming Soon"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for focused learning on one skill
@@ -362,7 +354,7 @@ const Home = () => {
                   className="mt-8 w-full rounded-full border border-white py-3 transition"
                   disabled={isLoading}
                 >
-                  {isAuthenticated ? "Buy Pro Plus Plan" : isLoading ? "Loading..." : "Buy Pro Plus Plan"}
+                  {isAuthenticated ? "Coming Soon" : isLoading ? "Loading..." : "Coming Soon"}
                 </button>
                 <p className="mt-4 text-center text-xs text-gray-400">
                   Best for learners exploring multiple skills

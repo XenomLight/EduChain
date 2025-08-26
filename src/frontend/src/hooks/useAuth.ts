@@ -8,7 +8,7 @@ import { idlFactory } from '../../../auth/app.did.mjs';
 // Load environment variables
 const network = import.meta.env.VITE_DFX_NETWORK || 'local';
 const canisterId =
-  import.meta.env.VITE_CANISTER_ID_BACKEND || 'qsgjb-riaaa-aaaaa-aaaga-cai';
+  import.meta.env.VITE_CANISTER_ID_BACKEND || 'rjsrd-kqaaa-aaaam-qd3ta-cai'; //tolong .env diimplementasikan
 // const internetIdentityCanisterId =
 //   import.meta.env.VITE_CANISTER_ID_INTERNET_IDENTITY ||
 //   'rdmx6-jaaaa-aaaaa-aaadq-cai';
