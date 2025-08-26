@@ -25,6 +25,7 @@ const Navbar = () => {
     // authService
     setIsLoading(true);
     try {
+
       const success = await authService.loginWithInternetIdentity();
       if (success) {
         setIsAuthenticated(authService.isAuthenticated);
