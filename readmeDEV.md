@@ -30,6 +30,11 @@
     cd <root path> && dfx deploy
     ```
 
+5. Run local server for dummy APIs
+   ```
+   npx ts-node-dev --respawn --transpile-only src/backend/server.ts
+   ```
+
 ## Testing Endpoint Backend
 
 ## 🔐 Authentication
