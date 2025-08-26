@@ -82,7 +82,9 @@ const Dashboard = () => {
             NotFound: unknown;
           };
         };
-        if (err) setPopup(true);
+        if (err || !ok?.first_name?.length || !ok?.last_name?.length) {
+        setPopup(true);
+        }
 
         setFirstName(ok?.first_name[0] || '');
         setLastName(ok?.last_name[0] || '');

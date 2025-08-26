@@ -43,14 +43,6 @@ const Home = () => {
   //     setIsLoading(true);
   //     try {
 
-  //        const hasLoggedInBefore = localStorage.getItem("hasLoggedInBefore");
-
-  //   if (!hasLoggedInBefore) {
-  //     // User pertama kali login → arahkan ke halaman login lokal
-  //     navigate("/auth/login");
-  //     return;
-  //   }
-
   //       const success = await authService.loginWithInternetIdentity();
   //       if (success) {
   //         setIsAuthenticated(authService.isAuthenticated);
