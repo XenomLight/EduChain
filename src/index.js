@@ -32,7 +32,7 @@ await authClient.login({
 
     const actor = Actor.createActor(idlFactory, {
       agent,
-      canisterId: "qsgjb-riaaa-aaaaa-aaaga-cai"
+      canisterId: "rjsrd-kqaaa-aaaam-qd3ta-cai"
     });
 
     async function registerWithEmail(username, email, password, konfirmasiPassword, firstName, lastName) {
