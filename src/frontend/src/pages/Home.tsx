@@ -280,8 +280,8 @@ const handleBuy = async (amount: number, desc: string) => {
               </div>
               <div className="mt-auto">
                 <button
-                  onClick={() => handleBuy(1, "Start Learning")}
-                  className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black"
+                  // onClick={() => handleBuy(1, "Start Learning")}
+                  className="mt-8 w-full rounded-full border border-white py-3 transition"
                   disabled={isLoading}
                 >
                   {isAuthenticated ? "Start Learning" : isLoading ? "Loading..." : "Login to Start"}
@@ -319,8 +319,8 @@ const handleBuy = async (amount: number, desc: string) => {
               </div>
               <div className="mt-auto">
                 <button
-                  onClick={() => handleBuy(472000, "Buy Pro Course Access")}
-                  className="mt-8 w-full rounded-full bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] py-3 font-semibold text-black transition hover:opacity-90"
+                  // onClick={() => handleBuy(472000, "Buy Pro Course Access")}
+                  className="mt-8 w-full rounded-full bg-gradient-to-r from-[#18E18C] via-[#77FFC6] to-[#FFD541] py-3 font-semibold text-black transition"
                   disabled={isLoading}
                 >
                   {isAuthenticated ? "Buy Pro Access" : isLoading ? "Loading..." : "Buy Pro Access"}
@@ -358,8 +358,8 @@ const handleBuy = async (amount: number, desc: string) => {
               </div>
               <div className="mt-auto">
                <button
-                  onClick={() => handleBuy(570000, "Buy Pro Plus Plan")}
-                  className="mt-8 w-full rounded-full border border-white py-3 transition hover:bg-white hover:text-black"
+                  // onClick={() => handleBuy(570000, "Buy Pro Plus Plan")}
+                  className="mt-8 w-full rounded-full border border-white py-3 transition"
                   disabled={isLoading}
                 >
                   {isAuthenticated ? "Buy Pro Plus Plan" : isLoading ? "Loading..." : "Buy Pro Plus Plan"}
