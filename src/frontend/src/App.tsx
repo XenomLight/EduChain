@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
-import Login from "./pages/auth/Login";
+//import Login from "./pages/auth/Login";
 // import Register from "./pages/auth/Register";
 import ProfileSetting from './pages/settings/ProfileSetting';
 import WalletSetting from './pages/settings/walletSetting';
@@ -28,8 +28,8 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<Courses />} />
-        <Route path="/auth/login" element={<Login />} />
-        {/*<Route path="/auth/register" element={<Register />} /> */}
+        {/*<Route path="/auth/login" element={<Login />} />
+        <Route path="/auth/register" element={<Register />} /> */}
         <Route path="/qris" element={<Qris />} />
         <Route path="/about" element={<About />} />
         <Route path="/news" element={<News />} />
