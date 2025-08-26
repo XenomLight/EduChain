@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import Footer from '../components/footer';
 import { useAuth } from '@/hooks/useAuth';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import certificartesvg from '../assets/icons/certificate.svg';
 import paymentsvg from '../assets/icons/payment.svg';
 import contentsvg from '../assets/icons/content.svg';
@@ -23,7 +22,6 @@ const Home = () => {
       isAuthenticated
     } = useAuth();
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
-  const navigate = useNavigate();
   
 
   // helper utk semua paket
@@ -42,14 +40,6 @@ const handleBuy = async (amount: number, desc: string) => {
       // authService
       setIsLoading(true);
       try {
-
-         const hasLoggedInBefore = localStorage.getItem("hasLoggedInBefore");
-
-    if (!hasLoggedInBefore) {
-      // User pertama kali login → arahkan ke halaman login lokal
-      navigate("/auth/login");
-      return;
-    }
 
         const success = await authService.loginWithInternetIdentity();
         if (success) {
